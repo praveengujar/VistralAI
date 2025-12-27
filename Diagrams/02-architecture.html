@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VistralAI - System Architecture</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const ArchitectureDiagram = () => {
+      return (
+        <div style={{
+          minHeight: '100vh',
+          background: 'linear-gradient(180deg, #0C0F1A 0%, #131825 50%, #0C0F1A 100%)',
+          padding: '40px 24px',
+          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <h1 style={{
+              fontSize: '32px',
+              fontWeight: '700',
+              color: '#F8FAFC',
+              margin: '0 0 8px 0',
+              letterSpacing: '-0.5px'
+            }}>
+              VistralAI System Architecture
+            </h1>
+            <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>
+              Production infrastructure on Google Cloud Platform
+            </p>
+          </div>
+
+          <div style={{
+            maxWidth: '1200px',
+            margin: '0 auto',
+            display: 'grid',
+            gridTemplateColumns: '200px 1fr 200px',
+            gap: '24px',
+            alignItems: 'start'
+          }}>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{
+                background: 'linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%)',
+                borderRadius: '12px',
+                padding: '20px',
+                textAlign: 'center',
+                boxShadow: '0 4px 24px rgba(59, 130, 246, 0.3)'
+              }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" style={{ margin: '0 auto 12px', display: 'block' }}>
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="2" y1="12" x2="22" y2="12" />
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+                <div style={{ color: 'white', fontWeight: '600', fontSize: '14px' }}>Browser Client</div>
+                <div style={{ color: '#93C5FD', fontSize: '11px', marginTop: '4px' }}>HTTPS</div>
+              </div>
+            </div>
+
+            <div style={{
+              background: '#1A1F2E',
+              borderRadius: '16px',
+              border: '1px solid #334155',
+              padding: '24px',
+              position: 'relative'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '24px',
+                paddingBottom: '16px',
+                borderBottom: '1px solid #334155'
+              }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  background: 'linear-gradient(135deg, #4285F4 25%, #34A853 25%, #34A853 50%, #FBBC05 50%, #FBBC05 75%, #EA4335 75%)',
+                  borderRadius: '8px'
+                }} />
+                <div>
+                  <div style={{ color: '#F8FAFC', fontWeight: '700', fontSize: '16px' }}>Google Cloud Platform</div>
+                  <div style={{ color: '#64748B', fontSize: '12px' }}>us-central1 region</div>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{
+                  color: '#94A3B8',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  letterSpacing: '1px',
+                  marginBottom: '12px'
+                }}>
+                  CLOUD RUN SERVICES
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div style={{
+                    background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    boxShadow: '0 4px 16px rgba(16, 185, 129, 0.2)'
+                  }}>
+                    <div style={{ color: 'white', fontWeight: '600', fontSize: '14px', marginBottom: '8px' }}>
+                      VistralAI
+                    </div>
+                    <div style={{ color: '#A7F3D0', fontSize: '11px', lineHeight: '1.6' }}>
+                      Next.js 14<br/>
+                      Port 8080<br/>
+                      2Gi RAM • 2 CPU<br/>
+                      0-20 instances
+                    </div>
+                  </div>
+                  <div style={{
+                    background: 'linear-gradient(135deg, #D97706 0%, #F59E0B 100%)',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    boxShadow: '0 4px 16px rgba(245, 158, 11, 0.2)'
+                  }}>
+                    <div style={{ color: 'white', fontWeight: '600', fontSize: '14px', marginBottom: '8px' }}>
+                      Firecrawl
+                    </div>
+                    <div style={{ color: '#FEF3C7', fontSize: '11px', lineHeight: '1.6' }}>
+                      Web Crawler<br/>
+                      Port 3000<br/>
+                      1Gi RAM • 1 CPU<br/>
+                      Internal only
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{
+                  color: '#94A3B8',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  letterSpacing: '1px',
+                  marginBottom: '12px'
+                }}>
+                  VPC NETWORK
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div style={{
+                    background: '#1E293B',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    border: '1px solid #334155'
+                  }}>
+                    <div style={{ color: '#E2E8F0', fontWeight: '500', fontSize: '13px', marginBottom: '4px' }}>
+                      VPC Connector
+                    </div>
+                    <div style={{ color: '#64748B', fontSize: '11px' }}>vistralai-connector</div>
+                  </div>
+                  <div style={{
+                    background: 'linear-gradient(135deg, #DC2626 0%, #EF4444 100%)',
+                    borderRadius: '12px',
+                    padding: '16px'
+                  }}>
+                    <div style={{ color: 'white', fontWeight: '500', fontSize: '13px', marginBottom: '4px' }}>
+                      Redis 7.0
+                    </div>
+                    <div style={{ color: '#FCA5A5', fontSize: '11px' }}>Cloud Memorystore • 1GB</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                <div style={{
+                  background: '#1E293B',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  border: '1px solid #334155',
+                  textAlign: 'center'
+                }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="1.5" style={{ margin: '0 auto 8px', display: 'block' }}>
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  <div style={{ color: '#E2E8F0', fontSize: '11px', fontWeight: '500' }}>Secret Manager</div>
+                </div>
+                <div style={{
+                  background: '#1E293B',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  border: '1px solid #334155',
+                  textAlign: 'center'
+                }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="1.5" style={{ margin: '0 auto 8px', display: 'block' }}>
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                  </svg>
+                  <div style={{ color: '#E2E8F0', fontSize: '11px', fontWeight: '500' }}>Container Registry</div>
+                </div>
+                <div style={{
+                  background: '#1E293B',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  border: '1px solid #334155',
+                  textAlign: 'center'
+                }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="1.5" style={{ margin: '0 auto 8px', display: 'block' }}>
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                  </svg>
+                  <div style={{ color: '#E2E8F0', fontSize: '11px', fontWeight: '500' }}>Cloud Logging</div>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{
+                background: 'linear-gradient(135deg, #C2410C 0%, #EA580C 100%)',
+                borderRadius: '12px',
+                padding: '16px',
+                textAlign: 'center',
+                boxShadow: '0 4px 16px rgba(234, 88, 12, 0.3)'
+              }}>
+                <div style={{ color: 'white', fontWeight: '600', fontSize: '13px' }}>Claude API</div>
+                <div style={{ color: '#FED7AA', fontSize: '11px', marginTop: '4px' }}>Anthropic</div>
+              </div>
+              
+              <div style={{
+                background: 'linear-gradient(135deg, #065F46 0%, #059669 100%)',
+                borderRadius: '12px',
+                padding: '16px',
+                textAlign: 'center',
+                boxShadow: '0 4px 16px rgba(5, 150, 105, 0.3)'
+              }}>
+                <div style={{ color: 'white', fontWeight: '600', fontSize: '13px' }}>OpenAI API</div>
+                <div style={{ color: '#A7F3D0', fontSize: '11px', marginTop: '4px' }}>GPT-4o-mini</div>
+              </div>
+              
+              <div style={{
+                background: 'linear-gradient(135deg, #166534 0%, #22C55E 100%)',
+                borderRadius: '12px',
+                padding: '16px',
+                textAlign: 'center',
+                boxShadow: '0 4px 16px rgba(34, 197, 94, 0.3)'
+              }}>
+                <div style={{ color: 'white', fontWeight: '600', fontSize: '13px' }}>MongoDB Atlas</div>
+                <div style={{ color: '#BBF7D0', fontSize: '11px', marginTop: '4px' }}>Database</div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{
+            maxWidth: '1200px',
+            margin: '48px auto 0',
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '32px',
+            flexWrap: 'wrap'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: '32px', height: '2px', background: '#3B82F6' }} />
+              <span style={{ color: '#64748B', fontSize: '12px' }}>HTTPS</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: '32px', height: '2px', background: '#10B981' }} />
+              <span style={{ color: '#64748B', fontSize: '12px' }}>Internal HTTP</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: '32px', height: '2px', background: '#8B5CF6', borderStyle: 'dashed' }} />
+              <span style={{ color: '#64748B', fontSize: '12px' }}>Secret Access</span>
+            </div>
+          </div>
+
+          <div style={{
+            maxWidth: '600px',
+            margin: '32px auto 0',
+            background: '#1A1F2E',
+            borderRadius: '12px',
+            padding: '20px',
+            border: '1px solid #334155'
+          }}>
+            <div style={{
+              color: '#94A3B8',
+              fontSize: '11px',
+              fontWeight: '600',
+              letterSpacing: '1px',
+              marginBottom: '12px'
+            }}>
+              SECRET MANAGER KEYS
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {['NEXTAUTH_SECRET', 'ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'MONGODB_URI', 'REDIS_URL'].map((secret) => (
+                <code key={secret} style={{
+                  background: '#0F172A',
+                  color: '#8B5CF6',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                  border: '1px solid #334155'
+                }}>
+                  {secret}
+                </code>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<ArchitectureDiagram />);
+  </script>
+</body>
+</html>

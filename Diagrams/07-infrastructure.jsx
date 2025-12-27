@@ -1,0 +1,440 @@
+import React from 'react';
+
+const InfrastructureDiagram = () => {
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(180deg, #0C0F1A 0%, #151C2C 50%, #0C0F1A 100%)',
+      padding: '40px 24px',
+      fontFamily: "'Inter', -apple-system, sans-serif"
+    }}>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+        <h1 style={{
+          fontSize: '32px',
+          fontWeight: '700',
+          color: '#F8FAFC',
+          margin: '0 0 8px 0'
+        }}>
+          Infrastructure & Deployment
+        </h1>
+        <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>
+          CI/CD pipeline and production architecture
+        </p>
+      </div>
+
+      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+        
+        {/* CI/CD Pipeline Flow */}
+        <div style={{
+          background: '#1A1F2E',
+          borderRadius: '16px',
+          padding: '24px',
+          marginBottom: '32px',
+          border: '1px solid #334155'
+        }}>
+          <div style={{
+            color: '#94A3B8',
+            fontSize: '11px',
+            fontWeight: '600',
+            letterSpacing: '1px',
+            marginBottom: '20px'
+          }}>
+            CI/CD PIPELINE
+          </div>
+          
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '16px'
+          }}>
+            {[
+              { name: 'Source Code', icon: '📝', color: '#64748B' },
+              { name: 'Git Push', icon: '↗️', color: '#64748B' },
+              { name: 'Cloud Build', icon: '🔨', color: '#4285F4' },
+              { name: 'Run Tests', icon: '✅', color: '#34A853' },
+              { name: 'Docker Build', icon: '🐳', color: '#2496ED' },
+              { name: 'Push to GCR', icon: '📦', color: '#4285F4' },
+              { name: 'Deploy', icon: '🚀', color: '#10B981' }
+            ].map((step, idx, arr) => (
+              <React.Fragment key={step.name}>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <div style={{
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '12px',
+                    background: `${step.color}20`,
+                    border: `2px solid ${step.color}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '24px'
+                  }}>
+                    {step.icon}
+                  </div>
+                  <span style={{ color: '#E2E8F0', fontSize: '11px', fontWeight: '500' }}>
+                    {step.name}
+                  </span>
+                </div>
+                {idx < arr.length - 1 && (
+                  <div style={{
+                    width: '40px',
+                    height: '2px',
+                    background: 'linear-gradient(to right, #334155, #475569)',
+                    position: 'relative'
+                  }}>
+                    <div style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: '-4px',
+                      width: 0,
+                      height: 0,
+                      borderTop: '5px solid transparent',
+                      borderBottom: '5px solid transparent',
+                      borderLeft: '8px solid #475569'
+                    }} />
+                  </div>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Infrastructure Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 2fr 1fr',
+          gap: '24px'
+        }}>
+          
+          {/* Left: Developer Environment */}
+          <div style={{
+            background: '#1A1F2E',
+            borderRadius: '16px',
+            padding: '20px',
+            border: '1px solid #334155'
+          }}>
+            <div style={{
+              color: '#94A3B8',
+              fontSize: '11px',
+              fontWeight: '600',
+              letterSpacing: '1px',
+              marginBottom: '16px'
+            }}>
+              LOCAL DEV
+            </div>
+            
+            <div style={{
+              background: '#0F172A',
+              borderRadius: '12px',
+              padding: '16px',
+              border: '1px solid #334155'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginBottom: '12px'
+              }}>
+                <span style={{ fontSize: '16px' }}>🐳</span>
+                <span style={{ color: '#2496ED', fontSize: '13px', fontWeight: '600' }}>
+                  Docker Compose
+                </span>
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {[
+                  { name: 'VistralAI', port: '3000', color: '#10B981' },
+                  { name: 'MongoDB', port: '27017', color: '#22C55E' },
+                  { name: 'Redis', port: '6379', color: '#EF4444' },
+                  { name: 'Firecrawl', port: '3002', color: '#F59E0B' }
+                ].map((svc) => (
+                  <div key={svc.name} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '8px 10px',
+                    background: `${svc.color}10`,
+                    borderRadius: '6px',
+                    borderLeft: `3px solid ${svc.color}`
+                  }}>
+                    <span style={{ color: '#E2E8F0', fontSize: '11px' }}>{svc.name}</span>
+                    <code style={{ color: svc.color, fontSize: '10px' }}>{svc.port}</code>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Center: GCP Production */}
+          <div style={{
+            background: '#1A1F2E',
+            borderRadius: '16px',
+            padding: '20px',
+            border: '2px solid #4285F4'
+          }}>
+            {/* GCP Header */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              marginBottom: '20px',
+              paddingBottom: '16px',
+              borderBottom: '1px solid #334155'
+            }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                background: 'linear-gradient(135deg, #4285F4 25%, #34A853 25%, #34A853 50%, #FBBC05 50%, #FBBC05 75%, #EA4335 75%)',
+                borderRadius: '8px'
+              }} />
+              <div>
+                <div style={{ color: '#F8FAFC', fontWeight: '700', fontSize: '16px' }}>
+                  Google Cloud Platform
+                </div>
+                <div style={{ color: '#64748B', fontSize: '12px' }}>Production Environment</div>
+              </div>
+            </div>
+
+            {/* Cloud Run Services */}
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{
+                color: '#94A3B8',
+                fontSize: '10px',
+                fontWeight: '600',
+                letterSpacing: '1px',
+                marginBottom: '12px'
+              }}>
+                CLOUD RUN SERVICES
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div style={{
+                  background: 'linear-gradient(135deg, #059669, #10B981)',
+                  borderRadius: '12px',
+                  padding: '16px'
+                }}>
+                  <div style={{ color: 'white', fontWeight: '600', fontSize: '14px', marginBottom: '8px' }}>
+                    VistralAI
+                  </div>
+                  <div style={{ color: '#A7F3D0', fontSize: '10px', lineHeight: 1.6 }}>
+                    us-central1 • 0-20 instances<br />
+                    2Gi RAM • 2 CPU
+                  </div>
+                </div>
+                <div style={{
+                  background: 'linear-gradient(135deg, #D97706, #F59E0B)',
+                  borderRadius: '12px',
+                  padding: '16px'
+                }}>
+                  <div style={{ color: 'white', fontWeight: '600', fontSize: '14px', marginBottom: '8px' }}>
+                    Firecrawl
+                  </div>
+                  <div style={{ color: '#FEF3C7', fontSize: '10px', lineHeight: 1.6 }}>
+                    us-central1 • 0-10 instances<br />
+                    1Gi RAM • 1 CPU
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Networking & Data */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              {/* Networking */}
+              <div>
+                <div style={{
+                  color: '#94A3B8',
+                  fontSize: '10px',
+                  fontWeight: '600',
+                  letterSpacing: '1px',
+                  marginBottom: '8px'
+                }}>
+                  NETWORKING
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{
+                    background: '#0F172A',
+                    borderRadius: '8px',
+                    padding: '10px 12px',
+                    border: '1px solid #334155'
+                  }}>
+                    <div style={{ color: '#E2E8F0', fontSize: '11px', fontWeight: '500' }}>Load Balancer</div>
+                    <div style={{ color: '#64748B', fontSize: '10px' }}>Public entry point</div>
+                  </div>
+                  <div style={{
+                    background: '#0F172A',
+                    borderRadius: '8px',
+                    padding: '10px 12px',
+                    border: '1px solid #334155'
+                  }}>
+                    <div style={{ color: '#E2E8F0', fontSize: '11px', fontWeight: '500' }}>VPC Connector</div>
+                    <div style={{ color: '#64748B', fontSize: '10px' }}>vistralai-connector</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Data Services */}
+              <div>
+                <div style={{
+                  color: '#94A3B8',
+                  fontSize: '10px',
+                  fontWeight: '600',
+                  letterSpacing: '1px',
+                  marginBottom: '8px'
+                }}>
+                  DATA SERVICES
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{
+                    background: 'linear-gradient(135deg, #DC2626, #EF4444)',
+                    borderRadius: '8px',
+                    padding: '10px 12px'
+                  }}>
+                    <div style={{ color: 'white', fontSize: '11px', fontWeight: '500' }}>Redis 7.0</div>
+                    <div style={{ color: '#FCA5A5', fontSize: '10px' }}>Memorystore • 1GB</div>
+                  </div>
+                  <div style={{
+                    background: '#0F172A',
+                    borderRadius: '8px',
+                    padding: '10px 12px',
+                    border: '1px solid #8B5CF6'
+                  }}>
+                    <div style={{ color: '#8B5CF6', fontSize: '11px', fontWeight: '500' }}>Secret Manager</div>
+                    <div style={{ color: '#64748B', fontSize: '10px' }}>API keys & secrets</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Monitoring */}
+            <div style={{ marginTop: '16px' }}>
+              <div style={{
+                color: '#94A3B8',
+                fontSize: '10px',
+                fontWeight: '600',
+                letterSpacing: '1px',
+                marginBottom: '8px'
+              }}>
+                MONITORING
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {['Cloud Logging', 'Cloud Monitoring', 'Alerting'].map((item) => (
+                  <div key={item} style={{
+                    background: '#0F172A',
+                    borderRadius: '6px',
+                    padding: '6px 12px',
+                    border: '1px solid #334155'
+                  }}>
+                    <span style={{ color: '#94A3B8', fontSize: '10px' }}>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right: External Services */}
+          <div style={{
+            background: '#1A1F2E',
+            borderRadius: '16px',
+            padding: '20px',
+            border: '1px solid #334155'
+          }}>
+            <div style={{
+              color: '#94A3B8',
+              fontSize: '11px',
+              fontWeight: '600',
+              letterSpacing: '1px',
+              marginBottom: '16px'
+            }}>
+              EXTERNAL SERVICES
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{
+                background: 'linear-gradient(135deg, #C2410C, #EA580C)',
+                borderRadius: '12px',
+                padding: '16px',
+                textAlign: 'center'
+              }}>
+                <div style={{ color: 'white', fontWeight: '600', fontSize: '14px' }}>Claude API</div>
+                <div style={{ color: '#FED7AA', fontSize: '11px' }}>Anthropic</div>
+              </div>
+              
+              <div style={{
+                background: 'linear-gradient(135deg, #065F46, #059669)',
+                borderRadius: '12px',
+                padding: '16px',
+                textAlign: 'center'
+              }}>
+                <div style={{ color: 'white', fontWeight: '600', fontSize: '14px' }}>OpenAI API</div>
+                <div style={{ color: '#A7F3D0', fontSize: '11px' }}>GPT-4o-mini</div>
+              </div>
+              
+              <div style={{
+                background: 'linear-gradient(135deg, #166534, #22C55E)',
+                borderRadius: '12px',
+                padding: '16px',
+                textAlign: 'center'
+              }}>
+                <div style={{ color: 'white', fontWeight: '600', fontSize: '14px' }}>MongoDB Atlas</div>
+                <div style={{ color: '#BBF7D0', fontSize: '11px' }}>Database</div>
+              </div>
+            </div>
+
+            {/* Connection arrows indicator */}
+            <div style={{
+              marginTop: '24px',
+              padding: '12px',
+              background: '#0F172A',
+              borderRadius: '8px',
+              border: '1px solid #334155'
+            }}>
+              <div style={{ color: '#64748B', fontSize: '10px', marginBottom: '8px' }}>
+                CONNECTIONS
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <span style={{ color: '#94A3B8', fontSize: '10px' }}>← HTTPS requests</span>
+                <span style={{ color: '#94A3B8', fontSize: '10px' }}>← TLS encrypted</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Deployment Info */}
+        <div style={{
+          marginTop: '24px',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '16px'
+        }}>
+          {[
+            { label: 'Region', value: 'us-central1', icon: '🌍' },
+            { label: 'Max Instances', value: '20 (main) + 10 (crawl)', icon: '📈' },
+            { label: 'Auto-scaling', value: 'CPU-based', icon: '⚡' },
+            { label: 'Min Instances', value: '0 (scale to zero)', icon: '💤' }
+          ].map((item) => (
+            <div key={item.label} style={{
+              background: '#1A1F2E',
+              borderRadius: '12px',
+              padding: '16px',
+              border: '1px solid #334155',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '20px', marginBottom: '8px' }}>{item.icon}</div>
+              <div style={{ color: '#E2E8F0', fontSize: '12px', fontWeight: '500' }}>{item.value}</div>
+              <div style={{ color: '#64748B', fontSize: '10px' }}>{item.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default InfrastructureDiagram;

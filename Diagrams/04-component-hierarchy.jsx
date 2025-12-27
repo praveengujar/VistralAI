@@ -1,0 +1,366 @@
+import React, { useState } from 'react';
+
+const ComponentHierarchyDiagram = () => {
+  const [expandedNodes, setExpandedNodes] = useState({
+    root: true,
+    auth: true,
+    dashboard: true,
+    brand360: false,
+    aeo: false,
+    review: false,
+    settings: false,
+    report: false,
+    onboarding: false,
+    shared: true
+  });
+
+  const toggleNode = (id) => {
+    setExpandedNodes(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const componentTree = {
+    id: 'root',
+    name: 'App Router',
+    type: 'layout',
+    color: '#6366F1',
+    children: [
+      {
+        id: 'rootLayout',
+        name: 'RootLayout',
+        type: 'layout',
+        color: '#6366F1'
+      },
+      {
+        id: 'auth',
+        name: 'AUTH PAGES',
+        type: 'group',
+        color: '#3B82F6',
+        children: [
+          { name: 'LoginPage', type: 'page', children: [{ name: 'AuthForm', type: 'component' }] },
+          { name: 'RegisterPage', type: 'page', children: [{ name: 'AuthForm', type: 'component' }] },
+          { name: 'ErrorPage', type: 'page' }
+        ]
+      },
+      {
+        id: 'dashboard',
+        name: 'DASHBOARD PAGES',
+        type: 'group',
+        color: '#10B981',
+        children: [
+          {
+            id: 'dashboardLayout',
+            name: 'DashboardLayout',
+            type: 'layout',
+            children: [
+              { name: 'SessionProvider', type: 'provider' },
+              { name: 'Sidebar/Navigation', type: 'component' }
+            ]
+          },
+          {
+            id: 'dashboardHome',
+            name: 'DashboardPage (Home)',
+            type: 'page',
+            children: [
+              { name: 'BrandPresenceHero', type: 'component' },
+              { name: 'BrandHealthIndicator', type: 'component' },
+              { name: 'BrandMoments', type: 'component' },
+              { name: 'BrandGrowthOpportunities', type: 'component' },
+              { name: 'MarketLandscape', type: 'component' },
+              { name: 'BrandStoryVisualizer', type: 'component' },
+              { name: 'AIPlatformGalaxy', type: 'component' }
+            ]
+          },
+          {
+            id: 'brand360',
+            name: 'Brand360Page',
+            type: 'page',
+            color: '#8B5CF6',
+            children: [
+              { name: 'WebsiteAnalyzer', type: 'component' },
+              { name: 'BrandStoryCanvas', type: 'component' },
+              { name: 'BrandOfferingsShowcase', type: 'component' },
+              { name: 'ProfileStrengthMeter', type: 'component' },
+              { name: 'DocumentUpload', type: 'component' },
+              { name: 'ProductCatalogConnector', type: 'component' }
+            ]
+          },
+          {
+            id: 'aeo',
+            name: 'AEOPage',
+            type: 'page',
+            color: '#F59E0B',
+            children: [
+              { name: 'QuadrantChart', type: 'component' },
+              { name: 'MetricsRadarChart', type: 'component' },
+              { name: 'PerceptionScoreCard', type: 'component' },
+              { name: 'PlatformComparisonChart', type: 'component' },
+              { name: 'ScoreTrendChart', type: 'component' },
+              { name: 'InsightsPriorityMatrix', type: 'component' },
+              { name: 'CorrectionFunnel', type: 'component' }
+            ]
+          },
+          {
+            id: 'review',
+            name: 'ReviewQueuePage',
+            type: 'page',
+            color: '#EC4899',
+            children: [
+              { name: 'ReviewQueueBanner', type: 'component' },
+              { name: 'ReviewModal', type: 'component' },
+              { name: 'FieldReviewCard', type: 'component' }
+            ]
+          },
+          {
+            id: 'settings',
+            name: 'SettingsPage',
+            type: 'page',
+            color: '#6B7280',
+            children: [
+              { name: 'ThemeSettings', type: 'component' },
+              { name: 'ThemeSelector', type: 'component' }
+            ]
+          },
+          {
+            id: 'report',
+            name: 'ReportPage',
+            type: 'page',
+            color: '#14B8A6',
+            children: [
+              { name: 'BrandStoryReport', type: 'component' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'onboarding',
+        name: 'ONBOARDING PAGE',
+        type: 'group',
+        color: '#F97316',
+        children: [
+          { name: 'OnboardingWizard / NewOnboardingWizard', type: 'component' },
+          { name: 'UrlAnalyzer', type: 'component' },
+          { name: 'ProfileReviewCards', type: 'component' },
+          { name: 'ProductIngestionTabs', type: 'component' }
+        ]
+      },
+      {
+        id: 'shared',
+        name: 'SHARED UI COMPONENTS',
+        type: 'group',
+        color: '#A855F7',
+        children: [
+          { name: 'ThemeToggle', type: 'component' },
+          { name: 'MetricCard', type: 'component' },
+          { name: 'AlertBanner', type: 'component' },
+          { name: 'OpportunityCard', type: 'component' }
+        ]
+      }
+    ]
+  };
+
+  const getTypeIcon = (type) => {
+    switch (type) {
+      case 'layout': return '📐';
+      case 'page': return '📄';
+      case 'component': return '🧩';
+      case 'provider': return '🔌';
+      case 'group': return '📁';
+      default: return '•';
+    }
+  };
+
+  const getTypeColor = (type, defaultColor) => {
+    switch (type) {
+      case 'layout': return '#6366F1';
+      case 'page': return defaultColor || '#3B82F6';
+      case 'component': return '#64748B';
+      case 'provider': return '#8B5CF6';
+      case 'group': return defaultColor || '#10B981';
+      default: return '#64748B';
+    }
+  };
+
+  const TreeNode = ({ node, depth = 0, parentColor }) => {
+    const nodeColor = node.color || parentColor || getTypeColor(node.type);
+    const hasChildren = node.children && node.children.length > 0;
+    const isExpanded = node.id ? expandedNodes[node.id] : true;
+
+    return (
+      <div style={{ marginLeft: depth > 0 ? '24px' : 0 }}>
+        <div
+          onClick={() => node.id && hasChildren && toggleNode(node.id)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 12px',
+            marginBottom: '4px',
+            background: node.type === 'group' ? `${nodeColor}15` : '#1E293B',
+            borderRadius: '8px',
+            border: `1px solid ${nodeColor}30`,
+            cursor: hasChildren && node.id ? 'pointer' : 'default',
+            transition: 'all 0.2s'
+          }}
+        >
+          {/* Expand/Collapse Icon */}
+          {hasChildren && node.id && (
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={nodeColor}
+              strokeWidth="2"
+              style={{
+                transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s'
+              }}
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          )}
+          {!hasChildren && node.id && <div style={{ width: '16px' }} />}
+
+          {/* Type Icon */}
+          <span style={{ fontSize: '14px' }}>{getTypeIcon(node.type)}</span>
+
+          {/* Node Name */}
+          <span style={{
+            color: node.type === 'group' ? nodeColor : '#E2E8F0',
+            fontWeight: node.type === 'group' || node.type === 'page' ? '600' : '400',
+            fontSize: node.type === 'group' ? '13px' : '12px',
+            letterSpacing: node.type === 'group' ? '0.5px' : '0'
+          }}>
+            {node.name}
+          </span>
+
+          {/* Type Badge */}
+          <span style={{
+            fontSize: '10px',
+            color: nodeColor,
+            background: `${nodeColor}20`,
+            padding: '2px 8px',
+            borderRadius: '10px',
+            marginLeft: 'auto'
+          }}>
+            {node.type}
+          </span>
+        </div>
+
+        {/* Children */}
+        {hasChildren && isExpanded && (
+          <div style={{
+            borderLeft: `2px solid ${nodeColor}30`,
+            marginLeft: '8px',
+            paddingLeft: '8px'
+          }}>
+            {node.children.map((child, idx) => (
+              <TreeNode
+                key={idx}
+                node={child}
+                depth={depth + 1}
+                parentColor={nodeColor}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%)',
+      padding: '40px 24px',
+      fontFamily: "'Inter', -apple-system, sans-serif"
+    }}>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+        <h1 style={{
+          fontSize: '32px',
+          fontWeight: '700',
+          color: '#F8FAFC',
+          margin: '0 0 8px 0'
+        }}>
+          Component Hierarchy
+        </h1>
+        <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>
+          VistralAI React application component tree
+        </p>
+      </div>
+
+      {/* Legend */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '24px',
+        marginBottom: '32px',
+        flexWrap: 'wrap'
+      }}>
+        {[
+          { type: 'layout', label: 'Layout' },
+          { type: 'page', label: 'Page' },
+          { type: 'component', label: 'Component' },
+          { type: 'provider', label: 'Provider' },
+          { type: 'group', label: 'Group' }
+        ].map(({ type, label }) => (
+          <div key={type} style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}>
+            <span style={{ fontSize: '16px' }}>{getTypeIcon(type)}</span>
+            <span style={{
+              color: '#94A3B8',
+              fontSize: '12px'
+            }}>{label}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Tree View */}
+      <div style={{
+        maxWidth: '800px',
+        margin: '0 auto',
+        background: '#0F172A80',
+        borderRadius: '16px',
+        padding: '24px',
+        border: '1px solid #334155'
+      }}>
+        <TreeNode node={componentTree} />
+      </div>
+
+      {/* Quick Stats */}
+      <div style={{
+        maxWidth: '800px',
+        margin: '32px auto 0',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '16px'
+      }}>
+        {[
+          { label: 'Pages', count: 8, color: '#3B82F6' },
+          { label: 'Components', count: 28, color: '#10B981' },
+          { label: 'Layouts', count: 2, color: '#6366F1' },
+          { label: 'Providers', count: 1, color: '#8B5CF6' }
+        ].map((stat) => (
+          <div key={stat.label} style={{
+            background: `${stat.color}15`,
+            borderRadius: '12px',
+            padding: '16px',
+            textAlign: 'center',
+            border: `1px solid ${stat.color}30`
+          }}>
+            <div style={{ color: stat.color, fontSize: '24px', fontWeight: '700' }}>
+              {stat.count}
+            </div>
+            <div style={{ color: '#94A3B8', fontSize: '12px' }}>{stat.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default ComponentHierarchyDiagram;

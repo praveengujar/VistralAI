@@ -1,0 +1,355 @@
+import React, { useState } from 'react';
+
+const DatabaseSchemaDiagram = () => {
+  const [selectedEntity, setSelectedEntity] = useState(null);
+
+  const entities = [
+    {
+      id: 'user',
+      name: 'User',
+      color: '#3B82F6',
+      fields: [
+        { name: 'id', type: 'ObjectId', pk: true },
+        { name: 'email', type: 'String', unique: true },
+        { name: 'password', type: 'String' },
+        { name: 'accountType', type: 'Enum' },
+        { name: 'subscription', type: 'Object' },
+        { name: 'mfaEnabled', type: 'Boolean' },
+        { name: 'createdAt', type: 'Date' },
+        { name: 'lastLoginAt', type: 'Date' }
+      ],
+      x: 50,
+      y: 50
+    },
+    {
+      id: 'brandProfile',
+      name: 'BrandProfile',
+      color: '#10B981',
+      fields: [
+        { name: 'id', type: 'ObjectId', pk: true },
+        { name: 'userId', type: 'ObjectId', fk: 'User' },
+        { name: 'brandName', type: 'String' },
+        { name: 'domain', type: 'String' },
+        { name: 'category', type: 'String' },
+        { name: 'crawlingStatus', type: 'Enum' }
+      ],
+      x: 300,
+      y: 50
+    },
+    {
+      id: 'brand360Profile',
+      name: 'Brand360Profile',
+      color: '#8B5CF6',
+      fields: [
+        { name: 'id', type: 'ObjectId', pk: true },
+        { name: 'organizationId', type: 'ObjectId' },
+        { name: 'brandName', type: 'String' },
+        { name: 'completionScore', type: 'Number' },
+        { name: 'entityHealthScore', type: 'Number' }
+      ],
+      x: 50,
+      y: 300
+    },
+    {
+      id: 'perceptionScan',
+      name: 'PerceptionScan',
+      color: '#F59E0B',
+      fields: [
+        { name: 'id', type: 'ObjectId', pk: true },
+        { name: 'brand360Id', type: 'ObjectId', fk: 'Brand360Profile' },
+        { name: 'status', type: 'Enum' },
+        { name: 'platforms', type: 'Array' },
+        { name: 'overallScore', type: 'Number' },
+        { name: 'quadrantPosition', type: 'Object' }
+      ],
+      x: 300,
+      y: 300
+    },
+    {
+      id: 'aiPerceptionResult',
+      name: 'AIPerceptionResult',
+      color: '#EC4899',
+      fields: [
+        { name: 'id', type: 'ObjectId', pk: true },
+        { name: 'promptId', type: 'ObjectId', fk: 'GeneratedPrompt' },
+        { name: 'brand360Id', type: 'ObjectId', fk: 'Brand360Profile' },
+        { name: 'platform', type: 'String' },
+        { name: 'faithfulnessScore', type: 'Number' },
+        { name: 'shareOfVoice', type: 'Number' },
+        { name: 'hallucinationScore', type: 'Number' }
+      ],
+      x: 550,
+      y: 300
+    },
+    {
+      id: 'generatedPrompt',
+      name: 'GeneratedPrompt',
+      color: '#14B8A6',
+      fields: [
+        { name: 'id', type: 'ObjectId', pk: true },
+        { name: 'brand360Id', type: 'ObjectId', fk: 'Brand360Profile' },
+        { name: 'category', type: 'String' },
+        { name: 'intent', type: 'String' },
+        { name: 'template', type: 'String' },
+        { name: 'renderedPrompt', type: 'String' }
+      ],
+      x: 550,
+      y: 50
+    }
+  ];
+
+  const relationships = [
+    { from: 'user', to: 'brandProfile', type: '1:0..1', label: 'has' },
+    { from: 'brand360Profile', to: 'perceptionScan', type: '1:0..N', label: 'has many' },
+    { from: 'brand360Profile', to: 'aiPerceptionResult', type: '1:0..N', label: 'has many' },
+    { from: 'brand360Profile', to: 'generatedPrompt', type: '1:0..N', label: 'generates' },
+    { from: 'perceptionScan', to: 'aiPerceptionResult', type: '1:0..N', label: 'contains' },
+    { from: 'generatedPrompt', to: 'aiPerceptionResult', type: '1:0..N', label: 'produces' }
+  ];
+
+  const embeddedDocs = [
+    { parent: 'Brand360Profile', children: ['EntityHome', 'OrganizationSchema', 'BrandIdentityPrism', 'BrandArchetype', 'BrandVoiceProfile', 'ClaimLocker', 'CompetitorGraph', 'RiskFactors'] },
+    { parent: 'Brand360Profile', children: ['CustomerPersona[]', 'Product[]'] },
+    { parent: 'BrandProfile', children: ['BrandIdentity', 'MarketPosition', 'CompetitorProfile[]', 'ProductDetail[]', 'BrandAsset[]', 'UploadedDocument[]'] }
+  ];
+
+  const EntityCard = ({ entity }) => (
+    <div
+      style={{
+        background: '#1A1F2E',
+        borderRadius: '12px',
+        border: `2px solid ${entity.color}`,
+        overflow: 'hidden',
+        width: '240px',
+        cursor: 'pointer',
+        boxShadow: selectedEntity === entity.id ? `0 0 20px ${entity.color}40` : 'none',
+        transition: 'box-shadow 0.2s'
+      }}
+      onClick={() => setSelectedEntity(selectedEntity === entity.id ? null : entity.id)}
+    >
+      {/* Header */}
+      <div style={{
+        background: entity.color,
+        padding: '12px 16px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
+      }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+          <path d="M4 7V4h16v3M9 20h6M12 4v16" />
+        </svg>
+        <span style={{ color: 'white', fontWeight: '600', fontSize: '14px' }}>
+          {entity.name}
+        </span>
+      </div>
+      
+      {/* Fields */}
+      <div style={{ padding: '12px' }}>
+        {entity.fields.map((field, idx) => (
+          <div key={idx} style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '6px 8px',
+            marginBottom: idx < entity.fields.length - 1 ? '4px' : 0,
+            background: field.pk ? `${entity.color}20` : 'transparent',
+            borderRadius: '4px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {field.pk && (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill={entity.color} stroke="none">
+                  <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+                </svg>
+              )}
+              {field.fk && (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
+              )}
+              <span style={{ color: '#E2E8F0', fontSize: '11px' }}>{field.name}</span>
+            </div>
+            <span style={{ color: '#64748B', fontSize: '10px' }}>{field.type}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #0A0E17 0%, #131B2E 50%, #0A0E17 100%)',
+      padding: '40px 24px',
+      fontFamily: "'JetBrains Mono', 'Fira Code', monospace"
+    }}>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+        <h1 style={{
+          fontSize: '32px',
+          fontWeight: '700',
+          color: '#F8FAFC',
+          margin: '0 0 8px 0',
+          fontFamily: "'Inter', sans-serif"
+        }}>
+          Database Schema (ERD)
+        </h1>
+        <p style={{ fontSize: '14px', color: '#64748B', margin: 0, fontFamily: "'Inter', sans-serif" }}>
+          MongoDB collections and relationships
+        </p>
+      </div>
+
+      {/* Legend */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '24px',
+        marginBottom: '32px',
+        flexWrap: 'wrap'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#3B82F6">
+            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+          </svg>
+          <span style={{ color: '#94A3B8', fontSize: '12px' }}>Primary Key</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+          </svg>
+          <span style={{ color: '#94A3B8', fontSize: '12px' }}>Foreign Key</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ color: '#94A3B8', fontSize: '12px' }}>1 ─── 0..1</span>
+          <span style={{ color: '#64748B', fontSize: '11px' }}>One to Optional One</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ color: '#94A3B8', fontSize: '12px' }}>1 ──&lt; 0..N</span>
+          <span style={{ color: '#64748B', fontSize: '11px' }}>One to Many</span>
+        </div>
+      </div>
+
+      {/* Entity Cards Grid */}
+      <div style={{
+        maxWidth: '1200px',
+        margin: '0 auto',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+        gap: '24px',
+        marginBottom: '48px'
+      }}>
+        {entities.map((entity) => (
+          <EntityCard key={entity.id} entity={entity} />
+        ))}
+      </div>
+
+      {/* Relationships */}
+      <div style={{
+        maxWidth: '1000px',
+        margin: '0 auto 48px',
+        background: '#1A1F2E',
+        borderRadius: '12px',
+        padding: '24px',
+        border: '1px solid #334155'
+      }}>
+        <div style={{
+          color: '#94A3B8',
+          fontSize: '11px',
+          fontWeight: '600',
+          letterSpacing: '1px',
+          marginBottom: '16px',
+          fontFamily: "'Inter', sans-serif"
+        }}>
+          RELATIONSHIPS
+        </div>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '12px'
+        }}>
+          {relationships.map((rel, idx) => (
+            <div key={idx} style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '12px',
+              background: '#0F172A60',
+              borderRadius: '8px'
+            }}>
+              <span style={{
+                color: entities.find(e => e.id === rel.from)?.color,
+                fontSize: '12px',
+                fontWeight: '600'
+              }}>
+                {entities.find(e => e.id === rel.from)?.name}
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ color: '#64748B', fontSize: '10px' }}>{rel.type.split(':')[0]}</span>
+                <div style={{ width: '40px', height: '1px', background: '#475569' }} />
+                <span style={{ color: '#64748B', fontSize: '10px' }}>{rel.type.split(':')[1]}</span>
+              </div>
+              <span style={{
+                color: entities.find(e => e.id === rel.to)?.color,
+                fontSize: '12px',
+                fontWeight: '600'
+              }}>
+                {entities.find(e => e.id === rel.to)?.name}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Embedded Documents */}
+      <div style={{
+        maxWidth: '1000px',
+        margin: '0 auto',
+        background: '#1A1F2E',
+        borderRadius: '12px',
+        padding: '24px',
+        border: '1px solid #334155'
+      }}>
+        <div style={{
+          color: '#94A3B8',
+          fontSize: '11px',
+          fontWeight: '600',
+          letterSpacing: '1px',
+          marginBottom: '16px',
+          fontFamily: "'Inter', sans-serif"
+        }}>
+          EMBEDDED DOCUMENTS
+        </div>
+        {embeddedDocs.map((doc, idx) => (
+          <div key={idx} style={{
+            marginBottom: idx < embeddedDocs.length - 1 ? '16px' : 0
+          }}>
+            <div style={{
+              color: '#8B5CF6',
+              fontSize: '13px',
+              fontWeight: '600',
+              marginBottom: '8px'
+            }}>
+              {doc.parent}
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {doc.children.map((child, cidx) => (
+                <code key={cidx} style={{
+                  background: '#0F172A',
+                  color: '#94A3B8',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                  border: '1px solid #334155'
+                }}>
+                  {child}
+                </code>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default DatabaseSchemaDiagram;
