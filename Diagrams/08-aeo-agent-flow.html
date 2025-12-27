@@ -9,222 +9,336 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    body { font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; }
   </style>
 </head>
 <body>
   <div id="root"></div>
   <script type="text/babel">
-    const AEOAgentFlowDiagram = () => {
-      const agents = [
-        { step: 1, name: 'CrawlerAgent', color: '#3B82F6', input: 'Website URL', process: 'Web crawling + Schema.org extraction', output: 'Raw website data' },
-        { step: 2, name: 'BrandIntelligence', color: '#8B5CF6', badge: 'GPT-4o-mini', input: 'Raw website data', process: 'Extract brand information', output: 'Structured brand data' },
-        { step: 3, name: 'VibeCheckAgent', color: '#EC4899', input: 'Brand data', process: 'Infer brand personality', output: 'Personality traits, archetypes' },
-        { step: 4, name: 'CompetitorAgent', color: '#F59E0B', input: 'Brand data', process: 'Discover competitors', output: 'Competitor list with analysis' },
-        { step: 5, name: 'Create Brand360Profile', color: '#10B981', input: 'All extracted data', process: 'Combine & structure', output: 'Complete Brand360 profile' },
-        { step: 6, name: 'Generate Prompts', color: '#6366F1', input: 'Brand360 profile', process: 'Create test prompts by category', output: 'Navigational, Functional, Comparative, Voice, Adversarial' },
-        { step: 7, name: 'PerceptionEvaluatorAgent', color: '#14B8A6', badge: 'LLM-as-a-Judge', input: 'Generated prompts', process: 'Query AI platforms, score responses', output: 'Perception metrics' }
-      ];
+    const { useState } = React;
 
-      const metrics = [
-        { name: 'Faithfulness Score', range: '0-100', desc: 'Accuracy to ground truth', color: '#10B981' },
-        { name: 'Share of Voice', range: '0-100', desc: 'Brand visibility', color: '#3B82F6' },
-        { name: 'Sentiment', range: '-1 to 1', desc: 'Overall sentiment', color: '#F59E0B' },
-        { name: 'Voice Alignment', range: '0-100', desc: 'Matches brand tone', color: '#8B5CF6' },
-        { name: 'Hallucination Score', range: '0-100', desc: '100 = no hallucinations', color: '#EF4444' }
-      ];
 
-      const quadrants = [
-        { name: 'DOMINANT', position: 'High Accuracy + High Visibility', color: '#10B981', bg: '#10B98120' },
-        { name: 'VULNERABLE', position: 'Low Accuracy + High Visibility', color: '#F59E0B', bg: '#F59E0B20' },
-        { name: 'NICHE', position: 'High Accuracy + Low Visibility', color: '#3B82F6', bg: '#3B82F620' },
-        { name: 'INVISIBLE', position: 'Low Accuracy + Low Visibility', color: '#EF4444', bg: '#EF444420' }
-      ];
 
-      return (
-        <div style={{
-          minHeight: '100vh',
-          background: 'linear-gradient(180deg, #0A0A12 0%, #12121F 50%, #0A0A12 100%)',
-          padding: '40px 24px',
-          fontFamily: "'Inter', -apple-system, sans-serif"
-        }}>
-          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-            <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 8px 0' }}>AEO Agent Workflow</h1>
-            <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>AI Engine Optimization pipeline from URL to perception metrics</p>
-          </div>
+const Component = () => {
+  const agents = [
+    {
+      step: 1,
+      name: 'CrawlerAgent',
+      color: '#3B82F6',
+      badge: 'Firecrawl',
+      input: 'Website URL',
+      process: 'Crawl up to 20 pages, extract Schema.org, meta tags, content',
+      output: 'CrawlResult {pages[], schemaOrg{}, socialLinks[]}',
+      metrics: 'pages_crawled, schema_types_found'
+    },
+    {
+      step: 2,
+      name: 'VibeCheckAgent',
+      color: '#EC4899',
+      badge: 'GPT-4o-mini',
+      input: 'CrawlResult',
+      process: 'Infer Kapferer prism (6 facets), archetype (12 Jungian), Big 5 traits',
+      output: 'BrandVibe {archetype, prism, voice, personality}',
+      metrics: 'archetype_confidence (0-100)'
+    },
+    {
+      step: 3,
+      name: 'CompetitorAgent',
+      color: '#8B5CF6',
+      badge: 'GPT-4o',
+      input: 'Brand name, industry, domain',
+      process: 'Discover direct, indirect, aspirational competitors',
+      output: 'Competitor[] {name, type, threatLevel, strengths[], weaknesses[]}',
+      metrics: 'competitors_found (by type)'
+    },
+    {
+      step: 4,
+      name: 'BrandIntelligence',
+      color: '#10B981',
+      badge: 'Synthesis',
+      input: 'All agent outputs',
+      process: 'Synthesize Brand360Profile, generate Organization Schema (JSON-LD)',
+      output: 'Complete Brand360Profile + EntityHome',
+      metrics: 'completion_score, entity_health_score (0-100)',
+      wsEvent: 'brand360:created'
+    }
+  ];
 
-          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-            
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
-              <div style={{
-                background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-                borderRadius: '16px',
-                padding: '20px 40px',
-                textAlign: 'center',
-                boxShadow: '0 4px 24px rgba(99, 102, 241, 0.4)'
-              }}>
-                <div style={{ fontSize: '24px', marginBottom: '8px' }}>🌐</div>
-                <div style={{ color: 'white', fontWeight: '600', fontSize: '16px' }}>Website URL</div>
-                <div style={{ color: '#C7D2FE', fontSize: '12px' }}>User input</div>
-              </div>
-            </div>
+  const promptCategories = [
+    { name: 'Navigational', desc: 'The Who - Brand discovery', color: '#3B82F6' },
+    { name: 'Functional', desc: 'The How - Features, capabilities', color: '#10B981' },
+    { name: 'Comparative', desc: 'The Which - vs competitors', color: '#8B5CF6' },
+    { name: 'Voice', desc: 'The Vibe - Tone, personality', color: '#EC4899' },
+    { name: 'Adversarial', desc: 'The Risk - Edge cases, attacks', color: '#EF4444' }
+  ];
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
-              <div style={{ background: '#1E293B', borderRadius: '20px', padding: '8px 20px', border: '1px solid #475569' }}>
-                <span style={{ color: '#94A3B8', fontSize: '12px' }}>
-                  Coordinated by <strong style={{ color: '#F8FAFC' }}>MagicImportOrchestrator</strong>
-                </span>
-              </div>
-            </div>
+  const perceptionMetrics = [
+    { name: 'Faithfulness', range: '0-100', desc: 'Accuracy to ground truth', color: '#10B981' },
+    { name: 'Share of Voice', range: '0-100', desc: 'Brand visibility', color: '#3B82F6' },
+    { name: 'Sentiment', range: '-1 to 1', desc: 'Overall sentiment', color: '#F59E0B' },
+    { name: 'Voice Alignment', range: '0-100', desc: 'Matches brand tone', color: '#8B5CF6' },
+    { name: 'Hallucination', range: '0-100', desc: '100 = no hallucinations', color: '#EF4444' }
+  ];
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
-              <div style={{ width: '2px', height: '24px', background: 'linear-gradient(to bottom, #6366F1, #3B82F6)' }} />
-            </div>
+  const quadrants = [
+    { name: 'DOMINANT', pos: 'High Acc + High Vis', color: '#10B981' },
+    { name: 'VULNERABLE', pos: 'Low Acc + High Vis', color: '#F59E0B' },
+    { name: 'NICHE', pos: 'High Acc + Low Vis', color: '#3B82F6' },
+    { name: 'INVISIBLE', pos: 'Low Acc + Low Vis', color: '#EF4444' }
+  ];
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {agents.map((agent, idx) => (
-                <React.Fragment key={agent.step}>
-                  <div style={{
-                    background: '#1A1F2E',
-                    borderRadius: '16px',
-                    border: `2px solid ${agent.color}`,
-                    overflow: 'hidden',
-                    boxShadow: `0 4px 16px ${agent.color}20`
-                  }}>
-                    <div style={{
-                      background: `${agent.color}20`,
-                      padding: '16px 20px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      borderBottom: `1px solid ${agent.color}40`
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '50%',
-                          background: agent.color,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: 'white',
-                          fontWeight: '700',
-                          fontSize: '14px'
-                        }}>
-                          {agent.step}
-                        </div>
-                        <span style={{ color: agent.color, fontWeight: '700', fontSize: '16px' }}>{agent.name}</span>
-                        {agent.badge && (
-                          <span style={{
-                            background: '#0F172A',
-                            color: '#94A3B8',
-                            padding: '4px 10px',
-                            borderRadius: '12px',
-                            fontSize: '11px',
-                            border: '1px solid #334155'
-                          }}>
-                            {agent.badge}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(180deg, #0A0A12 0%, #12121F 50%, #0A0A12 100%)',
+      padding: '40px 24px',
+      fontFamily: "'Inter', -apple-system, sans-serif"
+    }}>
+      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 8px 0' }}>AEO Agent Workflow</h1>
+        <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>AI Engine Optimization pipeline with real-time events</p>
+      </div>
 
-                    <div style={{ padding: '16px 20px', display: 'grid', gridTemplateColumns: '1fr 1.5fr 1fr', gap: '16px' }}>
-                      <div>
-                        <div style={{ color: '#64748B', fontSize: '10px', fontWeight: '600', marginBottom: '4px' }}>INPUT</div>
-                        <div style={{ color: '#E2E8F0', fontSize: '12px' }}>{agent.input}</div>
-                      </div>
-                      <div>
-                        <div style={{ color: '#64748B', fontSize: '10px', fontWeight: '600', marginBottom: '4px' }}>PROCESS</div>
-                        <div style={{ color: '#E2E8F0', fontSize: '12px' }}>{agent.process}</div>
-                      </div>
-                      <div>
-                        <div style={{ color: '#64748B', fontSize: '10px', fontWeight: '600', marginBottom: '4px' }}>OUTPUT</div>
-                        <div style={{ color: agent.color, fontSize: '12px', fontWeight: '500' }}>{agent.output}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {idx < agents.length - 1 && (
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                      <div style={{ width: '2px', height: '24px', background: `linear-gradient(to bottom, ${agent.color}, ${agents[idx + 1].color})` }} />
-                    </div>
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-
-            <div style={{ marginTop: '40px' }}>
-              <div style={{
-                background: '#1A1F2E',
-                borderRadius: '16px',
-                padding: '24px',
-                marginBottom: '24px',
-                border: '1px solid #334155'
-              }}>
-                <div style={{ color: '#94A3B8', fontSize: '11px', fontWeight: '600', letterSpacing: '1px', marginBottom: '16px' }}>
-                  PERCEPTION METRICS OUTPUT
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
-                  {metrics.map((metric) => (
-                    <div key={metric.name} style={{
-                      background: '#0F172A',
-                      borderRadius: '12px',
-                      padding: '16px',
-                      borderTop: `3px solid ${metric.color}`,
-                      textAlign: 'center'
-                    }}>
-                      <div style={{ color: metric.color, fontSize: '13px', fontWeight: '600', marginBottom: '4px' }}>{metric.name}</div>
-                      <div style={{ color: '#E2E8F0', fontSize: '14px', fontWeight: '700', marginBottom: '4px' }}>{metric.range}</div>
-                      <div style={{ color: '#64748B', fontSize: '10px' }}>{metric.desc}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div style={{
-                background: '#1A1F2E',
-                borderRadius: '16px',
-                padding: '24px',
-                border: '1px solid #334155'
-              }}>
-                <div style={{ color: '#94A3B8', fontSize: '11px', fontWeight: '600', letterSpacing: '1px', marginBottom: '16px' }}>
-                  QUADRANT CLASSIFICATION
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-                  {quadrants.map((q) => (
-                    <div key={q.name} style={{
-                      background: q.bg,
-                      borderRadius: '12px',
-                      padding: '16px',
-                      border: `1px solid ${q.color}40`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px'
-                    }}>
-                      <div style={{
-                        width: '12px',
-                        height: '12px',
-                        borderRadius: '50%',
-                        background: q.color,
-                        boxShadow: `0 0 12px ${q.color}`
-                      }} />
-                      <div>
-                        <div style={{ color: q.color, fontSize: '13px', fontWeight: '700' }}>{q.name}</div>
-                        <div style={{ color: '#94A3B8', fontSize: '11px' }}>{q.position}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+        
+        {/* Input */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+            borderRadius: '14px',
+            padding: '16px 36px',
+            textAlign: 'center',
+            boxShadow: '0 4px 20px rgba(99, 102, 241, 0.4)'
+          }}>
+            <div style={{ fontSize: '20px', marginBottom: '6px' }}>🌐</div>
+            <div style={{ color: 'white', fontWeight: '600', fontSize: '14px' }}>Website URL</div>
+            <code style={{ color: '#C7D2FE', fontSize: '11px' }}>/api/aeo/magic-import</code>
           </div>
         </div>
-      );
-    };
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<AEOAgentFlowDiagram />);
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+          <div style={{ background: '#1E293B', borderRadius: '16px', padding: '6px 16px', border: '1px solid #475569' }}>
+            <span style={{ color: '#94A3B8', fontSize: '11px' }}>
+              Coordinated by <strong style={{ color: '#F8FAFC' }}>MagicImportOrchestrator</strong>
+            </span>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+          <div style={{ width: '2px', height: '20px', background: 'linear-gradient(to bottom, #6366F1, #3B82F6)' }} />
+        </div>
+
+        {/* Agent Pipeline */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
+          {agents.map((agent, idx) => (
+            <React.Fragment key={agent.step}>
+              <div style={{
+                background: '#1A1F2E',
+                borderRadius: '14px',
+                border: `2px solid ${agent.color}`,
+                overflow: 'hidden',
+                boxShadow: `0 4px 16px ${agent.color}15`
+              }}>
+                <div style={{
+                  background: `${agent.color}20`,
+                  padding: '12px 18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  borderBottom: `1px solid ${agent.color}40`
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      background: agent.color,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontWeight: '700',
+                      fontSize: '13px'
+                    }}>
+                      {agent.step}
+                    </div>
+                    <span style={{ color: agent.color, fontWeight: '700', fontSize: '14px' }}>{agent.name}</span>
+                    <span style={{
+                      background: '#0F172A',
+                      color: '#94A3B8',
+                      padding: '3px 8px',
+                      borderRadius: '10px',
+                      fontSize: '10px',
+                      border: '1px solid #334155'
+                    }}>
+                      {agent.badge}
+                    </span>
+                  </div>
+                  {agent.wsEvent && (
+                    <code style={{
+                      background: '#8B5CF620',
+                      color: '#8B5CF6',
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      fontSize: '10px'
+                    }}>
+                      WS: {agent.wsEvent}
+                    </code>
+                  )}
+                </div>
+
+                <div style={{ padding: '14px 18px', display: 'grid', gridTemplateColumns: '1fr 1.5fr 1fr 1fr', gap: '14px' }}>
+                  <div>
+                    <div style={{ color: '#64748B', fontSize: '9px', fontWeight: '600', marginBottom: '3px' }}>INPUT</div>
+                    <div style={{ color: '#E2E8F0', fontSize: '11px' }}>{agent.input}</div>
+                  </div>
+                  <div>
+                    <div style={{ color: '#64748B', fontSize: '9px', fontWeight: '600', marginBottom: '3px' }}>PROCESS</div>
+                    <div style={{ color: '#E2E8F0', fontSize: '11px' }}>{agent.process}</div>
+                  </div>
+                  <div>
+                    <div style={{ color: '#64748B', fontSize: '9px', fontWeight: '600', marginBottom: '3px' }}>OUTPUT</div>
+                    <div style={{ color: agent.color, fontSize: '11px', fontWeight: '500' }}>{agent.output}</div>
+                  </div>
+                  <div>
+                    <div style={{ color: '#64748B', fontSize: '9px', fontWeight: '600', marginBottom: '3px' }}>METRICS</div>
+                    <div style={{ color: '#94A3B8', fontSize: '10px' }}>{agent.metrics}</div>
+                  </div>
+                </div>
+              </div>
+
+              {idx < agents.length - 1 && (
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <div style={{ width: '2px', height: '16px', background: `linear-gradient(to bottom, ${agent.color}, ${agents[idx + 1].color})` }} />
+                </div>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+
+        {/* Perception Scan Section */}
+        <div style={{
+          background: '#1A1F2E',
+          borderRadius: '16px',
+          padding: '20px',
+          marginBottom: '20px',
+          border: '1px solid #6366F1'
+        }}>
+          <div style={{ color: '#6366F1', fontSize: '12px', fontWeight: '700', letterSpacing: '1px', marginBottom: '16px' }}>
+            PERCEPTION SCAN (Separate Trigger)
+          </div>
+
+          {/* Prompt Generation */}
+          <div style={{ marginBottom: '16px' }}>
+            <div style={{ color: '#94A3B8', fontSize: '10px', fontWeight: '600', marginBottom: '10px' }}>PROMPT GENERATION (5 Categories)</div>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              {promptCategories.map((cat) => (
+                <div key={cat.name} style={{
+                  background: `${cat.color}15`,
+                  border: `1px solid ${cat.color}40`,
+                  borderRadius: '8px',
+                  padding: '10px 14px',
+                  flex: '1 1 180px'
+                }}>
+                  <div style={{ color: cat.color, fontSize: '12px', fontWeight: '600' }}>{cat.name}</div>
+                  <div style={{ color: '#94A3B8', fontSize: '10px' }}>{cat.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* PerceptionEvaluator */}
+          <div style={{
+            background: '#14B8A620',
+            border: '1px solid #14B8A640',
+            borderRadius: '10px',
+            padding: '14px',
+            marginBottom: '16px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: '#14B8A6', fontWeight: '700', fontSize: '13px' }}>PerceptionEvaluatorAgent</span>
+                <span style={{
+                  background: '#0F172A',
+                  color: '#94A3B8',
+                  padding: '2px 8px',
+                  borderRadius: '8px',
+                  fontSize: '9px'
+                }}>LLM-as-a-Judge</span>
+              </div>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <code style={{ background: '#8B5CF620', color: '#8B5CF6', padding: '2px 6px', borderRadius: '4px', fontSize: '9px' }}>WS: scan:progress</code>
+                <code style={{ background: '#8B5CF620', color: '#8B5CF6', padding: '2px 6px', borderRadius: '4px', fontSize: '9px' }}>WS: scan:complete</code>
+              </div>
+            </div>
+            <div style={{ color: '#94A3B8', fontSize: '10px' }}>
+              For each prompt × platform (Claude, ChatGPT, Gemini, Perplexity): Query → Capture response → Score with LLM-as-a-Judge
+            </div>
+          </div>
+
+          {/* Metrics */}
+          <div style={{ color: '#94A3B8', fontSize: '10px', fontWeight: '600', marginBottom: '10px' }}>PERCEPTION METRICS OUTPUT</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px' }}>
+            {perceptionMetrics.map((metric) => (
+              <div key={metric.name} style={{
+                background: '#0F172A',
+                borderRadius: '10px',
+                padding: '12px',
+                borderTop: `3px solid ${metric.color}`,
+                textAlign: 'center'
+              }}>
+                <div style={{ color: metric.color, fontSize: '11px', fontWeight: '600', marginBottom: '3px' }}>{metric.name}</div>
+                <div style={{ color: '#E2E8F0', fontSize: '13px', fontWeight: '700', marginBottom: '2px' }}>{metric.range}</div>
+                <div style={{ color: '#64748B', fontSize: '9px' }}>{metric.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Quadrant Classification */}
+        <div style={{
+          background: '#1A1F2E',
+          borderRadius: '16px',
+          padding: '20px',
+          border: '1px solid #334155'
+        }}>
+          <div style={{ color: '#94A3B8', fontSize: '11px', fontWeight: '600', letterSpacing: '1px', marginBottom: '14px' }}>
+            QUADRANT CLASSIFICATION
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+            {quadrants.map((q) => (
+              <div key={q.name} style={{
+                background: `${q.color}15`,
+                borderRadius: '10px',
+                padding: '14px',
+                border: `1px solid ${q.color}40`,
+                textAlign: 'center'
+              }}>
+                <div style={{
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '50%',
+                  background: q.color,
+                  boxShadow: `0 0 12px ${q.color}`,
+                  margin: '0 auto 8px'
+                }} />
+                <div style={{ color: q.color, fontSize: '12px', fontWeight: '700' }}>{q.name}</div>
+                <div style={{ color: '#94A3B8', fontSize: '10px' }}>{q.pos}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: '14px', textAlign: 'center' }}>
+            <code style={{ background: '#8B5CF620', color: '#8B5CF6', padding: '4px 10px', borderRadius: '6px', fontSize: '10px' }}>
+              WS: insight:new
+            </code>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<Component />);
   </script>
 </body>
 </html>

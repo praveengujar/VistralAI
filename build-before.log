@@ -1,0 +1,198 @@
+
+> vistralai@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.16
+  - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+
+./components/brand-360/BrandOfferingsShowcase.tsx
+75:41  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/brand-360/DocumentUpload.tsx
+42:6  Warning: React Hook useCallback has a missing dependency: 'handleFiles'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+47:6  Warning: React Hook useCallback has a missing dependency: 'handleFiles'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+   Collecting page data ...
+[Database] Using MongoDB (Legacy)
+[Database] Using MongoDB (Legacy)
+[Database] Using MongoDB (Legacy)
+[Database] Using MongoDB (Legacy)
+[Database] Using MongoDB (Legacy)
+[Database] Using MongoDB (Legacy)
+[Database] Using MongoDB (Legacy)
+[Database] Using MongoDB (Legacy)
+[Database] Using MongoDB (Legacy)
+[Database] Using MongoDB (Legacy)
+[Database] Using MongoDB (Legacy)
+[Database] Using MongoDB (Legacy)
+[Database] Using MongoDB (Legacy)
+[MockDB] Initializing new mock database storage
+   Generating static pages (0/59) ...
+[QueueFactory] Using in-memory job queue
+   Generating static pages (14/59) 
+[MockDB] Initializing new mock database storage
+Error fetching Brand 360° data: B [Error]: Dynamic server usage: Route /api/brand-360 couldn't be rendered statically because it used `nextUrl.searchParams`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at V (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:21777)
+    at Object.get (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:28809)
+    at u (/Users/pgujar/Documents/Projects/VistralAI/.next/server/app/api/brand-360/route.js:1:629)
+    at /Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:37016
+    at /Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/server/lib/trace/tracer.js:140:36
+    at NoopContextManager.with (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854)
+    at /Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/server/lib/trace/tracer.js:122:103 {
+  description: "Route /api/brand-360 couldn't be rendered statically because it used `nextUrl.searchParams`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching job status: B [Error]: Dynamic server usage: Route /api/onboarding/status couldn't be rendered statically because it used `nextUrl.searchParams`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at V (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:21777)
+    at Object.get (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:28809)
+    at i (/Users/pgujar/Documents/Projects/VistralAI/.next/server/app/api/onboarding/status/route.js:1:543)
+    at /Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:37016
+    at /Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/server/lib/trace/tracer.js:140:36
+    at NoopContextManager.with (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854)
+    at /Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/server/lib/trace/tracer.js:122:103 {
+  description: "Route /api/onboarding/status couldn't be rendered statically because it used `nextUrl.searchParams`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[App] Starting VistralAI initialization...
+[App] Validating feature configuration...
+[App] Checking Firecrawl connection...
+[Firecrawl] Client initialized with base URL: http://localhost:3002
+[App] Firecrawl health check passed
+[App] VistralAI initialization complete
+[API] Error fetching sessions: n [Error]: Dynamic server usage: Route /api/user/sessions couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (/Users/pgujar/Documents/Projects/VistralAI/.next/server/chunks/7787.js:1:37156)
+    at d (/Users/pgujar/Documents/Projects/VistralAI/.next/server/chunks/4522.js:25:29044)
+    at s (/Users/pgujar/Documents/Projects/VistralAI/.next/server/chunks/4522.js:25:20868)
+    at p (/Users/pgujar/Documents/Projects/VistralAI/.next/server/app/api/user/sessions/route.js:1:1342)
+    at /Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:37016
+    at /Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/server/lib/trace/tracer.js:140:36
+    at NoopContextManager.with (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854) {
+  description: "Route /api/user/sessions couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[Reports API] GET summary Error: n [Error]: Dynamic server usage: Route /api/aeo/reports/summary couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (/Users/pgujar/Documents/Projects/VistralAI/.next/server/chunks/7787.js:1:37156)
+    at d (/Users/pgujar/Documents/Projects/VistralAI/.next/server/chunks/4522.js:25:29044)
+    at s (/Users/pgujar/Documents/Projects/VistralAI/.next/server/chunks/4522.js:25:20868)
+    at d (/Users/pgujar/Documents/Projects/VistralAI/.next/server/app/api/aeo/reports/summary/route.js:1:1373)
+    at /Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:37016
+    at /Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/server/lib/trace/tracer.js:140:36
+    at NoopContextManager.with (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854) {
+  description: "Route /api/aeo/reports/summary couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages (29/59) 
+[API] Error fetching profile: n [Error]: Dynamic server usage: Route /api/user/profile couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (/Users/pgujar/Documents/Projects/VistralAI/.next/server/chunks/7787.js:1:37156)
+    at d (/Users/pgujar/Documents/Projects/VistralAI/.next/server/chunks/4522.js:25:29044)
+    at s (/Users/pgujar/Documents/Projects/VistralAI/.next/server/chunks/4522.js:25:20868)
+    at g (/Users/pgujar/Documents/Projects/VistralAI/.next/server/app/api/user/profile/route.js:1:1535)
+    at /Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:37016
+    at /Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/server/lib/trace/tracer.js:140:36
+    at NoopContextManager.with (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/Users/pgujar/Documents/Projects/VistralAI/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854) {
+  description: "Route /api/user/profile couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages (44/59) 
+ ✓ Generating static pages (59/59)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                    Size     First Load JS
+┌ ○ /                                          1.04 kB        88.4 kB
+├ ○ /_not-found                                880 B          88.3 kB
+├ ○ /api/admin/queue-stats                     0 B                0 B
+├ ○ /api/admin/review-queue                    0 B                0 B
+├ ƒ /api/aeo/compare-scans                     0 B                0 B
+├ ƒ /api/aeo/corrections                       0 B                0 B
+├ ƒ /api/aeo/corrections/[workflowId]          0 B                0 B
+├ ƒ /api/aeo/corrections/[workflowId]/approve  0 B                0 B
+├ ƒ /api/aeo/corrections/[workflowId]/verify   0 B                0 B
+├ ƒ /api/aeo/insights                          0 B                0 B
+├ ƒ /api/aeo/insights/[insightId]              0 B                0 B
+├ ƒ /api/aeo/insights/[insightId]/dismiss      0 B                0 B
+├ ƒ /api/aeo/magic-import                      0 B                0 B
+├ ƒ /api/aeo/perception-scan                   0 B                0 B
+├ ƒ /api/aeo/perception-scan/[scanId]          0 B                0 B
+├ ƒ /api/aeo/prompts                           0 B                0 B
+├ ƒ /api/aeo/prompts/generate                  0 B                0 B
+├ ƒ /api/aeo/reports/[reportId]                0 B                0 B
+├ ƒ /api/aeo/reports/export                    0 B                0 B
+├ ƒ /api/aeo/reports/summary                   0 B                0 B
+├ ƒ /api/auth/[...nextauth]                    0 B                0 B
+├ ƒ /api/auth/register                         0 B                0 B
+├ ƒ /api/brand-360                             0 B                0 B
+├ ƒ /api/brand-360/analyze-website             0 B                0 B
+├ ƒ /api/brand-360/catalog/upload              0 B                0 B
+├ ƒ /api/brand-360/competitors                 0 B                0 B
+├ ƒ /api/brand-360/identity                    0 B                0 B
+├ ƒ /api/brand-360/market-position             0 B                0 B
+├ ƒ /api/brand-360/products                    0 B                0 B
+├ ƒ /api/brand-360/upload                      0 B                0 B
+├ ƒ /api/brand-profile                         0 B                0 B
+├ ƒ /api/debug/db-dump                         0 B                0 B
+├ ƒ /api/health                                0 B                0 B
+├ ƒ /api/onboarding/analyze                    0 B                0 B
+├ ƒ /api/onboarding/confirm                    0 B                0 B
+├ ƒ /api/onboarding/products/upload            0 B                0 B
+├ ƒ /api/onboarding/review-queue               0 B                0 B
+├ ƒ /api/onboarding/review-queue/approve       0 B                0 B
+├ ƒ /api/onboarding/status                     0 B                0 B
+├ ƒ /api/reports/brand-story                   0 B                0 B
+├ ƒ /api/user/mfa                              0 B                0 B
+├ ƒ /api/user/mfa/setup                        0 B                0 B
+├ ƒ /api/user/mfa/verify                       0 B                0 B
+├ ƒ /api/user/password                         0 B                0 B
+├ ƒ /api/user/profile                          0 B                0 B
+├ ƒ /api/user/sessions                         0 B                0 B
+├ ○ /auth/error                                176 B          94.4 kB
+├ ○ /auth/login                                141 B           107 kB
+├ ○ /auth/register                             141 B           107 kB
+├ ○ /dashboard                                 11.7 kB         158 kB
+├ ○ /dashboard/aeo                             2.76 kB         273 kB
+├ ƒ /dashboard/aeo/scan/[scanId]               3.64 kB         274 kB
+├ ○ /dashboard/aeo/scan/new                    4.91 kB         151 kB
+├ ○ /dashboard/alerts                          4.32 kB         151 kB
+├ ○ /dashboard/analytics                       4.54 kB         151 kB
+├ ○ /dashboard/brand-profile                   17.5 kB         164 kB
+├ ○ /dashboard/insights                        4.73 kB         151 kB
+├ ○ /dashboard/report                          5.52 kB         157 kB
+├ ○ /dashboard/review-queue                    5.37 kB         152 kB
+├ ○ /dashboard/settings                        475 B          87.9 kB
+├ ○ /dashboard/settings/appearance             3 kB           90.4 kB
+├ ○ /dashboard/settings/organization/members   4.08 kB         106 kB
+├ ○ /dashboard/settings/profile                2.49 kB         113 kB
+├ ○ /dashboard/settings/security               4.34 kB         115 kB
+├ ○ /onboarding                                4.67 kB         141 kB
+└ ○ /test                                      138 B          87.5 kB
++ First Load JS shared by all                  87.4 kB
+  ├ chunks/117-66e28803b902be19.js             31.7 kB
+  ├ chunks/fd9d1056-fd002d4dfdb4321a.js        53.7 kB
+  └ other shared chunks (total)                1.99 kB
+
+
+ƒ Middleware                                   47.8 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

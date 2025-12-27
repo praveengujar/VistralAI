@@ -10,8 +10,21 @@ const nextConfig = {
     domains: [],
     formats: ['image/avif', 'image/webp'],
   },
+  // Remove console.log in production (keep error/warn)
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
   experimental: {
-    optimizePackageImports: ['lucide-react'],
+    // Optimize package imports for smaller bundles
+    optimizePackageImports: [
+      'lucide-react',
+      'recharts',
+      'date-fns',
+      'framer-motion',
+      '@tanstack/react-query',
+    ],
   },
   // Security headers
   async headers() {

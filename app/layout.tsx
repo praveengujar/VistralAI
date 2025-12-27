@@ -4,6 +4,7 @@ import "./globals.css";
 import SessionProvider from "@/components/providers/SessionProvider";
 import { ThemeProvider } from "@/lib/theme/ThemeContext";
 import { ThemeScript } from "@/lib/theme/ThemeScript";
+import { QueryProvider } from "@/lib/query/QueryProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: '--font-jetbrains-mono' });
@@ -26,9 +27,11 @@ export default function RootLayout({
         <ThemeScript />
       </head>
       <body className={`${inter.variable} ${jetbrainsMono.variable} ${playfairDisplay.variable} font-sans`}>
-        <ThemeProvider>
-          <SessionProvider>{children}</SessionProvider>
-        </ThemeProvider>
+        <QueryProvider>
+          <ThemeProvider>
+            <SessionProvider>{children}</SessionProvider>
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );

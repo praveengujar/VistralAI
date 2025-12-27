@@ -1,25 +1,26 @@
 import React from 'react';
 
 const DockerServicesDiagram = () => {
-  const mainServices = [
-    { name: 'Firecrawl', port: '3002', color: '#F59E0B', desc: 'Web crawler service' },
-    { name: 'Redis', port: '6379', color: '#DC2626', desc: 'In-memory data store' },
-    { name: 'PostgreSQL', port: '5432', color: '#336791', desc: 'Relational database' },
-    { name: 'Playwright', port: '3001', color: '#45BA4B', desc: 'Browser automation' }
+  const mongodbServices = [
+    { name: 'MongoDB 7.0', port: '27017', color: '#22C55E', desc: 'Replica set rs0 for Prisma txns', icon: '🍃' },
+    { name: 'Mongo Express', port: '8081', color: '#6B7280', desc: 'Web UI for MongoDB', icon: '🔍' },
+    { name: 'Redis 7', port: '6379', color: '#DC2626', desc: 'appendonly, 256MB, LRU', icon: '⚡' },
+    { name: 'Redis Commander', port: '8082', color: '#F59E0B', desc: 'Web UI for Redis', icon: '🔍' }
   ];
 
-  const mongoServices = [
-    { name: 'MongoDB', port: '27017', color: '#47A248', desc: 'Document database' },
-    { name: 'Mongo Express', port: '8081', color: '#6B7280', desc: 'Admin UI' }
+  const optionalServices = [
+    { name: 'Firecrawl', port: '3002', color: '#F97316', desc: 'Web crawling service' },
+    { name: 'Playwright', port: '3001', color: '#45BA4B', desc: 'Browser automation' },
+    { name: 'PostgreSQL', port: '5432', color: '#336791', desc: 'Alt DB (DATABASE_MODE)' }
   ];
 
   const connections = [
-    { from: 'VistralAI', to: 'Firecrawl', label: 'Crawling requests' },
-    { from: 'VistralAI', to: 'MongoDB', label: 'Data persistence' },
-    { from: 'VistralAI', to: 'Redis', label: 'Job queue' },
-    { from: 'Firecrawl', to: 'Redis', label: 'Queue backend' },
-    { from: 'Firecrawl', to: 'Playwright', label: 'Browser automation' },
-    { from: 'Mongo Express', to: 'MongoDB', label: 'Admin UI' }
+    { from: 'VistralAI', to: 'MongoDB', label: 'Data persistence', color: '#22C55E' },
+    { from: 'VistralAI', to: 'Redis', label: 'Caching + Sessions', color: '#DC2626' },
+    { from: 'VistralAI', to: 'Firecrawl', label: 'Web crawling', color: '#F97316' },
+    { from: 'Mongo Express', to: 'MongoDB', label: 'Admin UI', color: '#6B7280' },
+    { from: 'Redis Commander', to: 'Redis', label: 'Admin UI', color: '#F59E0B' },
+    { from: 'Firecrawl', to: 'Playwright', label: 'Browser automation', color: '#45BA4B' }
   ];
 
   return (
@@ -29,195 +30,146 @@ const DockerServicesDiagram = () => {
       padding: '40px 24px',
       fontFamily: "'Inter', -apple-system, sans-serif"
     }}>
-      {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-        <h1 style={{
-          fontSize: '32px',
-          fontWeight: '700',
-          color: '#F8FAFC',
-          margin: '0 0 8px 0'
-        }}>
-          Docker Services
-        </h1>
-        <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>
-          Local development container architecture
-        </p>
+      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 8px 0' }}>Docker Services</h1>
+        <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>Local development container architecture</p>
       </div>
 
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
         
-        {/* Main Application */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          marginBottom: '40px'
-        }}>
+        {/* VistralAI App */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
           <div style={{
             background: 'linear-gradient(135deg, #000000, #1A1A2E)',
-            borderRadius: '20px',
-            padding: '24px 48px',
+            borderRadius: '18px',
+            padding: '20px 40px',
             border: '2px solid #FFFFFF',
             textAlign: 'center',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)'
           }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '12px',
-              marginBottom: '12px'
-            }}>
-              <span style={{ fontSize: '28px' }}>▲</span>
-              <span style={{ color: '#FFFFFF', fontWeight: '700', fontSize: '24px' }}>
-                VistralAI
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '10px' }}>
+              <span style={{ fontSize: '24px' }}>▲</span>
+              <span style={{ color: '#FFFFFF', fontWeight: '700', fontSize: '22px' }}>VistralAI</span>
             </div>
-            <div style={{ color: '#94A3B8', fontSize: '14px', marginBottom: '8px' }}>
-              Next.js Application
-            </div>
-            <div style={{
-              display: 'inline-block',
-              background: '#10B98130',
-              border: '1px solid #10B981',
-              borderRadius: '20px',
-              padding: '4px 16px'
-            }}>
-              <code style={{ color: '#10B981', fontSize: '14px', fontWeight: '600' }}>
-                Port 3000
-              </code>
+            <div style={{ color: '#94A3B8', fontSize: '13px', marginBottom: '8px' }}>Next.js 14 (npm run dev)</div>
+            <div style={{ display: 'inline-block', background: '#10B98130', border: '1px solid #10B981', borderRadius: '16px', padding: '4px 14px' }}>
+              <code style={{ color: '#10B981', fontSize: '13px', fontWeight: '600' }}>Port 3000</code>
             </div>
           </div>
         </div>
 
-        {/* Connection Lines Visual */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          marginBottom: '16px'
-        }}>
-          <svg width="400" height="60" viewBox="0 0 400 60">
-            {/* Center line down */}
-            <line x1="200" y1="0" x2="200" y2="30" stroke="#475569" strokeWidth="2" />
-            {/* Horizontal spread */}
-            <line x1="50" y1="30" x2="350" y2="30" stroke="#475569" strokeWidth="2" />
-            {/* Lines down to services */}
-            <line x1="50" y1="30" x2="50" y2="60" stroke="#475569" strokeWidth="2" />
-            <line x1="150" y1="30" x2="150" y2="60" stroke="#475569" strokeWidth="2" />
-            <line x1="250" y1="30" x2="250" y2="60" stroke="#475569" strokeWidth="2" />
-            <line x1="350" y1="30" x2="350" y2="60" stroke="#475569" strokeWidth="2" />
+        {/* Connection Lines */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+          <svg width="500" height="50" viewBox="0 0 500 50">
+            <line x1="250" y1="0" x2="250" y2="25" stroke="#475569" strokeWidth="2" />
+            <line x1="80" y1="25" x2="420" y2="25" stroke="#475569" strokeWidth="2" />
+            <line x1="80" y1="25" x2="80" y2="50" stroke="#22C55E" strokeWidth="2" />
+            <line x1="180" y1="25" x2="180" y2="50" stroke="#DC2626" strokeWidth="2" />
+            <line x1="320" y1="25" x2="320" y2="50" stroke="#6B7280" strokeWidth="2" />
+            <line x1="420" y1="25" x2="420" y2="50" stroke="#F59E0B" strokeWidth="2" />
           </svg>
         </div>
 
         {/* Docker Compose Files */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '24px',
-          marginBottom: '40px'
-        }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '32px' }}>
           
-          {/* docker-compose.yml */}
+          {/* Main MongoDB Compose */}
           <div style={{
             background: '#1A1F2E',
             borderRadius: '16px',
-            border: '2px solid #2496ED',
+            border: '2px solid #22C55E',
             overflow: 'hidden'
           }}>
             <div style={{
-              background: '#2496ED20',
-              padding: '16px 20px',
-              borderBottom: '1px solid #2496ED40',
+              background: '#22C55E20',
+              padding: '14px 18px',
+              borderBottom: '1px solid #22C55E40',
               display: 'flex',
               alignItems: 'center',
-              gap: '12px'
+              gap: '10px'
             }}>
-              <span style={{ fontSize: '24px' }}>🐳</span>
+              <span style={{ fontSize: '20px' }}>🐳</span>
               <div>
-                <div style={{ color: '#2496ED', fontWeight: '700', fontSize: '14px' }}>
-                  docker-compose.yml
-                </div>
-                <div style={{ color: '#64748B', fontSize: '11px' }}>Main services</div>
+                <div style={{ color: '#22C55E', fontWeight: '700', fontSize: '13px' }}>docker-compose.mongodb.yml</div>
+                <div style={{ color: '#64748B', fontSize: '10px' }}>Primary development stack</div>
               </div>
             </div>
-            <div style={{ padding: '16px' }}>
-              {mainServices.map((service, idx) => (
+            <div style={{ padding: '14px' }}>
+              {mongodbServices.map((service, idx) => (
                 <div key={service.name} style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '12px 16px',
-                  marginBottom: idx < mainServices.length - 1 ? '8px' : 0,
+                  padding: '10px 14px',
+                  marginBottom: idx < mongodbServices.length - 1 ? '8px' : 0,
                   background: '#0F172A',
                   borderRadius: '10px',
                   borderLeft: `4px solid ${service.color}`
                 }}>
-                  <div>
-                    <div style={{ color: '#E2E8F0', fontSize: '14px', fontWeight: '600' }}>
-                      {service.name}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '16px' }}>{service.icon}</span>
+                    <div>
+                      <div style={{ color: '#E2E8F0', fontSize: '12px', fontWeight: '600' }}>{service.name}</div>
+                      <div style={{ color: '#64748B', fontSize: '10px' }}>{service.desc}</div>
                     </div>
-                    <div style={{ color: '#64748B', fontSize: '11px' }}>{service.desc}</div>
                   </div>
                   <div style={{
                     background: `${service.color}20`,
-                    padding: '4px 12px',
-                    borderRadius: '16px',
+                    padding: '4px 10px',
+                    borderRadius: '14px',
                     border: `1px solid ${service.color}40`
                   }}>
-                    <code style={{ color: service.color, fontSize: '12px' }}>{service.port}</code>
+                    <code style={{ color: service.color, fontSize: '11px', fontWeight: '600' }}>{service.port}</code>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* docker-compose.mongodb.yml */}
+          {/* Optional Firecrawl Compose */}
           <div style={{
             background: '#1A1F2E',
             borderRadius: '16px',
-            border: '2px solid #47A248',
+            border: '2px solid #F97316',
             overflow: 'hidden'
           }}>
             <div style={{
-              background: '#47A24820',
-              padding: '16px 20px',
-              borderBottom: '1px solid #47A24840',
+              background: '#F9731620',
+              padding: '14px 18px',
+              borderBottom: '1px solid #F9731640',
               display: 'flex',
               alignItems: 'center',
-              gap: '12px'
+              gap: '10px'
             }}>
-              <span style={{ fontSize: '24px' }}>🍃</span>
+              <span style={{ fontSize: '20px' }}>🔥</span>
               <div>
-                <div style={{ color: '#47A248', fontWeight: '700', fontSize: '14px' }}>
-                  docker-compose.mongodb.yml
-                </div>
-                <div style={{ color: '#64748B', fontSize: '11px' }}>Database services</div>
+                <div style={{ color: '#F97316', fontWeight: '700', fontSize: '13px' }}>docker-compose.yml</div>
+                <div style={{ color: '#64748B', fontSize: '10px' }}>Optional - Firecrawl stack</div>
               </div>
             </div>
-            <div style={{ padding: '16px' }}>
-              {mongoServices.map((service, idx) => (
+            <div style={{ padding: '14px' }}>
+              {optionalServices.map((service, idx) => (
                 <div key={service.name} style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '12px 16px',
-                  marginBottom: idx < mongoServices.length - 1 ? '8px' : 0,
+                  padding: '10px 14px',
+                  marginBottom: idx < optionalServices.length - 1 ? '8px' : 0,
                   background: '#0F172A',
                   borderRadius: '10px',
                   borderLeft: `4px solid ${service.color}`
                 }}>
                   <div>
-                    <div style={{ color: '#E2E8F0', fontSize: '14px', fontWeight: '600' }}>
-                      {service.name}
-                    </div>
-                    <div style={{ color: '#64748B', fontSize: '11px' }}>{service.desc}</div>
+                    <div style={{ color: '#E2E8F0', fontSize: '12px', fontWeight: '600' }}>{service.name}</div>
+                    <div style={{ color: '#64748B', fontSize: '10px' }}>{service.desc}</div>
                   </div>
                   <div style={{
                     background: `${service.color}20`,
-                    padding: '4px 12px',
-                    borderRadius: '16px',
+                    padding: '4px 10px',
+                    borderRadius: '14px',
                     border: `1px solid ${service.color}40`
                   }}>
-                    <code style={{ color: service.color, fontSize: '12px' }}>{service.port}</code>
+                    <code style={{ color: service.color, fontSize: '11px', fontWeight: '600' }}>{service.port}</code>
                   </div>
                 </div>
               ))}
@@ -225,128 +177,114 @@ const DockerServicesDiagram = () => {
           </div>
         </div>
 
-        {/* Connections */}
+        {/* Service Connections */}
         <div style={{
           background: '#1A1F2E',
           borderRadius: '16px',
-          padding: '24px',
+          padding: '20px',
+          marginBottom: '24px',
           border: '1px solid #334155'
         }}>
-          <div style={{
-            color: '#94A3B8',
-            fontSize: '11px',
-            fontWeight: '600',
-            letterSpacing: '1px',
-            marginBottom: '16px'
-          }}>
+          <div style={{ color: '#94A3B8', fontSize: '11px', fontWeight: '600', letterSpacing: '1px', marginBottom: '14px' }}>
             SERVICE CONNECTIONS
           </div>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '12px'
-          }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
             {connections.map((conn, idx) => (
               <div key={idx} style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                padding: '12px',
+                padding: '10px 12px',
                 background: '#0F172A',
                 borderRadius: '8px'
               }}>
-                <span style={{ color: '#E2E8F0', fontSize: '12px', fontWeight: '500' }}>
-                  {conn.from}
-                </span>
+                <span style={{ color: '#E2E8F0', fontSize: '11px', fontWeight: '500' }}>{conn.from}</span>
                 <svg width="20" height="10" viewBox="0 0 20 10">
-                  <line x1="0" y1="5" x2="16" y2="5" stroke="#475569" strokeWidth="2" />
-                  <polygon points="16,0 20,5 16,10" fill="#475569" />
+                  <line x1="0" y1="5" x2="14" y2="5" stroke={conn.color} strokeWidth="2" />
+                  <polygon points="14,1 20,5 14,9" fill={conn.color} />
                 </svg>
-                <span style={{ color: '#E2E8F0', fontSize: '12px', fontWeight: '500' }}>
-                  {conn.to}
-                </span>
+                <span style={{ color: '#E2E8F0', fontSize: '11px', fontWeight: '500' }}>{conn.to}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Quick Start Commands */}
+        {/* Quick Start */}
         <div style={{
-          marginTop: '24px',
           background: '#0F172A',
           borderRadius: '12px',
-          padding: '20px',
+          padding: '18px',
           border: '1px solid #334155'
         }}>
-          <div style={{
-            color: '#94A3B8',
-            fontSize: '11px',
-            fontWeight: '600',
-            letterSpacing: '1px',
-            marginBottom: '12px'
-          }}>
-            QUICK START
-          </div>
+          <div style={{ color: '#94A3B8', fontSize: '11px', fontWeight: '600', letterSpacing: '1px', marginBottom: '12px' }}>QUICK START</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <code style={{
-              background: '#1A1F2E',
-              color: '#10B981',
-              padding: '10px 16px',
-              borderRadius: '6px',
-              fontSize: '12px',
-              fontFamily: "'JetBrains Mono', monospace"
-            }}>
-              $ docker-compose -f docker-compose.yml -f docker-compose.mongodb.yml up -d
-            </code>
-            <code style={{
-              background: '#1A1F2E',
-              color: '#3B82F6',
-              padding: '10px 16px',
-              borderRadius: '6px',
-              fontSize: '12px',
-              fontFamily: "'JetBrains Mono', monospace"
-            }}>
-              $ npm run dev
-            </code>
+            <div>
+              <div style={{ color: '#64748B', fontSize: '10px', marginBottom: '4px' }}># Start MongoDB + Redis stack</div>
+              <code style={{
+                display: 'block',
+                background: '#1A1F2E',
+                color: '#10B981',
+                padding: '10px 14px',
+                borderRadius: '6px',
+                fontSize: '11px',
+                fontFamily: "'JetBrains Mono', monospace"
+              }}>
+                docker-compose -f docker-compose.mongodb.yml up -d
+              </code>
+            </div>
+            <div>
+              <div style={{ color: '#64748B', fontSize: '10px', marginBottom: '4px' }}># Start Firecrawl stack (optional)</div>
+              <code style={{
+                display: 'block',
+                background: '#1A1F2E',
+                color: '#F97316',
+                padding: '10px 14px',
+                borderRadius: '6px',
+                fontSize: '11px',
+                fontFamily: "'JetBrains Mono', monospace"
+              }}>
+                docker-compose up -d
+              </code>
+            </div>
+            <div>
+              <div style={{ color: '#64748B', fontSize: '10px', marginBottom: '4px' }}># Start Next.js dev server</div>
+              <code style={{
+                display: 'block',
+                background: '#1A1F2E',
+                color: '#3B82F6',
+                padding: '10px 14px',
+                borderRadius: '6px',
+                fontSize: '11px',
+                fontFamily: "'JetBrains Mono', monospace"
+              }}>
+                npm run dev
+              </code>
+            </div>
           </div>
         </div>
 
-        {/* Port Summary */}
-        <div style={{
-          marginTop: '24px',
-          display: 'flex',
-          justifyContent: 'center',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}>
+        {/* Port Legend */}
+        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '12px' }}>
           {[
             { service: 'App', port: '3000', color: '#FFFFFF' },
-            { service: 'Playwright', port: '3001', color: '#45BA4B' },
-            { service: 'Firecrawl', port: '3002', color: '#F59E0B' },
-            { service: 'PostgreSQL', port: '5432', color: '#336791' },
+            { service: 'MongoDB', port: '27017', color: '#22C55E' },
             { service: 'Redis', port: '6379', color: '#DC2626' },
             { service: 'Mongo Express', port: '8081', color: '#6B7280' },
-            { service: 'MongoDB', port: '27017', color: '#47A248' }
+            { service: 'Redis Commander', port: '8082', color: '#F59E0B' },
+            { service: 'Firecrawl', port: '3002', color: '#F97316' }
           ].map((item) => (
             <div key={item.service} style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '8px 16px',
+              gap: '6px',
+              padding: '6px 12px',
               background: '#1A1F2E',
-              borderRadius: '20px',
+              borderRadius: '16px',
               border: `1px solid ${item.color}40`
             }}>
-              <div style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                background: item.color
-              }} />
-              <span style={{ color: '#94A3B8', fontSize: '11px' }}>{item.service}</span>
-              <code style={{ color: item.color, fontSize: '11px', fontWeight: '600' }}>
-                :{item.port}
-              </code>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.color }} />
+              <span style={{ color: '#94A3B8', fontSize: '10px' }}>{item.service}</span>
+              <code style={{ color: item.color, fontSize: '10px', fontWeight: '600' }}>:{item.port}</code>
             </div>
           ))}
         </div>

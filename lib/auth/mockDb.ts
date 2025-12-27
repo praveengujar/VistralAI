@@ -402,3 +402,90 @@ export const getAllData = async () => {
     }
   };
 };
+
+// ============================================
+// AEO Stub Functions (Not implemented in mock mode)
+// These are placeholders that throw errors - AEO requires real database
+// ============================================
+
+const notImplemented = (fnName: string) => {
+  throw new Error(`${fnName} is not implemented in mock database mode. Use DATABASE_MODE=mongodb or DATABASE_MODE=postgres for AEO features.`);
+};
+
+// AEO: Brand 360 Profile operations
+export const createBrand360Profile = async (_organizationId: string) => notImplemented('createBrand360Profile');
+export const getBrand360ProfileByOrganizationId = async (_organizationId: string) => notImplemented('getBrand360ProfileByOrganizationId');
+export const getBrand360ProfileById = async (_id: string) => notImplemented('getBrand360ProfileById');
+export const updateBrand360Profile = async (_id: string, _data: any) => notImplemented('updateBrand360Profile');
+
+// AEO: Entity Home operations
+export const getEntityHomeByBrand360Id = async (_brand360Id: string) => notImplemented('getEntityHomeByBrand360Id');
+export const upsertEntityHome = async (_brand360Id: string, _data: any) => notImplemented('upsertEntityHome');
+
+// AEO: Organization Schema operations
+export const getOrganizationSchemaByBrand360Id = async (_brand360Id: string) => notImplemented('getOrganizationSchemaByBrand360Id');
+export const upsertOrganizationSchema = async (_brand360Id: string, _data: any) => notImplemented('upsertOrganizationSchema');
+
+// AEO: Brand Identity Prism operations
+export const getBrandIdentityPrismByBrand360Id = async (_brand360Id: string) => notImplemented('getBrandIdentityPrismByBrand360Id');
+export const upsertBrandIdentityPrism = async (_brand360Id: string, _data: any) => notImplemented('upsertBrandIdentityPrism');
+
+// AEO: Brand Archetype operations
+export const getBrandArchetypeByBrand360Id = async (_brand360Id: string) => notImplemented('getBrandArchetypeByBrand360Id');
+export const upsertBrandArchetype = async (_brand360Id: string, _data: any) => notImplemented('upsertBrandArchetype');
+
+// AEO: Brand Voice Profile operations
+export const getBrandVoiceProfileByBrand360Id = async (_brand360Id: string) => notImplemented('getBrandVoiceProfileByBrand360Id');
+export const upsertBrandVoiceProfile = async (_brand360Id: string, _data: any) => notImplemented('upsertBrandVoiceProfile');
+
+// AEO: Competitor Graph operations
+export const getCompetitorGraphByBrand360Id = async (_brand360Id: string) => notImplemented('getCompetitorGraphByBrand360Id');
+export const upsertCompetitorGraph = async (_brand360Id: string, _data: any) => notImplemented('upsertCompetitorGraph');
+export const addCompetitorToGraph = async (_graphId: string, _data: any) => notImplemented('addCompetitorToGraph');
+export const deleteCompetitorFromGraph = async (_competitorId: string) => notImplemented('deleteCompetitorFromGraph');
+
+// AEO: Claim Locker operations
+export const getClaimLockerByBrand360Id = async (_brand360Id: string) => notImplemented('getClaimLockerByBrand360Id');
+export const upsertClaimLocker = async (_brand360Id: string) => notImplemented('upsertClaimLocker');
+export const addClaimToLocker = async (_claimLockerId: string, _data: any) => notImplemented('addClaimToLocker');
+export const updateClaim = async (_claimId: string, _data: any) => notImplemented('updateClaim');
+export const deleteClaim = async (_claimId: string) => notImplemented('deleteClaim');
+
+// AEO: Customer Persona operations
+export const getCustomerPersonasByBrand360Id = async (_brand360Id: string) => notImplemented('getCustomerPersonasByBrand360Id');
+export const createCustomerPersona = async (_brand360Id: string, _data: any) => notImplemented('createCustomerPersona');
+export const updateCustomerPersona = async (_personaId: string, _data: any) => notImplemented('updateCustomerPersona');
+export const deleteCustomerPersona = async (_personaId: string) => notImplemented('deleteCustomerPersona');
+
+// AEO: Product operations (enhanced)
+export const getAEOProductsByBrand360Id = async (_brand360Id: string) => notImplemented('getAEOProductsByBrand360Id');
+export const createAEOProduct = async (_brand360Id: string, _data: any) => notImplemented('createAEOProduct');
+export const updateAEOProduct = async (_productId: string, _data: any) => notImplemented('updateAEOProduct');
+export const deleteAEOProduct = async (_productId: string) => notImplemented('deleteAEOProduct');
+
+// AEO: Generated Prompt operations
+export const getGeneratedPromptsByBrand360Id = async (_brand360Id: string) => notImplemented('getGeneratedPromptsByBrand360Id');
+export const getGeneratedPromptsByCategory = async (_brand360Id: string, _category: string) => notImplemented('getGeneratedPromptsByCategory');
+export const createGeneratedPrompt = async (_brand360Id: string, _data: any) => notImplemented('createGeneratedPrompt');
+export const updateGeneratedPrompt = async (_promptId: string, _data: any) => notImplemented('updateGeneratedPrompt');
+export const deleteGeneratedPrompt = async (_promptId: string) => notImplemented('deleteGeneratedPrompt');
+
+// AEO: Perception Scan operations
+export const getPerceptionScansByBrand360Id = async (_brand360Id: string) => notImplemented('getPerceptionScansByBrand360Id');
+export const createPerceptionScan = async (_brand360Id: string, _data: any) => notImplemented('createPerceptionScan');
+export const updatePerceptionScan = async (_scanId: string, _data: any) => notImplemented('updatePerceptionScan');
+export const addPerceptionResult = async (_perceptionScanId: string, _brand360Id: string, _data: any) => notImplemented('addPerceptionResult');
+
+// AEO: Perception Insight operations
+export const getPerceptionInsightsByBrand360Id = async (_brand360Id: string) => notImplemented('getPerceptionInsightsByBrand360Id');
+export const createPerceptionInsight = async (_brand360Id: string, _data: any) => notImplemented('createPerceptionInsight');
+export const updatePerceptionInsight = async (_insightId: string, _data: any) => notImplemented('updatePerceptionInsight');
+
+// AEO: Correction Workflow operations
+export const getCorrectionWorkflowsByBrand360Id = async (_brand360Id: string) => notImplemented('getCorrectionWorkflowsByBrand360Id');
+export const createCorrectionWorkflow = async (_brand360Id: string, _data: any) => notImplemented('createCorrectionWorkflow');
+export const updateCorrectionWorkflow = async (_workflowId: string, _data: any) => notImplemented('updateCorrectionWorkflow');
+
+// AEO: Risk Factors operations
+export const getRiskFactorsByBrand360Id = async (_brand360Id: string) => notImplemented('getRiskFactorsByBrand360Id');
+export const upsertRiskFactors = async (_brand360Id: string, _data: any) => notImplemented('upsertRiskFactors');

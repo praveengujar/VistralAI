@@ -1,12 +1,14 @@
 # ============================================
-# Docker Compose for MongoDB (VistralAI)
+# Docker Compose for MongoDB + Redis (VistralAI)
 # ============================================
-# Persistent database for Brand 360 data
+# Persistent database and caching for Brand 360 data
 # Run with: docker-compose -f docker-compose.mongodb.yml up -d
 #
 # Services:
 #   - mongodb: MongoDB 7.0 database as replica set (port 27017)
 #   - mongo-express: Web UI for MongoDB (port 8081)
+#   - redis: Redis 7 for caching (port 6379)
+#   - redis-commander: Web UI for Redis (port 8082)
 #
 # Note: MongoDB runs as a single-node replica set to support Prisma transactions.
 
@@ -71,10 +73,49 @@ services:
     networks:
       - vistralai-mongodb-network
 
+  # ============================================
+  # Redis Cache
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: vistralai-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - vistralai-mongodb-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ============================================
+  # Redis Commander (Web UI - Optional)
+  # ============================================
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: vistralai-redis-commander
+    restart: unless-stopped
+    ports:
+      - '8082:8081'
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - vistralai-mongodb-network
+
 volumes:
   mongodb_data:
     driver: local
   mongodb_config:
+    driver: local
+  redis_data:
     driver: local
 
 networks:
