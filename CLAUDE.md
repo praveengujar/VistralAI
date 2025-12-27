@@ -17,6 +17,7 @@ lib/query/            - React Query hooks
 lib/api/              - API middleware
 lib/hooks/            - Performance hooks
 lib/utils/            - Lazy loading utilities
+components/ui/        - State components (EmptyState, LoadingState, ErrorState, DataWrapper)
 ```
 
 ---
@@ -255,6 +256,43 @@ gcloud run logs read vistralai --region us-central1 --limit 50
 
 ---
 
+## Feature Flags (lib/config/features.ts)
+
+| Flag | Default | Purpose |
+|------|---------|---------|
+| `USE_FIRECRAWL` | true | Use Firecrawl for web crawling |
+| `USE_REAL_API` | true | Use real LLM API calls (not mocks) |
+| `CONFIDENCE_THRESHOLD` | 0.85 | Minimum confidence for auto-approval |
+| `FIRECRAWL_MAX_PAGES` | 20 | Max pages to crawl per domain |
+
+---
+
+## State Components (components/ui/)
+
+| Component | Purpose |
+|-----------|---------|
+| `EmptyState` | Display when no data exists |
+| `LoadingState` | Display during data fetching |
+| `ErrorState` | Display on error with retry |
+| `DataWrapper` | Combines all states in one wrapper |
+
+### Usage
+```typescript
+import DataWrapper from '@/components/ui/DataWrapper';
+
+<DataWrapper
+  data={profile}
+  isLoading={isLoading}
+  error={error}
+  emptyState={{ title: 'No data', description: 'Create profile first' }}
+  onRetry={refetch}
+>
+  {(data) => <ProfileView profile={data} />}
+</DataWrapper>
+```
+
+---
+
 ## Common Issues
 
 | Issue | Solution |
@@ -266,3 +304,4 @@ gcloud run logs read vistralai --region us-central1 --limit 50
 | Firecrawl not working | Start Firecrawl: `docker-compose up -d` |
 | Auth redirect loop | Verify `NEXTAUTH_URL` matches actual URL |
 | AEO dashboard empty | Complete Magic Import first |
+| Dashboard shows zeros | Run a perception scan to populate metrics |

@@ -214,7 +214,7 @@ export default function WebsiteAnalyzer({ brandId, organizationId, userId, brand
           websiteUrl: urlToAnalyze,
           brandName: derivedBrandName,
           options: {
-            maxPages: 5,
+            maxPages: 20,
           },
         }),
       });

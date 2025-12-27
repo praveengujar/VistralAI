@@ -159,7 +159,7 @@ docker-compose restart
 1. **Start with**: [app/dashboard/page.tsx](../app/dashboard/page.tsx)
 2. **Check components**: [components/ui/](../components/ui/)
 3. **Review types**: [types/index.ts](../types/index.ts)
-4. **Mock data**: [lib/mockData/generators.ts](../lib/mockData/generators.ts)
+4. **State components**: [components/ui/EmptyState.tsx](../components/ui/EmptyState.tsx), [components/ui/LoadingState.tsx](../components/ui/LoadingState.tsx)
 
 ### Next.js Patterns
 - Server Components (default)
