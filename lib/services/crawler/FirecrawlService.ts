@@ -23,8 +23,8 @@ export class FirecrawlService {
 
   constructor(options?: CrawlOptions) {
     this.options = {
-      maxDepth: options?.maxDepth ?? 2,
-      maxPages: options?.maxPages ?? 20,
+      maxDepth: options?.maxDepth ?? 3,
+      maxPages: options?.maxPages ?? 50,
       timeout: options?.timeout ?? 30000,
       respectRobotsTxt: options?.respectRobotsTxt ?? true,
     };
