@@ -102,6 +102,84 @@ export const {
   getBrand360Data,
   logDbStats,
   getAllData,
+
+  // AEO: Brand 360 Profile operations
+  createBrand360Profile,
+  getBrand360ProfileByOrganizationId,
+  getBrand360ProfileById,
+  updateBrand360Profile,
+
+  // AEO: Entity Home operations
+  getEntityHomeByBrand360Id,
+  upsertEntityHome,
+
+  // AEO: Organization Schema operations
+  getOrganizationSchemaByBrand360Id,
+  upsertOrganizationSchema,
+
+  // AEO: Brand Identity Prism operations
+  getBrandIdentityPrismByBrand360Id,
+  upsertBrandIdentityPrism,
+
+  // AEO: Brand Archetype operations
+  getBrandArchetypeByBrand360Id,
+  upsertBrandArchetype,
+
+  // AEO: Brand Voice Profile operations
+  getBrandVoiceProfileByBrand360Id,
+  upsertBrandVoiceProfile,
+
+  // AEO: Competitor Graph operations
+  getCompetitorGraphByBrand360Id,
+  upsertCompetitorGraph,
+  addCompetitorToGraph,
+  deleteCompetitorFromGraph,
+
+  // AEO: Claim Locker operations
+  getClaimLockerByBrand360Id,
+  upsertClaimLocker,
+  addClaimToLocker,
+  updateClaim,
+  deleteClaim,
+
+  // AEO: Customer Persona operations
+  getCustomerPersonasByBrand360Id,
+  createCustomerPersona,
+  updateCustomerPersona,
+  deleteCustomerPersona,
+
+  // AEO: Product operations (enhanced)
+  getAEOProductsByBrand360Id,
+  createAEOProduct,
+  updateAEOProduct,
+  deleteAEOProduct,
+
+  // AEO: Generated Prompt operations
+  getGeneratedPromptsByBrand360Id,
+  getGeneratedPromptsByCategory,
+  createGeneratedPrompt,
+  updateGeneratedPrompt,
+  deleteGeneratedPrompt,
+
+  // AEO: Perception Scan operations
+  getPerceptionScansByBrand360Id,
+  createPerceptionScan,
+  updatePerceptionScan,
+  addPerceptionResult,
+
+  // AEO: Perception Insight operations
+  getPerceptionInsightsByBrand360Id,
+  createPerceptionInsight,
+  updatePerceptionInsight,
+
+  // AEO: Correction Workflow operations
+  getCorrectionWorkflowsByBrand360Id,
+  createCorrectionWorkflow,
+  updateCorrectionWorkflow,
+
+  // AEO: Risk Factors operations
+  getRiskFactorsByBrand360Id,
+  upsertRiskFactors,
 } = dbModule;
 
 // Export database type for debugging/logging

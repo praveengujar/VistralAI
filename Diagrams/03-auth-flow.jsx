@@ -8,6 +8,7 @@ const AuthFlowDiagram = () => {
     { id: 'browser', name: 'Browser', color: '#8B5CF6', icon: '🌐' },
     { id: 'nextjs', name: 'Next.js', color: '#000000', icon: '▲' },
     { id: 'nextauth', name: 'NextAuth', color: '#10B981', icon: '🔐' },
+    { id: 'redis', name: 'Redis', color: '#DC2626', icon: '⚡' },
     { id: 'mongodb', name: 'MongoDB', color: '#22C55E', icon: '🍃' },
     { id: 'audit', name: 'Audit Log', color: '#F59E0B', icon: '📋' }
   ];
@@ -20,35 +21,30 @@ const AuthFlowDiagram = () => {
         { from: 0, to: 1, label: 'Enter email/password', type: 'action' },
         { from: 1, to: 2, label: 'POST /api/auth/signin', type: 'request' },
         { from: 2, to: 3, label: 'Forward credentials', type: 'request' },
-        { from: 3, to: 4, label: 'getUserByEmail()', type: 'query' },
-        { from: 4, to: 3, label: 'User record', type: 'response' },
-        { from: 3, to: 3, label: 'Verify password', type: 'process', note: 'bcrypt.compare()' },
-        { from: 3, to: 4, label: 'Update lastLoginAt', type: 'query', condition: 'if valid' },
-        { from: 3, to: 5, label: 'Log signin event', type: 'async', condition: 'if valid' },
-        { from: 3, to: 1, label: 'HTTP-only cookie + JWT', type: 'response', condition: 'if valid' },
-        { from: 1, to: 0, label: 'Redirect to /dashboard', type: 'action', condition: 'if valid' },
-        { from: 3, to: 1, label: 'Error response', type: 'error', condition: 'if invalid' },
-        { from: 1, to: 0, label: 'Show error message', type: 'action', condition: 'if invalid' }
+        { from: 3, to: 5, label: 'getUserByEmail()', type: 'query' },
+        { from: 5, to: 3, label: 'User record', type: 'response' },
+        { from: 3, to: 3, label: 'bcrypt.compare()', type: 'process' },
+        { from: 3, to: 3, label: 'Check mfaEnabled', type: 'process', note: 'if valid' },
+        { from: 3, to: 4, label: 'Cache session (15min TTL)', type: 'cache', condition: '!mfaEnabled' },
+        { from: 3, to: 5, label: 'Update lastLoginAt', type: 'query', condition: '!mfaEnabled' },
+        { from: 3, to: 6, label: 'Log signin event', type: 'async' },
+        { from: 3, to: 1, label: 'HTTP-only cookie + JWT (1hr)', type: 'response' },
+        { from: 1, to: 0, label: 'Redirect to /dashboard', type: 'redirect' }
       ]
     },
-    oauth: {
-      name: 'OAuth Login (Google/GitHub)',
+    mfa: {
+      name: 'MFA Verification',
       color: '#8B5CF6',
       steps: [
-        { from: 0, to: 1, label: 'Click OAuth button', type: 'action' },
-        { from: 1, to: 2, label: 'GET /api/auth/signin/google', type: 'request' },
-        { from: 2, to: 3, label: 'Initialize OAuth', type: 'request' },
-        { from: 3, to: 1, label: 'Redirect to provider', type: 'redirect' },
-        { from: 1, to: 0, label: 'OAuth consent screen', type: 'action' },
-        { from: 0, to: 1, label: 'Grant permission', type: 'action' },
-        { from: 1, to: 3, label: 'Callback with auth code', type: 'request' },
-        { from: 3, to: 3, label: 'Exchange code for tokens', type: 'process' },
-        { from: 3, to: 4, label: 'Find or create user', type: 'query' },
-        { from: 4, to: 3, label: 'User record', type: 'response' },
-        { from: 3, to: 4, label: 'Link OAuth account', type: 'query' },
-        { from: 3, to: 5, label: 'Log signin event', type: 'async' },
-        { from: 3, to: 1, label: 'HTTP-only cookie', type: 'response' },
-        { from: 1, to: 0, label: 'Redirect to /dashboard', type: 'action' }
+        { from: 0, to: 1, label: 'Enter 6-digit TOTP code', type: 'action' },
+        { from: 1, to: 2, label: 'POST /api/user/mfa/verify', type: 'request' },
+        { from: 2, to: 2, label: 'speakeasy.totp.verify()', type: 'process' },
+        { from: 2, to: 4, label: 'Upgrade session to full access', type: 'cache', condition: 'if valid' },
+        { from: 2, to: 5, label: 'Update lastLoginAt', type: 'query', condition: 'if valid' },
+        { from: 2, to: 6, label: 'Log MFA success', type: 'async', condition: 'if valid' },
+        { from: 2, to: 1, label: 'Success + redirect to dashboard', type: 'response', condition: 'if valid' },
+        { from: 2, to: 6, label: 'Log MFA failure', type: 'async', condition: 'if invalid' },
+        { from: 2, to: 1, label: 'Error (3 attempts max)', type: 'error', condition: 'if invalid' }
       ]
     },
     session: {
@@ -57,11 +53,16 @@ const AuthFlowDiagram = () => {
       steps: [
         { from: 0, to: 1, label: 'Access protected route', type: 'action' },
         { from: 1, to: 2, label: 'Request with cookie', type: 'request' },
-        { from: 2, to: 3, label: 'Validate JWT', type: 'request' },
+        { from: 2, to: 4, label: 'Check Redis cache (fast path)', type: 'cache' },
+        { from: 4, to: 2, label: 'Cache HIT: session data', type: 'response', condition: 'if cached' },
+        { from: 2, to: 3, label: 'Cache MISS: validate JWT', type: 'request', condition: 'if not cached' },
         { from: 3, to: 3, label: 'Decode & verify token', type: 'process' },
+        { from: 3, to: 5, label: 'Check user exists', type: 'query' },
+        { from: 5, to: 3, label: 'User record', type: 'response' },
+        { from: 3, to: 4, label: 'Cache session', type: 'cache', condition: 'if valid' },
         { from: 3, to: 2, label: 'Session data', type: 'response', condition: 'if valid' },
-        { from: 2, to: 1, label: 'Protected content', type: 'response', condition: 'if valid' },
-        { from: 3, to: 2, label: 'Invalid session', type: 'error', condition: 'if invalid' },
+        { from: 2, to: 1, label: 'Protected content', type: 'response' },
+        { from: 3, to: 4, label: 'Clear Redis cache', type: 'cache', condition: 'if invalid' },
         { from: 2, to: 1, label: 'Redirect to /auth/login', type: 'redirect', condition: 'if invalid' }
       ]
     }
@@ -77,6 +78,7 @@ const AuthFlowDiagram = () => {
       case 'error': return '#EF4444';
       case 'redirect': return '#EC4899';
       case 'async': return '#6366F1';
+      case 'cache': return '#DC2626';
       default: return '#64748B';
     }
   };
@@ -90,28 +92,17 @@ const AuthFlowDiagram = () => {
       padding: '40px 24px',
       fontFamily: "'Inter', -apple-system, sans-serif"
     }}>
-      {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <h1 style={{
-          fontSize: '32px',
-          fontWeight: '700',
-          color: '#F8FAFC',
-          margin: '0 0 8px 0'
-        }}>
+        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 8px 0' }}>
           Authentication Flows
         </h1>
         <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>
-          VistralAI authentication sequence diagrams
+          VistralAI authentication with Redis session caching and MFA
         </p>
       </div>
 
-      {/* Flow Selector */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '12px',
-        marginBottom: '40px'
-      }}>
+      {/* Flow Tabs */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '40px' }}>
         {Object.entries(flows).map(([key, flow]) => (
           <button
             key={key}
@@ -133,36 +124,31 @@ const AuthFlowDiagram = () => {
         ))}
       </div>
 
-      {/* Participants Header */}
+      {/* Participants */}
       <div style={{
-        maxWidth: '1100px',
+        maxWidth: '1200px',
         margin: '0 auto 24px',
         display: 'grid',
         gridTemplateColumns: `repeat(${participants.length}, 1fr)`,
-        gap: '16px'
+        gap: '12px'
       }}>
         {participants.map((p) => (
           <div key={p.id} style={{
             textAlign: 'center',
-            padding: '16px 8px',
+            padding: '14px 8px',
             background: `${p.color}15`,
             borderRadius: '12px',
             border: `1px solid ${p.color}40`
           }}>
-            <div style={{ fontSize: '24px', marginBottom: '8px' }}>{p.icon}</div>
-            <div style={{ color: p.color, fontWeight: '600', fontSize: '13px' }}>{p.name}</div>
+            <div style={{ fontSize: '20px', marginBottom: '6px' }}>{p.icon}</div>
+            <div style={{ color: p.color, fontWeight: '600', fontSize: '11px' }}>{p.name}</div>
           </div>
         ))}
       </div>
 
-      {/* Lifelines */}
-      <div style={{
-        maxWidth: '1100px',
-        margin: '0 auto',
-        position: 'relative',
-        paddingTop: '20px'
-      }}>
-        {/* Vertical lifelines */}
+      {/* Sequence Diagram */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', paddingTop: '20px' }}>
+        {/* Lifelines */}
         <div style={{
           position: 'absolute',
           top: 0,
@@ -171,14 +157,11 @@ const AuthFlowDiagram = () => {
           bottom: 0,
           display: 'grid',
           gridTemplateColumns: `repeat(${participants.length}, 1fr)`,
-          gap: '16px',
+          gap: '12px',
           pointerEvents: 'none'
         }}>
           {participants.map((p, i) => (
-            <div key={i} style={{
-              display: 'flex',
-              justifyContent: 'center'
-            }}>
+            <div key={i} style={{ display: 'flex', justifyContent: 'center' }}>
               <div style={{
                 width: '2px',
                 height: '100%',
@@ -196,90 +179,86 @@ const AuthFlowDiagram = () => {
             const toPos = (step.to / (participants.length - 1)) * 100;
             const isLeftToRight = step.to > step.from;
             const isSameColumn = step.from === step.to;
-            
+
             return (
               <div key={idx} style={{
-                marginBottom: '16px',
+                marginBottom: '14px',
                 position: 'relative',
-                height: isSameColumn ? '48px' : '40px'
+                height: isSameColumn ? '44px' : '36px'
               }}>
                 {isSameColumn ? (
-                  // Self-referential (process)
                   <div style={{
                     position: 'absolute',
-                    left: `calc(${fromPos}% + 20px)`,
-                    top: '8px',
-                    width: '60px',
-                    height: '32px',
+                    left: `calc(${fromPos}% + 16px)`,
+                    top: '6px',
+                    width: '50px',
+                    height: '28px',
                     border: `2px solid ${getStepColor(step.type)}`,
                     borderLeft: 'none',
                     borderRadius: '0 8px 8px 0'
                   }}>
                     <div style={{
                       position: 'absolute',
-                      left: '70px',
+                      left: '60px',
                       top: '50%',
                       transform: 'translateY(-50%)',
                       whiteSpace: 'nowrap',
                       background: '#1A1A2E',
-                      padding: '4px 12px',
-                      borderRadius: '6px',
-                      border: `1px solid ${getStepColor(step.type)}40`
+                      padding: '3px 10px',
+                      borderRadius: '4px',
+                      border: `1px solid ${getStepColor(step.type)}30`
                     }}>
-                      <span style={{ color: getStepColor(step.type), fontSize: '12px', fontWeight: '500' }}>
+                      <span style={{ color: getStepColor(step.type), fontSize: '10px', fontWeight: '500' }}>
                         {step.label}
                       </span>
                       {step.note && (
-                        <span style={{ color: '#64748B', fontSize: '10px', marginLeft: '8px' }}>
+                        <span style={{ color: '#64748B', fontSize: '9px', marginLeft: '6px' }}>
                           {step.note}
                         </span>
                       )}
                     </div>
                   </div>
                 ) : (
-                  // Arrow between columns
                   <>
                     <div style={{
                       position: 'absolute',
-                      left: `calc(${Math.min(fromPos, toPos)}% + 8px)`,
-                      right: `calc(${100 - Math.max(fromPos, toPos)}% + 8px)`,
+                      left: `calc(${Math.min(fromPos, toPos)}% + 6px)`,
+                      right: `calc(${100 - Math.max(fromPos, toPos)}% + 6px)`,
                       top: '50%',
                       height: '2px',
                       background: getStepColor(step.type),
                       transform: 'translateY(-50%)'
                     }}>
-                      {/* Arrow head */}
                       <div style={{
                         position: 'absolute',
-                        [isLeftToRight ? 'right' : 'left']: '-6px',
+                        [isLeftToRight ? 'right' : 'left']: '-5px',
                         top: '-4px',
                         width: 0,
                         height: 0,
                         borderTop: '5px solid transparent',
                         borderBottom: '5px solid transparent',
-                        [isLeftToRight ? 'borderLeft' : 'borderRight']: `8px solid ${getStepColor(step.type)}`
+                        [isLeftToRight ? 'borderLeft' : 'borderRight']: `7px solid ${getStepColor(step.type)}`
                       }} />
                     </div>
-                    {/* Label */}
                     <div style={{
                       position: 'absolute',
                       left: `${(fromPos + toPos) / 2}%`,
-                      top: '-4px',
+                      top: '-6px',
                       transform: 'translateX(-50%)',
                       background: '#1A1A2E',
-                      padding: '2px 10px',
+                      padding: '2px 8px',
                       borderRadius: '4px',
                       whiteSpace: 'nowrap',
                       border: `1px solid ${getStepColor(step.type)}30`
                     }}>
-                      <span style={{ color: getStepColor(step.type), fontSize: '11px', fontWeight: '500' }}>
+                      <span style={{ color: getStepColor(step.type), fontSize: '10px', fontWeight: '500' }}>
                         {step.label}
                       </span>
                       {step.condition && (
                         <span style={{
                           color: '#F59E0B',
-                          fontSize: '10px',
-                          marginLeft: '6px',
+                          fontSize: '9px',
+                          marginLeft: '5px',
                           fontStyle: 'italic'
                         }}>
                           [{step.condition}]
@@ -296,7 +275,7 @@ const AuthFlowDiagram = () => {
 
       {/* Legend */}
       <div style={{
-        maxWidth: '800px',
+        maxWidth: '900px',
         margin: '48px auto 0',
         display: 'flex',
         justifyContent: 'center',
@@ -309,13 +288,14 @@ const AuthFlowDiagram = () => {
           { type: 'query', label: 'DB Query' },
           { type: 'action', label: 'User Action' },
           { type: 'process', label: 'Processing' },
+          { type: 'cache', label: 'Redis Cache' },
           { type: 'error', label: 'Error' },
           { type: 'redirect', label: 'Redirect' },
           { type: 'async', label: 'Async' }
         ].map(({ type, label }) => (
           <div key={type} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <div style={{
-              width: '24px',
+              width: '20px',
               height: '3px',
               background: getStepColor(type),
               borderRadius: '2px'

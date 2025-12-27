@@ -6,48 +6,55 @@ AI Visibility Optimization Platform — Monitor and optimize how AI platforms pe
 
 - **Magic Import**: Auto-extract brand data from any website
 - **AI Perception Scanning**: Evaluate brand perception across ChatGPT, Claude, Gemini, Perplexity
+- **Real-Time Updates**: WebSocket-powered scan progress and insights
 - **Correction Workflows**: AI-generated fixes for perception issues
 - **Brand 360 Profile**: Comprehensive semantic ground truth engine
-- **Interactive Dashboards**: Real-time metrics, quadrant positioning, trend analysis
+- **Interactive Dashboards**: Quadrant positioning, radar charts, trend analysis
 
 ## Tech Stack
 
-Next.js 14 · TypeScript · Tailwind CSS · MongoDB · Prisma · NextAuth.js · OpenAI API · Firecrawl · Google Cloud Run
+Next.js 14 · TypeScript · React Query · Tailwind CSS · MongoDB · Redis · Prisma · Socket.io · NextAuth.js · OpenAI API
 
 ## Quick Start
 
 ```bash
-# 1. Install dependencies
+# Install dependencies
 npm install
 
-# 2. Set up environment
-cp .env.example .env.local
-# Edit .env.local with your credentials
-
-# 3. Start services (requires Docker)
+# Start MongoDB + Redis
 docker-compose -f docker-compose.mongodb.yml up -d
-docker-compose up -d
 
-# 4. Generate Prisma client
+# Generate Prisma client
 npx prisma generate
 
-# 5. Run development server
+# Run development server
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000)
 
+## Local Services
+
+| Service | URL | Purpose |
+|---------|-----|---------|
+| App | http://localhost:3000 | VistralAI application |
+| Mongo Express | http://localhost:8081 | MongoDB admin UI |
+| Redis Commander | http://localhost:8082 | Redis admin UI |
+
 ## Environment Variables
+
+Create `.env.local` with:
 
 ```env
 # Required
 NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-secret
-DATABASE_URL=mongodb://vistralai:vistralai_dev_password@localhost:27017/vistralai?authSource=admin&replicaSet=rs0&directConnection=true
+NEXTAUTH_SECRET=your-secret-key
+DATABASE_URL=mongodb://vistralai:vistralai_dev_password@localhost:27017/vistralai?authSource=admin&replicaSet=rs0
 DATABASE_MODE=mongodb
+REDIS_URL=redis://localhost:6379
 
 # AI Features
-OPENAI_API_KEY=your-key
+OPENAI_API_KEY=your-openai-key
 FIRECRAWL_INTERNAL_URL=http://localhost:3002
 ```
 
@@ -57,17 +64,35 @@ FIRECRAWL_INTERNAL_URL=http://localhost:3002
 |---------|-------------|
 | `npm run dev` | Development server |
 | `npm run build` | Production build |
-| `npm run start` | Production server |
+| `npm run type-check` | TypeScript validation |
 | `npm run lint` | Lint code |
 | `./deploy.sh` | Deploy to Cloud Run |
+
+## Project Structure
+
+```
+app/                  # Next.js App Router pages
+components/           # React components
+lib/
+├── api/              # API middleware
+├── cache/            # Redis caching layer
+├── db/operations/    # Database operations
+├── hooks/            # Custom React hooks
+├── query/            # React Query setup
+├── realtime/         # WebSocket support
+├── services/         # Business logic & agents
+└── utils/            # Utilities & lazy loading
+prisma/               # Database schema
+```
 
 ## Documentation
 
 See [`/docs`](./docs) for detailed guides:
-- Architecture
-- API Reference
-- Deployment Guide
-- Local Development
+- [Architecture](./docs/ARCHITECTURE.md)
+- [API Reference](./docs/API_REFERENCE.md)
+- [Deployment Guide](./docs/DEPLOYMENT_GUIDE.md)
+- [Local Development](./docs/LOCAL_DEVELOPMENT.md)
+- [Diagram Prompts](./docs/DIAGRAM_PROMPTS.md)
 
 ## License
 

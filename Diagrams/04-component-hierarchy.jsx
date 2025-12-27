@@ -2,160 +2,13 @@ import React, { useState } from 'react';
 
 const ComponentHierarchyDiagram = () => {
   const [expandedNodes, setExpandedNodes] = useState({
-    root: true,
-    auth: true,
-    dashboard: true,
-    brand360: false,
-    aeo: false,
-    review: false,
-    settings: false,
-    report: false,
-    onboarding: false,
-    shared: true
+    root: true, providers: true, auth: true, dashboard: true, brand360: false,
+    aeo: false, scanDetail: false, review: false, settings: false, report: false,
+    onboarding: false, shared: false, hooks: true, queryHooks: true, socketHooks: true
   });
 
   const toggleNode = (id) => {
     setExpandedNodes(prev => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const componentTree = {
-    id: 'root',
-    name: 'App Router',
-    type: 'layout',
-    color: '#6366F1',
-    children: [
-      {
-        id: 'rootLayout',
-        name: 'RootLayout',
-        type: 'layout',
-        color: '#6366F1'
-      },
-      {
-        id: 'auth',
-        name: 'AUTH PAGES',
-        type: 'group',
-        color: '#3B82F6',
-        children: [
-          { name: 'LoginPage', type: 'page', children: [{ name: 'AuthForm', type: 'component' }] },
-          { name: 'RegisterPage', type: 'page', children: [{ name: 'AuthForm', type: 'component' }] },
-          { name: 'ErrorPage', type: 'page' }
-        ]
-      },
-      {
-        id: 'dashboard',
-        name: 'DASHBOARD PAGES',
-        type: 'group',
-        color: '#10B981',
-        children: [
-          {
-            id: 'dashboardLayout',
-            name: 'DashboardLayout',
-            type: 'layout',
-            children: [
-              { name: 'SessionProvider', type: 'provider' },
-              { name: 'Sidebar/Navigation', type: 'component' }
-            ]
-          },
-          {
-            id: 'dashboardHome',
-            name: 'DashboardPage (Home)',
-            type: 'page',
-            children: [
-              { name: 'BrandPresenceHero', type: 'component' },
-              { name: 'BrandHealthIndicator', type: 'component' },
-              { name: 'BrandMoments', type: 'component' },
-              { name: 'BrandGrowthOpportunities', type: 'component' },
-              { name: 'MarketLandscape', type: 'component' },
-              { name: 'BrandStoryVisualizer', type: 'component' },
-              { name: 'AIPlatformGalaxy', type: 'component' }
-            ]
-          },
-          {
-            id: 'brand360',
-            name: 'Brand360Page',
-            type: 'page',
-            color: '#8B5CF6',
-            children: [
-              { name: 'WebsiteAnalyzer', type: 'component' },
-              { name: 'BrandStoryCanvas', type: 'component' },
-              { name: 'BrandOfferingsShowcase', type: 'component' },
-              { name: 'ProfileStrengthMeter', type: 'component' },
-              { name: 'DocumentUpload', type: 'component' },
-              { name: 'ProductCatalogConnector', type: 'component' }
-            ]
-          },
-          {
-            id: 'aeo',
-            name: 'AEOPage',
-            type: 'page',
-            color: '#F59E0B',
-            children: [
-              { name: 'QuadrantChart', type: 'component' },
-              { name: 'MetricsRadarChart', type: 'component' },
-              { name: 'PerceptionScoreCard', type: 'component' },
-              { name: 'PlatformComparisonChart', type: 'component' },
-              { name: 'ScoreTrendChart', type: 'component' },
-              { name: 'InsightsPriorityMatrix', type: 'component' },
-              { name: 'CorrectionFunnel', type: 'component' }
-            ]
-          },
-          {
-            id: 'review',
-            name: 'ReviewQueuePage',
-            type: 'page',
-            color: '#EC4899',
-            children: [
-              { name: 'ReviewQueueBanner', type: 'component' },
-              { name: 'ReviewModal', type: 'component' },
-              { name: 'FieldReviewCard', type: 'component' }
-            ]
-          },
-          {
-            id: 'settings',
-            name: 'SettingsPage',
-            type: 'page',
-            color: '#6B7280',
-            children: [
-              { name: 'ThemeSettings', type: 'component' },
-              { name: 'ThemeSelector', type: 'component' }
-            ]
-          },
-          {
-            id: 'report',
-            name: 'ReportPage',
-            type: 'page',
-            color: '#14B8A6',
-            children: [
-              { name: 'BrandStoryReport', type: 'component' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'onboarding',
-        name: 'ONBOARDING PAGE',
-        type: 'group',
-        color: '#F97316',
-        children: [
-          { name: 'OnboardingWizard / NewOnboardingWizard', type: 'component' },
-          { name: 'UrlAnalyzer', type: 'component' },
-          { name: 'ProfileReviewCards', type: 'component' },
-          { name: 'ProductIngestionTabs', type: 'component' }
-        ]
-      },
-      {
-        id: 'shared',
-        name: 'SHARED UI COMPONENTS',
-        type: 'group',
-        color: '#A855F7',
-        children: [
-          { name: 'ThemeToggle', type: 'component' },
-          { name: 'MetricCard', type: 'component' },
-          { name: 'AlertBanner', type: 'component' },
-          { name: 'OpportunityCard', type: 'component' }
-        ]
-      }
-    ]
   };
 
   const getTypeIcon = (type) => {
@@ -165,6 +18,8 @@ const ComponentHierarchyDiagram = () => {
       case 'component': return '🧩';
       case 'provider': return '🔌';
       case 'group': return '📁';
+      case 'hook': return '🪝';
+      case 'lazy': return '💤';
       default: return '•';
     }
   };
@@ -176,6 +31,8 @@ const ComponentHierarchyDiagram = () => {
       case 'component': return '#64748B';
       case 'provider': return '#8B5CF6';
       case 'group': return defaultColor || '#10B981';
+      case 'hook': return '#EC4899';
+      case 'lazy': return '#F59E0B';
       default: return '#64748B';
     }
   };
@@ -186,7 +43,7 @@ const ComponentHierarchyDiagram = () => {
     const isExpanded = node.id ? expandedNodes[node.id] : true;
 
     return (
-      <div style={{ marginLeft: depth > 0 ? '24px' : 0 }}>
+      <div style={{ marginLeft: depth > 0 ? '20px' : 0 }}>
         <div
           onClick={() => node.id && hasChildren && toggleNode(node.id)}
           style={{
@@ -202,70 +59,184 @@ const ComponentHierarchyDiagram = () => {
             transition: 'all 0.2s'
           }}
         >
-          {/* Expand/Collapse Icon */}
           {hasChildren && node.id && (
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke={nodeColor}
-              strokeWidth="2"
-              style={{
-                transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s'
-              }}
-            >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={nodeColor} strokeWidth="2"
+              style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s', flexShrink: 0 }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
           )}
-          {!hasChildren && node.id && <div style={{ width: '16px' }} />}
-
-          {/* Type Icon */}
-          <span style={{ fontSize: '14px' }}>{getTypeIcon(node.type)}</span>
-
-          {/* Node Name */}
+          {!hasChildren && node.id && <div style={{ width: '14px' }} />}
+          <span style={{ fontSize: '12px' }}>{getTypeIcon(node.type)}</span>
           <span style={{
             color: node.type === 'group' ? nodeColor : '#E2E8F0',
             fontWeight: node.type === 'group' || node.type === 'page' ? '600' : '400',
-            fontSize: node.type === 'group' ? '13px' : '12px',
-            letterSpacing: node.type === 'group' ? '0.5px' : '0'
+            fontSize: node.type === 'group' ? '12px' : '11px',
+            letterSpacing: node.type === 'group' ? '0.5px' : '0',
+            flex: 1
           }}>
             {node.name}
+            {node.badge && (
+              <span style={{
+                background: '#F59E0B20',
+                color: '#F59E0B',
+                fontSize: '9px',
+                padding: '1px 6px',
+                borderRadius: '4px',
+                marginLeft: '8px'
+              }}>
+                {node.badge}
+              </span>
+            )}
           </span>
-
-          {/* Type Badge */}
           <span style={{
-            fontSize: '10px',
+            fontSize: '9px',
             color: nodeColor,
             background: `${nodeColor}20`,
-            padding: '2px 8px',
-            borderRadius: '10px',
-            marginLeft: 'auto'
+            padding: '2px 6px',
+            borderRadius: '8px'
           }}>
             {node.type}
           </span>
         </div>
-
-        {/* Children */}
         {hasChildren && isExpanded && (
-          <div style={{
-            borderLeft: `2px solid ${nodeColor}30`,
-            marginLeft: '8px',
-            paddingLeft: '8px'
-          }}>
+          <div style={{ borderLeft: `2px solid ${nodeColor}30`, marginLeft: '7px', paddingLeft: '8px' }}>
             {node.children.map((child, idx) => (
-              <TreeNode
-                key={idx}
-                node={child}
-                depth={depth + 1}
-                parentColor={nodeColor}
-              />
+              <TreeNode key={idx} node={child} depth={depth + 1} parentColor={nodeColor} />
             ))}
           </div>
         )}
       </div>
     );
+  };
+
+  const componentTree = {
+    id: 'root',
+    name: 'App Router (Next.js 14)',
+    type: 'layout',
+    color: '#6366F1',
+    children: [
+      {
+        id: 'providers', name: 'PROVIDERS', type: 'group', color: '#8B5CF6',
+        children: [
+          { name: 'QueryProvider', type: 'provider', badge: 'React Query' },
+          { name: 'ThemeProvider', type: 'provider', badge: 'Morning/Evening/Night' },
+          { name: 'SessionProvider', type: 'provider', badge: 'NextAuth' }
+        ]
+      },
+      {
+        id: 'auth', name: 'AUTH PAGES', type: 'group', color: '#3B82F6',
+        children: [
+          { name: 'LoginPage → AuthForm', type: 'page' },
+          { name: 'RegisterPage → AuthForm', type: 'page' },
+          { name: 'ErrorPage', type: 'page' }
+        ]
+      },
+      {
+        id: 'dashboard', name: 'DASHBOARD PAGES', type: 'group', color: '#10B981',
+        children: [
+          { name: 'DashboardLayout', type: 'layout', children: [
+            { name: 'Sidebar + Navigation', type: 'component' },
+            { name: 'TopBar + UserMenu', type: 'component' }
+          ]},
+          { id: 'dashboardHome', name: 'DashboardPage (Home)', type: 'page', children: [
+            { name: 'BrandPresenceHero', type: 'component' },
+            { name: 'BrandHealthIndicator', type: 'component' },
+            { name: 'BrandMoments', type: 'component' },
+            { name: 'BrandGrowthOpportunities', type: 'component' },
+            { name: 'MarketLandscape', type: 'lazy', badge: 'LAZY' },
+            { name: 'BrandStoryVisualizer', type: 'lazy', badge: 'LAZY' },
+            { name: 'AIPlatformGalaxy', type: 'lazy', badge: 'LAZY' }
+          ]},
+          { id: 'brand360', name: 'Brand360Page', type: 'page', color: '#8B5CF6', children: [
+            { name: 'WebsiteAnalyzer', type: 'component' },
+            { name: 'BrandStoryCanvas', type: 'component' },
+            { name: 'BrandOfferingsShowcase', type: 'component' },
+            { name: 'ProfileStrengthMeter', type: 'component' },
+            { name: 'DocumentUpload', type: 'component' },
+            { name: 'ProductCatalogConnector', type: 'component' }
+          ]},
+          { id: 'aeo', name: 'AEOPage', type: 'page', color: '#F59E0B', children: [
+            { name: 'QuadrantChart', type: 'lazy', badge: 'LAZY' },
+            { name: 'MetricsRadarChart', type: 'lazy', badge: 'LAZY' },
+            { name: 'PerceptionScoreCard', type: 'component' },
+            { name: 'PlatformComparisonChart', type: 'component' },
+            { name: 'ScoreTrendChart', type: 'component' },
+            { name: 'InsightsPriorityMatrix', type: 'component' },
+            { name: 'CorrectionFunnel', type: 'component' }
+          ]},
+          { id: 'scanDetail', name: 'ScanDetailPage (/aeo/scan/[scanId])', type: 'page', color: '#EC4899', children: [
+            { name: 'useScanSocket hook', type: 'hook', badge: 'Real-time' },
+            { name: 'ScanProgressBar', type: 'component' },
+            { name: 'PlatformResults', type: 'component' },
+            { name: 'MetricsBreakdown', type: 'component' }
+          ]},
+          { name: 'NewScanPage (/aeo/scan/new)', type: 'page', children: [
+            { name: 'PlatformSelector', type: 'component' },
+            { name: 'ScanConfiguration', type: 'component' }
+          ]},
+          { id: 'review', name: 'ReviewQueuePage', type: 'page', color: '#EC4899', children: [
+            { name: 'ReviewQueueBanner', type: 'component' },
+            { name: 'ReviewModal', type: 'component' },
+            { name: 'FieldReviewCard', type: 'component' }
+          ]},
+          { id: 'settings', name: 'SettingsPages', type: 'page', color: '#6B7280', children: [
+            { name: 'ProfileSettings', type: 'component' },
+            { name: 'SecuritySettings (MFA)', type: 'component' },
+            { name: 'AppearanceSettings', type: 'component' },
+            { name: 'OrganizationSettings', type: 'component' }
+          ]},
+          { id: 'report', name: 'ReportPage', type: 'page', color: '#14B8A6', children: [
+            { name: 'BrandStoryReport', type: 'component' }
+          ]}
+        ]
+      },
+      {
+        id: 'onboarding', name: 'ONBOARDING PAGE', type: 'group', color: '#F97316',
+        children: [
+          { name: 'NewOnboardingWizard', type: 'component' },
+          { name: 'UrlAnalyzer', type: 'component' },
+          { name: 'ProfileReviewCards', type: 'component' },
+          { name: 'ProductIngestionTabs', type: 'component' }
+        ]
+      },
+      {
+        id: 'shared', name: 'SHARED UI (components/ui/)', type: 'group', color: '#A855F7',
+        children: [
+          { name: 'Button, Card, Input, Modal, Tabs', type: 'component' },
+          { name: 'DataTable, Toast, AlertBanner', type: 'component' },
+          { name: 'MetricCard, OpportunityCard', type: 'component' }
+        ]
+      },
+      {
+        id: 'hooks', name: 'PERFORMANCE HOOKS (lib/hooks/)', type: 'group', color: '#EC4899',
+        children: [
+          { name: 'useDebouncedValue', type: 'hook' },
+          { name: 'useDebouncedCallback', type: 'hook' },
+          { name: 'useThrottledCallback', type: 'hook' },
+          { name: 'useIntersectionObserver', type: 'hook' },
+          { name: 'useLocalStorage', type: 'hook' }
+        ]
+      },
+      {
+        id: 'queryHooks', name: 'REACT QUERY HOOKS (lib/query/)', type: 'group', color: '#FF4154',
+        children: [
+          { name: 'useBrand360Profile', type: 'hook' },
+          { name: 'useAEOPrompts', type: 'hook' },
+          { name: 'useAEOScans', type: 'hook' },
+          { name: 'useAEOScan', type: 'hook', badge: 'polling' },
+          { name: 'useAEOInsights', type: 'hook' },
+          { name: 'useAEOCorrections', type: 'hook' }
+        ]
+      },
+      {
+        id: 'socketHooks', name: 'SOCKET HOOKS (lib/realtime/)', type: 'group', color: '#7C3AED',
+        children: [
+          { name: 'useSocket (base)', type: 'hook' },
+          { name: 'useScanSocket', type: 'hook', badge: 'scan progress' },
+          { name: 'useInsightSocket', type: 'hook', badge: 'new insights' }
+        ]
+      }
+    ]
   };
 
   return (
@@ -275,87 +246,68 @@ const ComponentHierarchyDiagram = () => {
       padding: '40px 24px',
       fontFamily: "'Inter', -apple-system, sans-serif"
     }}>
-      {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-        <h1 style={{
-          fontSize: '32px',
-          fontWeight: '700',
-          color: '#F8FAFC',
-          margin: '0 0 8px 0'
-        }}>
+      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 8px 0' }}>
           Component Hierarchy
         </h1>
         <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>
-          VistralAI React application component tree
+          VistralAI React application with React Query, Socket.io, and lazy loading
         </p>
       </div>
 
       {/* Legend */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '24px',
-        marginBottom: '32px',
-        flexWrap: 'wrap'
-      }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '28px', flexWrap: 'wrap' }}>
         {[
           { type: 'layout', label: 'Layout' },
           { type: 'page', label: 'Page' },
           { type: 'component', label: 'Component' },
           { type: 'provider', label: 'Provider' },
-          { type: 'group', label: 'Group' }
+          { type: 'hook', label: 'Hook' },
+          { type: 'lazy', label: 'Lazy-loaded' }
         ].map(({ type, label }) => (
-          <div key={type} style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}>
-            <span style={{ fontSize: '16px' }}>{getTypeIcon(type)}</span>
-            <span style={{
-              color: '#94A3B8',
-              fontSize: '12px'
-            }}>{label}</span>
+          <div key={type} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '14px' }}>{getTypeIcon(type)}</span>
+            <span style={{ color: '#94A3B8', fontSize: '11px' }}>{label}</span>
           </div>
         ))}
       </div>
 
-      {/* Tree View */}
+      {/* Tree */}
       <div style={{
-        maxWidth: '800px',
+        maxWidth: '900px',
         margin: '0 auto',
         background: '#0F172A80',
         borderRadius: '16px',
-        padding: '24px',
+        padding: '20px',
         border: '1px solid #334155'
       }}>
         <TreeNode node={componentTree} />
       </div>
 
-      {/* Quick Stats */}
+      {/* Stats */}
       <div style={{
-        maxWidth: '800px',
-        margin: '32px auto 0',
+        maxWidth: '900px',
+        margin: '28px auto 0',
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '16px'
+        gridTemplateColumns: 'repeat(5, 1fr)',
+        gap: '12px'
       }}>
         {[
-          { label: 'Pages', count: 8, color: '#3B82F6' },
-          { label: 'Components', count: 28, color: '#10B981' },
-          { label: 'Layouts', count: 2, color: '#6366F1' },
-          { label: 'Providers', count: 1, color: '#8B5CF6' }
+          { label: 'Pages', count: 10, color: '#3B82F6' },
+          { label: 'Components', count: 35, color: '#10B981' },
+          { label: 'Hooks', count: 14, color: '#EC4899' },
+          { label: 'Lazy-loaded', count: 5, color: '#F59E0B' },
+          { label: 'Providers', count: 3, color: '#8B5CF6' }
         ].map((stat) => (
           <div key={stat.label} style={{
             background: `${stat.color}15`,
-            borderRadius: '12px',
-            padding: '16px',
+            borderRadius: '10px',
+            padding: '14px',
             textAlign: 'center',
             border: `1px solid ${stat.color}30`
           }}>
-            <div style={{ color: stat.color, fontSize: '24px', fontWeight: '700' }}>
-              {stat.count}
-            </div>
-            <div style={{ color: '#94A3B8', fontSize: '12px' }}>{stat.label}</div>
+            <div style={{ color: stat.color, fontSize: '22px', fontWeight: '700' }}>{stat.count}</div>
+            <div style={{ color: '#94A3B8', fontSize: '11px' }}>{stat.label}</div>
           </div>
         ))}
       </div>

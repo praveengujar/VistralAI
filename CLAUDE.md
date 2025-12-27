@@ -1,109 +1,179 @@
 # VistralAI Development Reference
 
-## Architecture
+## Quick Reference
 
-### Database Adapter Pattern
-```typescript
-// lib/db/index.ts - Switch via DATABASE_MODE env var
-const DATABASE_MODE = process.env.DATABASE_MODE || 'mock';
-// Values: 'mongodb' | 'postgres' | 'mock'
+### Start Development
+```bash
+docker-compose -f docker-compose.mongodb.yml up -d
+npm run dev
 ```
+
+### Key Directories
+```
+lib/db/operations/    - Database operations (9 files)
+lib/cache/            - Redis caching layer
+lib/realtime/         - WebSocket support
+lib/query/            - React Query hooks
+lib/api/              - API middleware
+lib/hooks/            - Performance hooks
+lib/utils/            - Lazy loading utilities
+```
+
+---
+
+## Architecture
 
 ### Data Flow
 ```
-Website URL → Firecrawl (crawl) → BrandIntelligence (GPT-4o-mini) → Brand360Profile → MongoDB
+Website URL → Firecrawl → BrandIntelligence → Brand360Profile → MongoDB → Redis Cache
 ```
 
-### Key Services
-| Service | Path |
-|---------|------|
-| BrandIntelligence | `lib/services/llm/BrandIntelligence.ts` |
-| WebCrawler | `lib/services/crawler/WebCrawler.ts` |
-| Website Analyzer | `lib/ai/website-analyzer.ts` |
-
----
-
-## Critical Patterns
-
-### Prisma Embedded Documents (MongoDB)
-Always use nested objects for embedded types:
-
+### Database Adapter
 ```typescript
-// CORRECT
-brandVoice: { tone: ['professional'], keywords: ['innovative'], avoidWords: [] }
-pricing: { currency: 'USD', amount: 99, billingPeriod: 'monthly' }
-
-// WRONG - causes "Unknown argument" errors
-voiceTone: ['professional']
-pricingCurrency: 'USD'
-```
-**Files**: `lib/db/operations.ts`
-
-### Theme CSS Variables
-```css
-background: rgb(var(--background));
-background: rgb(var(--surface));
-color: rgb(var(--foreground));
-color: rgb(var(--foreground-secondary));
-border-color: rgb(var(--border));
+// lib/db/index.ts - Switch via DATABASE_MODE env var
+DATABASE_MODE = 'mongodb' | 'postgres' | 'mock'
 ```
 
-| Theme | CSS Class | Background |
-|-------|-----------|------------|
-| Morning | `.light` | #FFFFFF |
-| Evening | `.dim` | #15202B |
-| Night | `.lights-out` | #000000 |
+---
+
+## Caching Layer
+
+### Redis (lib/cache/)
+| File | Purpose |
+|------|---------|
+| `redis.ts` | Client with in-memory fallback |
+| `keys.ts` | Key generators + TTL presets |
+
+### TTL Presets
+| Preset | Duration | Use Case |
+|--------|----------|----------|
+| short | 1 min | Frequently changing |
+| standard | 5 min | Default |
+| medium | 15 min | Moderately stable |
+| long | 1 hour | Stable data |
+
+### Usage
+```typescript
+import { cacheGet, cacheSet, withCache } from '@/lib/cache/redis';
+import { cacheKeys, cacheTTL } from '@/lib/cache/keys';
+
+// Cache wrapper
+const data = await withCache(cacheKeys.brand360.profile(orgId), fetchFn, { ttl: cacheTTL.standard });
+```
 
 ---
 
-## API Routes
+## API Middleware (lib/api/middleware.ts)
 
-### Brand 360
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/brand-360` | GET | Get complete Brand 360 data |
-| `/api/brand-360/analyze-website` | POST | Analyze website URL |
-| `/api/brand-360/identity` | POST/PUT | Brand identity CRUD |
-| `/api/brand-360/products` | POST/PUT/DELETE | Products CRUD |
-| `/api/brand-360/competitors` | POST/PUT/DELETE | Competitors CRUD |
+| Function | Purpose |
+|----------|---------|
+| `withErrorHandler` | Standardized error responses |
+| `withAuth` | Session validation wrapper |
+| `withRateLimit` | Rate limiting (100 req/min default) |
+| `successResponse` | JSON success helper |
+| `errorResponse` | JSON error helper |
 
-### AEO System
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/aeo/magic-import` | POST | Extract brand data from website |
-| `/api/aeo/perception-scan` | GET/POST | Start/list perception scans |
-| `/api/aeo/perception-scan/[scanId]` | GET | Scan results with metrics |
-| `/api/aeo/insights` | GET/POST | Perception insights CRUD |
-| `/api/aeo/corrections` | GET/POST | Correction workflows CRUD |
-| `/api/aeo/prompts/generate` | POST | Generate evaluation prompts |
+### Usage
+```typescript
+import { withMiddleware, successResponse, errorResponse } from '@/lib/api/middleware';
 
----
-
-## Key Components
-
-| Component | Path | Purpose |
-|-----------|------|---------|
-| DashboardLayout | `components/layout/` | Main layout wrapper |
-| BrandStoryVisualizer | `components/dashboard/` | Narrative arc with consistency scores |
-| QuadrantChart | `components/aeo/` | Position quadrant visualization |
-| MetricsRadarChart | `components/aeo/` | 5-axis radar chart |
-| ThemeSettings | `components/settings/` | Morning/Evening/Night toggle |
+export const GET = withMiddleware(async (req) => {
+  const data = await fetchData();
+  return successResponse(data);
+}, { requireAuth: true, rateLimit: { maxRequests: 50 } });
+```
 
 ---
 
-## AEO Agents
+## Real-Time Updates (lib/realtime/)
 
-| Agent | Path | Purpose |
-|-------|------|---------|
-| CrawlerAgent | `lib/services/agents/CrawlerAgent.ts` | Crawl + Schema.org extraction |
-| VibeCheckAgent | `lib/services/agents/VibeCheckAgent.ts` | Brand personality inference |
-| CompetitorAgent | `lib/services/agents/CompetitorAgent.ts` | Competitor discovery |
-| PerceptionEvaluatorAgent | `lib/services/agents/PerceptionEvaluatorAgent.ts` | LLM-as-a-Judge scoring |
-| MagicImportOrchestrator | `lib/services/agents/MagicImportOrchestrator.ts` | Coordinates import flow |
+### Server Events
+| Event | Direction | Purpose |
+|-------|-----------|---------|
+| `scan:started` | Server → Client | Scan initiated |
+| `scan:progress` | Server → Client | Progress update (%) |
+| `scan:complete` | Server → Client | Scan finished |
+| `scan:error` | Server → Client | Scan failed |
+| `insight:new` | Server → Client | New insight created |
 
-### Perception Metrics
-| Metric | Range | Measures |
-|--------|-------|----------|
+### Client Hooks
+```typescript
+import { useSocket, useScanSocket, useInsightSocket } from '@/lib/realtime/socket-client';
+
+// Track scan progress
+const { progress, isComplete } = useScanSocket({ brand360Id, scanId });
+
+// Listen for new insights
+const { latestInsight } = useInsightSocket({ brand360Id });
+```
+
+---
+
+## React Query (lib/query/)
+
+### Query Hooks
+| Hook | Purpose |
+|------|---------|
+| `useBrand360Profile(orgId)` | Fetch brand profile |
+| `useAEOScans(brand360Id)` | List perception scans |
+| `useAEOScan(scanId)` | Single scan with polling |
+| `useAEOInsights(brand360Id)` | Perception insights |
+| `useAEOPrompts(brand360Id)` | Generated prompts |
+
+### Query Keys
+```typescript
+import { queryKeys } from '@/lib/query/hooks';
+
+queryKeys.brand360.profile(orgId)
+queryKeys.aeo.scans(brand360Id)
+queryKeys.aeo.insights(brand360Id)
+```
+
+---
+
+## Performance Patterns
+
+### Lazy Loading (lib/utils/lazy.tsx)
+```typescript
+import { LazyQuadrantChart, LazyMetricsRadarChart } from '@/lib/utils/lazy';
+
+// Components load on demand with skeleton
+<LazyQuadrantChart data={data} />
+```
+
+Available lazy components:
+- `LazyQuadrantChart`
+- `LazyMetricsRadarChart`
+- `LazyBrandStoryVisualizer`
+- `LazyAIPlatformGalaxy`
+- `LazyMarketLandscape`
+
+### Performance Hooks (lib/hooks/useOptimized.ts)
+```typescript
+import { useDebouncedValue, useThrottledCallback } from '@/lib/hooks/useOptimized';
+
+const debouncedSearch = useDebouncedValue(searchTerm, 300);
+const throttledScroll = useThrottledCallback(handleScroll, 100);
+```
+
+---
+
+## Docker Services
+
+| Service | Port | Compose File |
+|---------|------|--------------|
+| MongoDB | 27017 | docker-compose.mongodb.yml |
+| Mongo Express | 8081 | docker-compose.mongodb.yml |
+| Redis | 6379 | docker-compose.mongodb.yml |
+| Redis Commander | 8082 | docker-compose.mongodb.yml |
+| Firecrawl | 3002 | docker-compose.yml |
+
+---
+
+## AEO Metrics
+
+| Metric | Range | Meaning |
+|--------|-------|---------|
 | Faithfulness | 0-100 | Accuracy to ground truth |
 | Share of Voice | 0-100 | Brand visibility |
 | Sentiment | -1 to 1 | Overall sentiment |
@@ -120,16 +190,48 @@ Low Accuracy + Low Visibility = INVISIBLE (red)
 
 ---
 
-## Docker Services
+## AEO Agents
 
-| Service | Port | Compose File |
-|---------|------|--------------|
-| MongoDB | 27017 | `docker-compose.mongodb.yml` |
-| Mongo Express | 8081 | `docker-compose.mongodb.yml` |
-| Firecrawl | 3002 | `docker-compose.yml` |
-| Redis | 6379 | `docker-compose.yml` |
-| PostgreSQL | 5432 | `docker-compose.yml` |
-| Playwright | 3001 | `docker-compose.yml` |
+| Agent | Path | Purpose |
+|-------|------|---------|
+| CrawlerAgent | `lib/services/agents/CrawlerAgent.ts` | Web crawl + Schema.org |
+| VibeCheckAgent | `lib/services/agents/VibeCheckAgent.ts` | Brand personality |
+| CompetitorAgent | `lib/services/agents/CompetitorAgent.ts` | Competitor discovery |
+| PerceptionEvaluatorAgent | `lib/services/agents/PerceptionEvaluatorAgent.ts` | LLM-as-a-Judge |
+| MagicImportOrchestrator | `lib/services/agents/MagicImportOrchestrator.ts` | Coordinates flow |
+
+---
+
+## Prisma Patterns
+
+### Embedded Documents (MongoDB)
+```typescript
+// CORRECT
+brandVoice: { tone: ['professional'], keywords: ['innovative'], avoidWords: [] }
+pricing: { currency: 'USD', amount: 99, billingPeriod: 'monthly' }
+
+// WRONG - causes "Unknown argument" errors
+voiceTone: ['professional']
+pricingCurrency: 'USD'
+```
+
+---
+
+## Theme CSS Variables
+
+```css
+background: rgb(var(--background));
+background: rgb(var(--surface));
+color: rgb(var(--foreground));
+color: rgb(var(--foreground-secondary));
+border-color: rgb(var(--border));
+```
+
+| Theme | Class | Background |
+|-------|-------|------------|
+| Morning | `.light` | #FFFFFF |
+| Evening | `.dim` | #15202B |
+| Night | `.lights-out` | #000000 |
 
 ---
 
@@ -139,8 +241,10 @@ Low Accuracy + Low Visibility = INVISIBLE (red)
 # MongoDB shell
 docker exec vistralai-mongodb mongosh -u vistralai -p vistralai_dev_password --authenticationDatabase admin vistralai
 
-# View logs
-docker-compose logs -f firecrawl
+# View container logs
+docker-compose -f docker-compose.mongodb.yml logs -f
+
+# View Cloud Run logs
 gcloud run logs read vistralai --region us-central1 --limit 50
 ```
 
@@ -152,8 +256,8 @@ gcloud run logs read vistralai --region us-central1 --limit 50
 |-------|----------|
 | `Unknown argument voiceTone` | Use nested `brandVoice: { tone, keywords, avoidWords }` |
 | `Unknown argument pricingCurrency` | Use nested `pricing: { currency, amount, billingPeriod }` |
-| Database not persisting | Set `DATABASE_MODE=mongodb` |
-| Firecrawl not working | Check Docker container on port 3002 |
+| Database not persisting | Set `DATABASE_MODE=mongodb` in `.env.local` |
+| Redis connection failed | Check Redis container: `docker ps` |
+| Firecrawl not working | Start Firecrawl: `docker-compose up -d` |
 | Auth redirect loop | Verify `NEXTAUTH_URL` matches actual URL |
-| AEO dashboard empty | Complete Magic Import first to create Brand360 profile |
-| MongoDB password error | MongoDB uses `password` field, not `passwordHash` |
+| AEO dashboard empty | Complete Magic Import first |
