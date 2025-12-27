@@ -1,0 +1,147 @@
+# ============================================
+# Docker Compose for VistralAI Local Development
+# ============================================
+# External services for local development
+# Run VistralAI with: npm run dev
+# Run services with: docker-compose up
+#
+# Services:
+#   - redis: Redis cache/queue backend (port 6379)
+#   - firecrawl: Firecrawl API service (port 3002)
+#   - playwright: Playwright browser service (internal)
+#
+
+services:
+  # ============================================
+  # PostgreSQL (for Firecrawl NUQ queue)
+  # ============================================
+  postgres:
+    build:
+      context: ./firecrawl/apps/nuq-postgres
+      args:
+        PG_MAJOR: 17
+    container_name: vistralai-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - vistralai-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================
+  # Redis (Queue and Cache)
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: vistralai-redis
+    ports:
+      - '6379:6379'
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - vistralai-network
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================
+  # Playwright Service (for Firecrawl)
+  # ============================================
+  playwright:
+    image: ghcr.io/firecrawl/playwright-service:latest
+    platform: linux/amd64
+    container_name: vistralai-playwright
+    environment:
+      PORT: '3000'
+      PROXY_SERVER: ''
+      BLOCK_MEDIA: 'false'
+    networks:
+      - vistralai-network
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3000/health']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+
+  # ============================================
+  # Firecrawl API Service
+  # ============================================
+  firecrawl:
+    image: ghcr.io/firecrawl/firecrawl:latest
+    platform: linux/amd64
+    container_name: vistralai-firecrawl
+    ports:
+      - '3002:3000'
+    environment:
+      # Redis connection
+      REDIS_URL: 'redis://redis:6379'
+      REDIS_RATE_LIMIT_URL: 'redis://redis:6379'
+
+      # PostgreSQL connection (for NUQ queue)
+      NUQ_DATABASE_URL: 'postgresql://postgres:postgres@postgres:5432/postgres'
+      POSTGRES_HOST: 'postgres'
+      POSTGRES_PORT: '5432'
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: 'postgres'
+      POSTGRES_DB: 'postgres'
+
+      # Firecrawl configuration
+      NUM_WORKERS_PER_QUEUE: '4'
+      PORT: '3000'
+      HOST: '0.0.0.0'
+
+      # Playwright connection
+      PLAYWRIGHT_MICROSERVICE_URL: 'http://playwright:3000/scrape'
+
+      # Logging
+      LOGGING_LEVEL: 'info'
+
+      # Auth (disabled for local dev)
+      USE_DB_AUTHENTICATION: 'false'
+
+      # Rate limiting (generous for local dev)
+      RATE_LIMIT_TEST_MODE: 'true'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      playwright:
+        condition: service_started
+    networks:
+      - vistralai-network
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3000/']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - firecrawl_data:/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  firecrawl_data:
+    driver: local
+
+networks:
+  vistralai-network:
+    driver: bridge

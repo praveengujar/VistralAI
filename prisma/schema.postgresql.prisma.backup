@@ -1,0 +1,787 @@
+// VistralAI Enterprise Prisma Schema for PostgreSQL
+// Includes: Users, Organizations, OAuth, MFA, Audit Logging, Brands
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+model User {
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  emailVerified       DateTime?
+  passwordHash        String?
+  name                String?
+  firstName           String?
+  lastName            String?
+  avatarUrl           String?
+  phone               String?
+  timezone            String    @default("America/Los_Angeles")
+  locale              String    @default("en-US")
+
+  // Security
+  mfaEnabled          Boolean   @default(false)
+  mfaSecret           String?
+  mfaBackupCodes      String[]
+  passwordChangedAt   DateTime?
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+
+  // Preferences
+  theme               String    @default("system") // light, dark, system
+  emailNotifications  Boolean   @default(true)
+  marketingEmails     Boolean   @default(false)
+
+  // Status
+  status              UserStatus @default(ACTIVE)
+  lastLoginAt         DateTime?
+  lastActiveAt        DateTime?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  // Legacy compatibility
+  accountType         AccountType @default(brand)
+  subscription        SubscriptionTier @default(free)
+
+  // Relations
+  accounts            Account[]
+  sessions            Session[]
+  memberships         OrganizationMember[]
+  apiKeys             ApiKey[]
+  auditLogs           AuditLog[]
+  passwordResets      PasswordReset[]
+  invitationsSent     Invitation[] @relation("InvitedBy")
+  brandProfile        BrandProfile?
+
+  @@index([email])
+  @@index([status])
+  @@map("users")
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+enum AccountType {
+  brand
+  agency
+  enterprise
+}
+
+enum SubscriptionTier {
+  free
+  pro
+  enterprise
+}
+
+// OAuth Account (NextAuth.js)
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+// Session (NextAuth.js with device tracking)
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  // Session metadata
+  userAgent    String?
+  ipAddress    String?
+  deviceType   String?  // desktop, mobile, tablet
+  location     String?
+  lastActiveAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expires])
+  @@map("sessions")
+}
+
+// Email verification token
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// Password reset token
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expires   DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@map("password_resets")
+}
+
+// ============================================
+// ORGANIZATION & TEAM
+// ============================================
+
+model Organization {
+  id               String    @id @default(cuid())
+  name             String
+  slug             String    @unique
+  logoUrl          String?
+  website          String?
+  industry         String?
+  size             OrgSize   @default(SMALL)
+
+  // Billing (placeholder for future)
+  plan             PlanType  @default(FREE)
+  planExpiresAt    DateTime?
+  stripeCustomerId String?
+
+  // Settings
+  settings         Json      @default("{}")
+  features         String[]  @default([])
+
+  // Status
+  status           OrgStatus @default(ACTIVE)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relations
+  members          OrganizationMember[]
+  invitations      Invitation[]
+  brands           Brand[]
+  apiKeys          ApiKey[]
+  auditLogs        AuditLog[]
+
+  @@index([slug])
+  @@index([status])
+  @@map("organizations")
+}
+
+enum OrgSize {
+  SOLO
+  SMALL      // 2-10
+  MEDIUM     // 11-50
+  LARGE      // 51-200
+  ENTERPRISE // 200+
+}
+
+enum PlanType {
+  FREE
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum OrgStatus {
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+}
+
+model OrganizationMember {
+  id             String       @id @default(cuid())
+  userId         String
+  organizationId String
+  role           OrgRole      @default(MEMBER)
+
+  // Permissions override (optional granular control)
+  permissions    String[]     @default([])
+
+  // Status
+  status         MemberStatus @default(ACTIVE)
+  joinedAt       DateTime     @default(now())
+  invitedBy      String?
+
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+  @@index([userId])
+  @@map("organization_members")
+}
+
+enum OrgRole {
+  OWNER      // Full access, can delete org
+  ADMIN      // Manage members, settings
+  MEMBER     // Standard access
+  VIEWER     // Read-only access
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  REMOVED
+}
+
+model Invitation {
+  id             String       @id @default(cuid())
+  email          String
+  organizationId String
+  role           OrgRole      @default(MEMBER)
+  token          String       @unique
+  invitedById    String
+
+  status         InviteStatus @default(PENDING)
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  createdAt      DateTime     @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy      User         @relation("InvitedBy", fields: [invitedById], references: [id])
+
+  @@index([token])
+  @@index([email])
+  @@index([organizationId])
+  @@map("invitations")
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+// ============================================
+// API KEYS
+// ============================================
+
+model ApiKey {
+  id             String       @id @default(cuid())
+  name           String
+  keyHash        String       @unique  // Store hashed, not plain
+  keyPrefix      String                // First 8 chars for identification
+
+  userId         String
+  organizationId String?
+
+  // Permissions
+  scopes         String[]     @default(["read"])
+
+  // Usage tracking
+  lastUsedAt     DateTime?
+  usageCount     Int          @default(0)
+
+  // Limits
+  rateLimit      Int          @default(1000) // requests per hour
+  expiresAt      DateTime?
+
+  // Status
+  status         ApiKeyStatus @default(ACTIVE)
+  createdAt      DateTime     @default(now())
+  revokedAt      DateTime?
+
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([keyHash])
+  @@index([userId])
+  @@index([organizationId])
+  @@map("api_keys")
+}
+
+enum ApiKeyStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+// ============================================
+// AUDIT LOGGING
+// ============================================
+
+model AuditLog {
+  id             String        @id @default(cuid())
+
+  // Actor
+  userId         String?
+  userEmail      String?
+  organizationId String?
+
+  // Action
+  action         String        // e.g., "user.login", "brand.create", "settings.update"
+  category       AuditCategory
+
+  // Target
+  targetType     String?       // e.g., "Brand", "User", "Organization"
+  targetId       String?
+
+  // Details
+  description    String?
+  metadata       Json          @default("{}")
+
+  // Context
+  ipAddress      String?
+  userAgent      String?
+
+  // Status
+  status         AuditStatus   @default(SUCCESS)
+  errorMessage   String?
+
+  createdAt      DateTime      @default(now())
+
+  user           User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([action])
+  @@index([createdAt])
+  @@index([category])
+  @@map("audit_logs")
+}
+
+enum AuditCategory {
+  AUTH           // Login, logout, password change
+  USER           // Profile updates
+  ORGANIZATION   // Org settings, member changes
+  BRAND          // Brand profile changes
+  SECURITY       // MFA, API keys, sessions
+  BILLING        // Subscription changes
+  SYSTEM         // System events
+}
+
+enum AuditStatus {
+  SUCCESS
+  FAILURE
+  WARNING
+}
+
+// ============================================
+// BRAND PROFILE (Legacy - Enhanced)
+// ============================================
+
+model BrandProfile {
+  id             String         @id @default(cuid())
+  userId         String         @unique
+  brandName      String
+  domain         String
+  descriptor     String         @default("")
+  category       String         @default("General")
+  competitors    String[]       // Simple string array for competitor names
+  crawlingStatus CrawlingStatus @default(idle)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Relations
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brandIdentity      BrandIdentity?
+  marketPosition     MarketPosition?
+  competitorProfiles CompetitorProfile[]
+  productDetails     ProductDetail[]
+  brandAssets        BrandAsset[]
+  uploadedDocuments  UploadedDocument[]
+
+  @@map("brand_profiles")
+}
+
+enum CrawlingStatus {
+  idle
+  processing
+  completed
+  failed
+}
+
+// ============================================
+// BRAND (New Organization-based)
+// ============================================
+
+model Brand {
+  id                   String      @id @default(cuid())
+  organizationId       String
+
+  // Basic Info
+  name                 String
+  website              String?
+  description          String?
+  logoUrl              String?
+
+  // AI-Extracted Identity
+  vision               String?
+  mission              String?
+  coreValues           String[]
+  brandVoiceAttributes String[]
+  industry             String?
+  subIndustry          String?
+  targetAudience       Json?
+  uniqueSellingPoints  String[]
+
+  // Extraction metadata
+  extractedFromUrl     String?
+  extractionConfidence Json?
+  source               BrandSource @default(MANUAL)
+
+  // Status
+  status               BrandStatus @default(ACTIVE)
+  onboardingCompleted  Boolean     @default(false)
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  organization         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  competitors          Competitor[]
+  products             Product[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("brands")
+}
+
+enum BrandSource {
+  MANUAL
+  AI_GENERATED
+  HYBRID
+}
+
+enum BrandStatus {
+  ACTIVE
+  ARCHIVED
+  DRAFT
+}
+
+model Competitor {
+  id              String          @id @default(cuid())
+  brandId         String
+
+  name            String
+  website         String?
+  description     String?
+
+  competitionType CompetitionType @default(DIRECT)
+  rationale       String?
+  source          String          @default("ai-generated")
+  confidence      Float           @default(0.5)
+
+  // Metrics (populated by analysis)
+  shareOfVoice    Float?
+  visibilityScore Float?
+  lastAnalyzed    DateTime?
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  brand           Brand           @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@map("competitors")
+}
+
+enum CompetitionType {
+  DIRECT
+  INDIRECT
+  ASPIRATIONAL
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  brandId     String
+
+  name        String
+  description String?
+  category    String?
+  subCategory String?
+  features    String[]
+  benefits    String[]
+  priceRange  String?
+  sku         String?
+
+  source      String   @default("manual")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  brand       Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@index([category])
+  @@map("products")
+}
+
+// ============================================
+// BRAND 360 - Pillar 1: Brand Identity
+// ============================================
+
+model BrandIdentity {
+  id                   String      @id @default(cuid())
+  brandId              String      @unique
+  mission              String?
+  vision               String?
+  values               String[]
+  brandStory           String?
+  uniqueSellingPoints  String[]
+  brandPersonality     String?
+  tagline              String?
+  foundedYear          Int?
+  headquarters         String?
+
+  // Brand Voice (flattened from embedded type)
+  voiceTone            String[]
+  voiceKeywords        String[]
+  voiceAvoidWords      String[]
+
+  // AI extraction metadata
+  source               DataSource?
+  extractionConfidence Json?
+  extractedFromUrl     String?
+
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  // Relation
+  brandProfile         BrandProfile @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@map("brand_identities")
+}
+
+enum DataSource {
+  manual
+  ai_generated
+  hybrid
+}
+
+// ============================================
+// BRAND 360 - Pillar 2: Market Position
+// ============================================
+
+model MarketPosition {
+  id                String          @id @default(cuid())
+  brandId           String          @unique
+  marketSegment     String?
+  geographicMarkets String[]
+  industryVerticals String[]
+  marketShare       Float?
+  positioning       String?
+  pricingStrategy   PricingStrategy?
+
+  // Market Size (flattened from embedded type)
+  marketSizeValue    Float?
+  marketSizeCurrency String?
+  marketSizeYear     Int?
+
+  // Target Audiences (stored as JSON for PostgreSQL)
+  targetAudiences   Json            @default("[]")
+
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  // Relation
+  brandProfile      BrandProfile    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@map("market_positions")
+}
+
+enum PricingStrategy {
+  premium
+  value
+  competitive
+  penetration
+}
+
+// ============================================
+// BRAND 360 - Pillar 3: Competitors (Legacy)
+// ============================================
+
+model CompetitorProfile {
+  id                    String           @id @default(cuid())
+  brandId               String
+  name                  String
+  domain                String
+  isPrimary             Boolean          @default(false)
+  strengths             String[]
+  weaknesses            String[]
+  marketShare           Float?
+  pricingPosition       PricingPosition?
+  differentiators       String[]
+  targetAudienceOverlap Float?
+
+  // AI extraction metadata
+  source                DataSource?
+  competitionType       LegacyCompetitionType?
+  confidenceScore       Float?
+  reasonForSelection    String?
+
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  // Relation
+  brandProfile          BrandProfile     @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@map("competitor_profiles")
+}
+
+enum PricingPosition {
+  higher
+  similar
+  lower
+}
+
+enum LegacyCompetitionType {
+  direct
+  indirect
+  aspirational
+}
+
+// ============================================
+// BRAND 360 - Pillar 4: Products & Services
+// ============================================
+
+model ProductDetail {
+  id               String         @id @default(cuid())
+  brandId          String
+  name             String
+  sku              String?
+  category         String
+  subcategory      String?
+  description      String         @default("")
+  shortDescription String?
+  features         String[]
+  benefits         String[]
+  useCases         String[]
+  targetAudience   String[]
+  url              String         @default("")
+  imageUrls        String[]
+  specifications   Json?
+  awards           String[]
+  certifications   String[]
+  isActive         Boolean        @default(true)
+  launchDate       DateTime?
+
+  // Pricing (flattened from embedded type)
+  pricingCurrency      String?
+  pricingAmount        Float?
+  pricingBillingPeriod BillingPeriod?
+
+  // AI extraction metadata
+  source               ProductSource?
+  confidenceScore      Float?
+
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  // Relation
+  brandProfile         BrandProfile   @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@map("product_details")
+}
+
+enum ProductSource {
+  csv
+  xlsx
+  shopify
+  website
+  manual
+}
+
+enum BillingPeriod {
+  one_time
+  monthly
+  yearly
+}
+
+// ============================================
+// Brand Assets
+// ============================================
+
+model BrandAsset {
+  id          String    @id @default(cuid())
+  brandId     String
+  type        AssetType
+  name        String
+  description String?
+  fileUrl     String?
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relation
+  brandProfile BrandProfile @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@map("brand_assets")
+}
+
+enum AssetType {
+  logo
+  color_palette
+  typography
+  imagery
+  document
+  other
+}
+
+// ============================================
+// Uploaded Documents
+// ============================================
+
+model UploadedDocument {
+  id              String           @id @default(cuid())
+  brandId         String
+  fileName        String
+  fileType        DocumentType
+  fileSize        Int              @default(0)
+  fileUrl         String
+  status          ProcessingStatus @default(pending)
+  extractedData   Json?
+  processingError String?
+  uploadedAt      DateTime         @default(now())
+  processedAt     DateTime?
+
+  // Relation
+  brandProfile    BrandProfile     @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@map("uploaded_documents")
+}
+
+enum DocumentType {
+  pdf
+  docx
+  txt
+  csv
+}
+
+enum ProcessingStatus {
+  pending
+  processing
+  completed
+  failed
+}

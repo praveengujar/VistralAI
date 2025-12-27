@@ -1,0 +1,389 @@
+// VistralAI Prisma Schema for MongoDB
+// This schema defines all 8 Brand 360 entities
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// User & Authentication
+// ============================================
+
+model User {
+  id           String           @id @default(auto()) @map("_id") @db.ObjectId
+  email        String           @unique
+  password     String
+  accountType  AccountType
+  subscription SubscriptionTier @default(free)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  // Relations
+  brandProfile BrandProfile?
+
+  @@map("users")
+}
+
+enum AccountType {
+  brand
+  agency
+  enterprise
+}
+
+enum SubscriptionTier {
+  free
+  pro
+  enterprise
+}
+
+// ============================================
+// Brand Profile (Main entity)
+// ============================================
+
+model BrandProfile {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String         @unique @db.ObjectId
+  brandName      String
+  domain         String
+  descriptor     String         @default("")
+  category       String         @default("General")
+  competitors    String[] // Simple string array for competitor names
+  crawlingStatus CrawlingStatus @default(idle)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Embedded documents (MongoDB-native)
+  catalog      ProductCatalog?
+  integrations Integrations?
+
+  // Relations
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brandIdentity      BrandIdentity?
+  marketPosition     MarketPosition?
+  competitorProfiles CompetitorProfile[]
+  productDetails     ProductDetail[]
+  brandAssets        BrandAsset[]
+  uploadedDocuments  UploadedDocument[]
+
+  @@map("brand_profiles")
+}
+
+enum CrawlingStatus {
+  idle
+  processing
+  completed
+  failed
+}
+
+// Embedded type for ProductCatalog
+type ProductCatalog {
+  products CatalogProduct[]
+}
+
+// Embedded type for simple Product (in catalog)
+type CatalogProduct {
+  id         String
+  name       String
+  category   String
+  url        String
+  attributes Json?
+}
+
+// Embedded type for Integrations
+type Integrations {
+  gsc     Boolean @default(false)
+  ga4     Boolean @default(false)
+  shopify Boolean @default(false)
+}
+
+// ============================================
+// Brand 360 - Pillar 1: Brand Identity
+// ============================================
+
+model BrandIdentity {
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  brandId             String   @unique @db.ObjectId
+  mission             String?
+  vision              String?
+  values              String[]
+  brandStory          String?
+  uniqueSellingPoints String[]
+  brandPersonality    String?
+  tagline             String?
+  foundedYear         Int?
+  headquarters        String?
+
+  // AI extraction metadata
+  source               DataSource?
+  extractionConfidence Json? // Record<string, number>
+  extractedFromUrl     String?
+
+  // Embedded document
+  brandVoice BrandVoice?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relation
+  brandProfile BrandProfile @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@map("brand_identities")
+}
+
+enum DataSource {
+  manual
+  ai_generated @map("ai-generated")
+  hybrid
+}
+
+// Embedded type for BrandVoice
+type BrandVoice {
+  tone       String[]
+  keywords   String[]
+  avoidWords String[]
+}
+
+// ============================================
+// Brand 360 - Pillar 2: Market Position
+// ============================================
+
+model MarketPosition {
+  id                String           @id @default(auto()) @map("_id") @db.ObjectId
+  brandId           String           @unique @db.ObjectId
+  marketSegment     String?
+  geographicMarkets String[]
+  industryVerticals String[]
+  marketShare       Float?
+  positioning       String?
+  pricingStrategy   PricingStrategy?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  // Embedded documents
+  targetAudiences TargetAudience[]
+  marketSize      MarketSize?
+
+  // Relation
+  brandProfile BrandProfile @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@map("market_positions")
+}
+
+enum PricingStrategy {
+  premium
+  value
+  competitive
+  penetration
+}
+
+// Embedded type for TargetAudience
+type TargetAudience {
+  id             String
+  name           String
+  isPrimary      Boolean
+  demographics   Demographics?
+  psychographics Psychographics?
+}
+
+type Demographics {
+  ageRange   String?
+  gender     String?
+  income     String?
+  location   String[]
+  occupation String[]
+}
+
+type Psychographics {
+  interests  String[]
+  painPoints String[]
+  goals      String[]
+  behaviors  String[]
+}
+
+type MarketSize {
+  value    Float
+  currency String
+  year     Int
+}
+
+// ============================================
+// Brand 360 - Pillar 3: Competitors
+// ============================================
+
+model CompetitorProfile {
+  id                    String           @id @default(auto()) @map("_id") @db.ObjectId
+  brandId               String           @db.ObjectId
+  name                  String
+  domain                String
+  isPrimary             Boolean          @default(false)
+  strengths             String[]
+  weaknesses            String[]
+  marketShare           Float?
+  pricingPosition       PricingPosition?
+  differentiators       String[]
+  targetAudienceOverlap Float?
+
+  // AI extraction metadata
+  source             DataSource?
+  competitionType    CompetitionType?
+  confidenceScore    Float?
+  reasonForSelection String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relation
+  brandProfile BrandProfile @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@map("competitor_profiles")
+}
+
+enum PricingPosition {
+  higher
+  similar
+  lower
+}
+
+enum CompetitionType {
+  direct
+  indirect
+  aspirational
+}
+
+// ============================================
+// Brand 360 - Pillar 4: Products & Services
+// ============================================
+
+model ProductDetail {
+  id               String         @id @default(auto()) @map("_id") @db.ObjectId
+  brandId          String         @db.ObjectId
+  name             String
+  sku              String?
+  category         String
+  subcategory      String?
+  description      String         @default("")
+  shortDescription String?
+  features         String[]
+  benefits         String[]
+  useCases         String[]
+  targetAudience   String[] // References to TargetAudience names
+  url              String         @default("")
+  imageUrls        String[]
+  specifications   Json? // Record<string, string>
+  awards           String[]
+  certifications   String[]
+  isActive         Boolean        @default(true)
+  launchDate       DateTime?
+
+  // AI extraction metadata
+  source          ProductSource?
+  confidenceScore Float?
+
+  // Embedded document
+  pricing Pricing?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relation
+  brandProfile BrandProfile @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@map("product_details")
+}
+
+enum ProductSource {
+  csv
+  xlsx
+  shopify
+  website
+  manual
+}
+
+// Embedded type for Pricing
+type Pricing {
+  currency      String
+  amount        Float
+  billingPeriod BillingPeriod?
+}
+
+enum BillingPeriod {
+  one_time @map("one-time")
+  monthly
+  yearly
+}
+
+// ============================================
+// Brand Assets
+// ============================================
+
+model BrandAsset {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  brandId     String    @db.ObjectId
+  type        AssetType
+  name        String
+  description String?
+  fileUrl     String?
+  metadata    Json? // Type-specific metadata
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relation
+  brandProfile BrandProfile @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@map("brand_assets")
+}
+
+enum AssetType {
+  logo
+  color_palette
+  typography
+  imagery
+  document
+  other
+}
+
+// ============================================
+// Uploaded Documents
+// ============================================
+
+model UploadedDocument {
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  brandId         String           @db.ObjectId
+  fileName        String
+  fileType        DocumentType
+  fileSize        Int              @default(0)
+  fileUrl         String
+  status          ProcessingStatus @default(pending)
+  extractedData   Json? // Partial<Brand360Data>
+  processingError String?
+  uploadedAt      DateTime         @default(now())
+  processedAt     DateTime?
+
+  // Relation
+  brandProfile BrandProfile @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@map("uploaded_documents")
+}
+
+enum DocumentType {
+  pdf
+  docx
+  txt
+  csv
+}
+
+enum ProcessingStatus {
+  pending
+  processing
+  completed
+  failed
+}

@@ -1,0 +1,972 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================
+   DESIGN SYSTEM - VistralAI
+   Modern, consistent styling foundation
+   with WCAG 2.1 AA compliant dark mode
+   ========================================== */
+
+@layer base {
+  /* ========================================
+   * LIGHT MODE (Default)
+   * WCAG 2.1 AA Compliant - 4.5:1 contrast ratio
+   * ======================================== */
+  :root {
+    /* Color scheme hint for browser */
+    color-scheme: light;
+
+    /* ---- Background Colors ---- */
+    --background: 248 250 252; /* #f8fafc - secondary-50 */
+    --background-secondary: 241 245 249; /* #f1f5f9 */
+    --background-tertiary: 226 232 240; /* #e2e8f0 */
+    --background-elevated: 255 255 255; /* #ffffff */
+    --background-inverse: 15 23 42; /* #0f172a */
+
+    /* ---- Foreground/Text Colors ---- */
+    /* Primary text: #0f172a on #f8fafc = 15.44:1 contrast ✓ */
+    --foreground: 15 23 42; /* #0f172a */
+    /* Secondary text: #334155 on #f8fafc = 9.19:1 contrast ✓ */
+    --foreground-secondary: 51 65 85; /* #334155 */
+    /* Tertiary text: #475569 on #f8fafc = 6.51:1 contrast ✓ */
+    --foreground-tertiary: 71 85 105; /* #475569 */
+    /* Muted text: #64748b on #f8fafc = 4.54:1 contrast ✓ */
+    --foreground-muted: 100 116 139; /* #64748b */
+    --foreground-inverse: 248 250 252; /* #f8fafc */
+
+    /* ---- Border Colors ---- */
+    --border: 226 232 240; /* #e2e8f0 */
+    --border-secondary: 203 213 225; /* #cbd5e1 */
+    --border-focus: 99 102 241; /* #6366f1 */
+
+    /* ---- Primary Brand Colors (Indigo) ---- */
+    --primary: 99 102 241; /* #6366f1 */
+    --primary-foreground: 255 255 255; /* #ffffff */
+    --primary-hover: 79 70 229; /* #4f46e5 */
+
+    /* ---- Status Colors (Accessible) ---- */
+    /* Success - Green */
+    --success: 5 150 105; /* #059669 */
+    --success-foreground: 255 255 255;
+    --success-background: 236 253 245; /* #ecfdf5 */
+    --success-border: 167 243 208; /* #a7f3d0 */
+
+    /* Warning - Amber (adjusted for accessibility) */
+    --warning: 180 83 9; /* #b45309 */
+    --warning-foreground: 255 255 255;
+    --warning-background: 255 251 235; /* #fffbeb */
+    --warning-border: 252 211 77; /* #fcd34d */
+
+    /* Error - Red */
+    --error: 220 38 38; /* #dc2626 */
+    --error-foreground: 255 255 255;
+    --error-background: 254 242 242; /* #fef2f2 */
+    --error-border: 252 165 165; /* #fca5a5 */
+
+    /* Info - Blue */
+    --info: 2 132 199; /* #0284c7 */
+    --info-foreground: 255 255 255;
+    --info-background: 240 249 255; /* #f0f9ff */
+    --info-border: 125 211 252; /* #7dd3fc */
+
+    /* ---- Chart Colors (IBM Color Blind Safe Palette) ---- */
+    --chart-1: 100 143 255; /* #648fff - Blue */
+    --chart-2: 120 94 240; /* #785ef0 - Purple */
+    --chart-3: 220 38 127; /* #dc267f - Magenta */
+    --chart-4: 254 97 0; /* #fe6100 - Orange */
+    --chart-5: 255 176 0; /* #ffb000 - Gold */
+    --chart-6: 0 158 115; /* #009e73 - Teal */
+    --chart-7: 86 180 233; /* #56b4e9 - Sky Blue */
+    --chart-8: 230 159 0; /* #e69f00 - Amber */
+
+    /* ---- Surface Colors ---- */
+    --surface: 255 255 255; /* #ffffff */
+    --surface-hover: 248 250 252; /* #f8fafc */
+    --surface-active: 241 245 249; /* #f1f5f9 */
+    --surface-disabled: 241 245 249; /* #f1f5f9 */
+
+    /* ---- Input Colors ---- */
+    --input: 255 255 255; /* #ffffff */
+    --input-border: 203 213 225; /* #cbd5e1 */
+    --input-focus: 99 102 241; /* #6366f1 */
+    --input-placeholder: 148 163 184; /* #94a3b8 */
+
+    /* ---- Sidebar Colors ---- */
+    --sidebar: 255 255 255; /* #ffffff */
+    --sidebar-foreground: 51 65 85; /* #334155 */
+    --sidebar-border: 226 232 240; /* #e2e8f0 */
+    --sidebar-hover: 241 245 249; /* #f1f5f9 */
+    --sidebar-active: 238 242 255; /* #eef2ff - primary-50 */
+
+    /* ---- Misc ---- */
+    --ring: 99 102 241; /* #6366f1 */
+    --radius: 0.5rem;
+  }
+
+  /* ========================================
+   * DIM MODE (Twitter-style soft dark)
+   * WCAG 2.1 AA Compliant - 4.5:1 contrast ratio
+   * Softer dark blue tones, easier on the eyes
+   * ======================================== */
+  .dim {
+    /* Color scheme hint for browser */
+    color-scheme: dark;
+
+    /* ---- Background Colors ---- */
+    --background: 21 32 43; /* #15202B - Twitter Dim background */
+    --background-secondary: 30 42 56; /* #1e2a38 */
+    --background-tertiary: 45 62 80; /* #2d3e50 */
+    --background-elevated: 30 42 56; /* #1e2a38 */
+    --background-inverse: 248 250 252; /* #f8fafc */
+
+    /* ---- Foreground/Text Colors ---- */
+    --foreground: 247 249 249; /* #f7f9f9 */
+    --foreground-secondary: 217 228 232; /* #d9e4e8 */
+    --foreground-tertiary: 182 197 207; /* #b6c5cf */
+    --foreground-muted: 136 153 166; /* #8899a6 - Twitter's muted text */
+    --foreground-inverse: 21 32 43; /* #15202B */
+
+    /* ---- Border Colors ---- */
+    --border: 56 68 77; /* #38444d - Twitter's border */
+    --border-secondary: 70 85 96; /* #465560 */
+    --border-focus: 29 161 242; /* #1da1f2 - Twitter blue */
+
+    /* ---- Primary Brand Colors (Twitter Blue adjusted) ---- */
+    --primary: 129 140 248; /* #818cf8 */
+    --primary-foreground: 21 32 43; /* #15202B */
+    --primary-hover: 165 180 252; /* #a5b4fc */
+
+    /* ---- Status Colors (Adjusted for Dim Mode) ---- */
+    --success: 52 211 153; /* #34d399 */
+    --success-foreground: 21 32 43;
+    --success-background: 6 78 59; /* #064e3b */
+    --success-border: 5 150 105; /* #059669 */
+
+    --warning: 251 191 36; /* #fbbf24 */
+    --warning-foreground: 21 32 43;
+    --warning-background: 120 53 15; /* #78350f */
+    --warning-border: 180 83 9; /* #b45309 */
+
+    --error: 248 113 113; /* #f87171 */
+    --error-foreground: 21 32 43;
+    --error-background: 127 29 29; /* #7f1d1d */
+    --error-border: 220 38 38; /* #dc2626 */
+
+    --info: 56 189 248; /* #38bdf8 */
+    --info-foreground: 21 32 43;
+    --info-background: 12 74 110; /* #0c4a6e */
+    --info-border: 2 132 199; /* #0284c7 */
+
+    /* ---- Chart Colors ---- */
+    --chart-1: 129 140 248;
+    --chart-2: 167 139 250;
+    --chart-3: 244 114 182;
+    --chart-4: 251 146 60;
+    --chart-5: 252 211 77;
+    --chart-6: 52 211 153;
+    --chart-7: 56 189 248;
+    --chart-8: 250 204 21;
+
+    /* ---- Surface Colors ---- */
+    --surface: 30 42 56; /* #1e2a38 */
+    --surface-hover: 45 62 80; /* #2d3e50 */
+    --surface-active: 56 75 96; /* #384b60 */
+    --surface-disabled: 30 42 56; /* #1e2a38 */
+
+    /* ---- Input Colors ---- */
+    --input: 30 42 56; /* #1e2a38 */
+    --input-border: 56 68 77; /* #38444d */
+    --input-focus: 129 140 248; /* #818cf8 */
+    --input-placeholder: 136 153 166; /* #8899a6 */
+
+    /* ---- Sidebar Colors ---- */
+    --sidebar: 30 42 56; /* #1e2a38 */
+    --sidebar-foreground: 217 228 232; /* #d9e4e8 */
+    --sidebar-border: 56 68 77; /* #38444d */
+    --sidebar-hover: 45 62 80; /* #2d3e50 */
+    --sidebar-active: 30 58 138; /* #1e3a8a */
+
+    /* ---- Misc ---- */
+    --ring: 129 140 248; /* #818cf8 */
+  }
+
+  /* ========================================
+   * LIGHTS OUT MODE (Pure Black - AMOLED)
+   * WCAG 2.1 AA Compliant - Maximum contrast
+   * Pure black for AMOLED screens
+   * ======================================== */
+  .dark,
+  .lights-out {
+    /* Color scheme hint for browser */
+    color-scheme: dark;
+
+    /* ---- Background Colors ---- */
+    --background: 0 0 0; /* #000000 - Pure black */
+    --background-secondary: 15 15 15; /* #0f0f0f */
+    --background-tertiary: 32 32 32; /* #202020 */
+    --background-elevated: 15 15 15; /* #0f0f0f */
+    --background-inverse: 248 250 252; /* #f8fafc */
+
+    /* ---- Foreground/Text Colors ---- */
+    --foreground: 247 249 249; /* #f7f9f9 */
+    --foreground-secondary: 217 217 217; /* #d9d9d9 */
+    --foreground-tertiary: 179 179 179; /* #b3b3b3 */
+    --foreground-muted: 113 118 123; /* #71767b - Twitter's muted */
+    --foreground-inverse: 0 0 0; /* #000000 */
+
+    /* ---- Border Colors ---- */
+    --border: 47 51 54; /* #2f3336 - Twitter Lights Out border */
+    --border-secondary: 62 65 68; /* #3e4144 */
+    --border-focus: 129 140 248; /* #818cf8 */
+
+    /* ---- Primary Brand Colors ---- */
+    --primary: 129 140 248; /* #818cf8 */
+    --primary-foreground: 0 0 0; /* #000000 */
+    --primary-hover: 165 180 252; /* #a5b4fc */
+
+    /* ---- Status Colors ---- */
+    --success: 52 211 153; /* #34d399 */
+    --success-foreground: 0 0 0;
+    --success-background: 6 78 59; /* #064e3b */
+    --success-border: 5 150 105; /* #059669 */
+
+    --warning: 251 191 36; /* #fbbf24 */
+    --warning-foreground: 0 0 0;
+    --warning-background: 120 53 15; /* #78350f */
+    --warning-border: 180 83 9; /* #b45309 */
+
+    --error: 248 113 113; /* #f87171 */
+    --error-foreground: 0 0 0;
+    --error-background: 127 29 29; /* #7f1d1d */
+    --error-border: 220 38 38; /* #dc2626 */
+
+    --info: 56 189 248; /* #38bdf8 */
+    --info-foreground: 0 0 0;
+    --info-background: 12 74 110; /* #0c4a6e */
+    --info-border: 2 132 199; /* #0284c7 */
+
+    /* ---- Chart Colors ---- */
+    --chart-1: 129 140 248;
+    --chart-2: 167 139 250;
+    --chart-3: 244 114 182;
+    --chart-4: 251 146 60;
+    --chart-5: 252 211 77;
+    --chart-6: 52 211 153;
+    --chart-7: 56 189 248;
+    --chart-8: 250 204 21;
+
+    /* ---- Surface Colors ---- */
+    --surface: 15 15 15; /* #0f0f0f */
+    --surface-hover: 32 32 32; /* #202020 */
+    --surface-active: 47 47 47; /* #2f2f2f */
+    --surface-disabled: 15 15 15; /* #0f0f0f */
+
+    /* ---- Input Colors ---- */
+    --input: 15 15 15; /* #0f0f0f */
+    --input-border: 47 51 54; /* #2f3336 */
+    --input-focus: 129 140 248; /* #818cf8 */
+    --input-placeholder: 113 118 123; /* #71767b */
+
+    /* ---- Sidebar Colors ---- */
+    --sidebar: 15 15 15; /* #0f0f0f */
+    --sidebar-foreground: 217 217 217; /* #d9d9d9 */
+    --sidebar-border: 47 51 54; /* #2f3336 */
+    --sidebar-hover: 32 32 32; /* #202020 */
+    --sidebar-active: 30 58 138; /* #1e3a8a */
+
+    /* ---- Misc ---- */
+    --ring: 129 140 248; /* #818cf8 */
+  }
+
+  /* ========================================
+   * BASE STYLES
+   * ======================================== */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    border-color: rgb(var(--border));
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: rgb(var(--background));
+    color: rgb(var(--foreground));
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+
+  /* Smooth theme transitions */
+  *,
+  *::before,
+  *::after {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-duration: 200ms;
+    transition-timing-function: ease;
+  }
+
+  /* Disable transitions on page load to prevent flash */
+  .no-transitions *,
+  .no-transitions *::before,
+  .no-transitions *::after {
+    transition: none !important;
+  }
+
+  /* Focus visible styles for accessibility */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgb(var(--background)), 0 0 0 4px rgb(var(--ring));
+  }
+
+  /* Selection colors */
+  ::selection {
+    background-color: rgb(var(--primary) / 0.3);
+    color: rgb(var(--foreground));
+  }
+
+  /* Scrollbar styling - Light mode */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: rgb(var(--background-secondary));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--border-secondary));
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(var(--foreground-muted));
+  }
+}
+
+@layer components {
+  /* ==========================================
+     BUTTONS
+     ========================================== */
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-medium transition-all duration-200
+           rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed;
+    --tw-ring-offset-color: rgb(var(--background));
+  }
+
+  .btn-primary {
+    @apply btn shadow-soft hover:shadow-soft-lg active:scale-[0.98];
+    background-color: rgb(var(--primary));
+    color: rgb(var(--primary-foreground));
+    --tw-ring-color: rgb(var(--primary) / 0.5);
+  }
+
+  .btn-primary:hover {
+    background-color: rgb(var(--primary-hover));
+  }
+
+  .btn-secondary {
+    @apply btn shadow-soft;
+    background-color: rgb(var(--surface));
+    color: rgb(var(--foreground-secondary));
+    border: 1px solid rgb(var(--border));
+    --tw-ring-color: rgb(var(--primary) / 0.5);
+  }
+
+  .btn-secondary:hover {
+    background-color: rgb(var(--surface-hover));
+    border-color: rgb(var(--border-secondary));
+    color: rgb(var(--foreground));
+  }
+
+  .btn-ghost {
+    @apply btn;
+    color: rgb(var(--foreground-secondary));
+    --tw-ring-color: rgb(var(--primary) / 0.5);
+  }
+
+  .btn-ghost:hover {
+    background-color: rgb(var(--surface-hover));
+    color: rgb(var(--foreground));
+  }
+
+  .btn-danger {
+    @apply btn shadow-soft;
+    background-color: rgb(var(--error));
+    color: rgb(var(--error-foreground));
+    --tw-ring-color: rgb(var(--error) / 0.5);
+  }
+
+  .btn-danger:hover {
+    opacity: 0.9;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-sm;
+  }
+
+  .btn-md {
+    @apply px-4 py-2 text-sm;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+
+  .btn-xl {
+    @apply px-8 py-4 text-lg;
+  }
+
+  /* ==========================================
+     CARDS
+     ========================================== */
+
+  .card {
+    background-color: rgb(var(--surface));
+    border: 1px solid rgb(var(--border) / 0.6);
+    @apply rounded-2xl shadow-card;
+  }
+
+  .card-hover {
+    @apply card transition-all duration-200;
+  }
+
+  .card-hover:hover {
+    @apply shadow-card-hover;
+    border-color: rgb(var(--border-secondary) / 0.6);
+  }
+
+  .card-interactive {
+    @apply card-hover cursor-pointer active:scale-[0.99];
+  }
+
+  .card-elevated {
+    background-color: rgb(var(--surface));
+    @apply rounded-2xl shadow-elevated border-0;
+  }
+
+  .card-glass {
+    background-color: rgb(var(--surface) / 0.8);
+    @apply backdrop-blur-xl rounded-2xl shadow-soft;
+    border: 1px solid rgb(var(--border) / 0.2);
+  }
+
+  /* ==========================================
+     INPUTS
+     ========================================== */
+
+  .input {
+    @apply w-full px-4 py-3 rounded-xl transition-all duration-200;
+    background-color: rgb(var(--input));
+    border: 1px solid rgb(var(--input-border));
+    color: rgb(var(--foreground));
+  }
+
+  .input::placeholder {
+    color: rgb(var(--input-placeholder));
+  }
+
+  .input:focus {
+    border-color: rgb(var(--input-focus));
+    box-shadow: 0 0 0 3px rgb(var(--input-focus) / 0.2);
+    outline: none;
+  }
+
+  .input:disabled {
+    background-color: rgb(var(--surface-disabled));
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .input-sm {
+    @apply px-3 py-2 text-sm rounded-lg;
+  }
+
+  .input-lg {
+    @apply px-5 py-4 text-base rounded-xl;
+  }
+
+  .input-error {
+    border-color: rgb(var(--error-border));
+  }
+
+  .input-error:focus {
+    border-color: rgb(var(--error));
+    box-shadow: 0 0 0 3px rgb(var(--error) / 0.2);
+  }
+
+  .input-success {
+    border-color: rgb(var(--success-border));
+  }
+
+  .input-success:focus {
+    border-color: rgb(var(--success));
+    box-shadow: 0 0 0 3px rgb(var(--success) / 0.2);
+  }
+
+  /* Label styling */
+  .label {
+    @apply block text-sm font-medium mb-1.5;
+    color: rgb(var(--foreground-secondary));
+  }
+
+  .label-error {
+    color: rgb(var(--error));
+  }
+
+  /* Helper text */
+  .helper-text {
+    @apply mt-1.5 text-sm;
+    color: rgb(var(--foreground-muted));
+  }
+
+  .helper-text-error {
+    color: rgb(var(--error));
+  }
+
+  /* ==========================================
+     BADGES & TAGS
+     ========================================== */
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-primary {
+    @apply badge;
+    background-color: rgb(var(--primary) / 0.1);
+    color: rgb(var(--primary));
+  }
+
+  .badge-secondary {
+    @apply badge;
+    background-color: rgb(var(--foreground) / 0.1);
+    color: rgb(var(--foreground-secondary));
+  }
+
+  .badge-success {
+    @apply badge;
+    background-color: rgb(var(--success-background));
+    color: rgb(var(--success));
+  }
+
+  .badge-warning {
+    @apply badge;
+    background-color: rgb(var(--warning-background));
+    color: rgb(var(--warning));
+  }
+
+  .badge-error {
+    @apply badge;
+    background-color: rgb(var(--error-background));
+    color: rgb(var(--error));
+  }
+
+  .badge-outline {
+    @apply badge bg-transparent;
+    border: 1px solid rgb(var(--border));
+  }
+
+  /* ==========================================
+     NAVIGATION
+     ========================================== */
+
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200;
+    color: rgb(var(--sidebar-foreground));
+  }
+
+  .nav-item:hover {
+    background-color: rgb(var(--sidebar-hover));
+    color: rgb(var(--foreground));
+  }
+
+  .nav-item-active {
+    @apply nav-item;
+    background-color: rgb(var(--sidebar-active));
+    color: rgb(var(--primary));
+  }
+
+  .nav-item-active:hover {
+    background-color: rgb(var(--sidebar-active));
+  }
+
+  /* ==========================================
+     PAGE LAYOUTS
+     ========================================== */
+
+  .page-header {
+    @apply mb-8;
+  }
+
+  .page-title {
+    @apply text-2xl font-bold tracking-tight;
+    color: rgb(var(--foreground));
+  }
+
+  .page-subtitle {
+    @apply mt-1;
+    color: rgb(var(--foreground-muted));
+  }
+
+  .page-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* ==========================================
+     SECTION STYLING
+     ========================================== */
+
+  .section {
+    @apply mb-8;
+  }
+
+  .section-header {
+    @apply flex items-center justify-between mb-6;
+  }
+
+  .section-title {
+    @apply text-lg font-semibold;
+    color: rgb(var(--foreground));
+  }
+
+  /* ==========================================
+     DIVIDERS
+     ========================================== */
+
+  .divider {
+    border-top: 1px solid rgb(var(--border));
+  }
+
+  .divider-light {
+    border-top: 1px solid rgb(var(--border) / 0.5);
+  }
+
+  /* ==========================================
+     LOADING STATES
+     ========================================== */
+
+  .spinner {
+    @apply animate-spin rounded-full border-2 border-current border-t-transparent;
+  }
+
+  .spinner-sm {
+    @apply spinner h-4 w-4;
+  }
+
+  .spinner-md {
+    @apply spinner h-6 w-6;
+  }
+
+  .spinner-lg {
+    @apply spinner h-8 w-8;
+  }
+
+  .skeleton {
+    @apply rounded animate-pulse;
+    background-color: rgb(var(--border));
+  }
+
+  /* ==========================================
+     GRADIENTS
+     ========================================== */
+
+  .gradient-primary {
+    background: linear-gradient(to right, rgb(var(--primary)), rgb(var(--primary-hover)));
+  }
+
+  .gradient-accent {
+    @apply bg-gradient-to-r from-primary-600 via-accent-500 to-primary-600;
+    background-size: 200% 100%;
+  }
+
+  .gradient-hero {
+    background: linear-gradient(to bottom right, rgb(var(--primary) / 0.05), rgb(var(--background)), rgb(var(--primary) / 0.05));
+  }
+
+  .gradient-subtle {
+    background: linear-gradient(to bottom right, rgb(var(--background-secondary)), rgb(var(--background)));
+  }
+
+  /* ==========================================
+     GLASS EFFECTS
+     ========================================== */
+
+  .glass {
+    background-color: rgb(var(--surface) / 0.8);
+    @apply backdrop-blur-xl;
+    border: 1px solid rgb(var(--border) / 0.2);
+  }
+
+  .glass-dark {
+    background-color: rgb(var(--background) / 0.8);
+    @apply backdrop-blur-xl;
+    border: 1px solid rgb(var(--border) / 0.1);
+  }
+
+  /* ==========================================
+     TRANSITIONS
+     ========================================== */
+
+  .transition-base {
+    @apply transition-all duration-200 ease-smooth;
+  }
+
+  .transition-fast {
+    @apply transition-all duration-150 ease-smooth;
+  }
+
+  .transition-slow {
+    @apply transition-all duration-300 ease-smooth;
+  }
+}
+
+@layer utilities {
+  /* Text utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-accent-500;
+  }
+
+  /* Theme-aware text colors */
+  .text-theme {
+    color: rgb(var(--foreground));
+  }
+
+  .text-theme-secondary {
+    color: rgb(var(--foreground-secondary));
+  }
+
+  .text-theme-muted {
+    color: rgb(var(--foreground-muted));
+  }
+
+  /* Theme-aware backgrounds */
+  .bg-theme {
+    background-color: rgb(var(--background));
+  }
+
+  .bg-theme-surface {
+    background-color: rgb(var(--surface));
+  }
+
+  .bg-theme-elevated {
+    background-color: rgb(var(--background-elevated));
+  }
+
+  /* Theme-aware borders */
+  .border-theme {
+    border-color: rgb(var(--border));
+  }
+
+  /* Hide scrollbar */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Safe area padding for mobile */
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ==========================================
+   INPUT TEXT VISIBILITY - Theme Aware
+   ========================================== */
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+input[type="file"],
+textarea,
+select {
+  color: rgb(var(--foreground)) !important;
+  -webkit-text-fill-color: rgb(var(--foreground)) !important;
+  background-color: rgb(var(--input)) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgb(var(--input-placeholder)) !important;
+  -webkit-text-fill-color: rgb(var(--input-placeholder)) !important;
+  opacity: 1 !important;
+}
+
+/* Autofill styling - Light mode */
+:root input:-webkit-autofill,
+:root input:-webkit-autofill:hover,
+:root input:-webkit-autofill:focus,
+:root textarea:-webkit-autofill,
+:root textarea:-webkit-autofill:hover,
+:root textarea:-webkit-autofill:focus,
+:root select:-webkit-autofill,
+:root select:-webkit-autofill:hover,
+:root select:-webkit-autofill:focus {
+  -webkit-text-fill-color: rgb(var(--foreground)) !important;
+  -webkit-box-shadow: 0 0 0px 1000px rgb(var(--input)) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Autofill styling - Dark mode */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark textarea:-webkit-autofill,
+.dark textarea:-webkit-autofill:hover,
+.dark textarea:-webkit-autofill:focus,
+.dark select:-webkit-autofill,
+.dark select:-webkit-autofill:hover,
+.dark select:-webkit-autofill:focus {
+  -webkit-text-fill-color: rgb(var(--foreground)) !important;
+  -webkit-box-shadow: 0 0 0px 1000px rgb(var(--input)) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ==========================================
+   REDUCED MOTION
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================
+   PRINT STYLES
+   ========================================== */
+
+@media print {
+  /* Force light mode CSS variables for printing */
+  :root,
+  .dark,
+  .dim,
+  .lights-out {
+    --background: 255 255 255 !important;
+    --background-secondary: 248 250 252 !important;
+    --background-tertiary: 241 245 249 !important;
+    --surface: 255 255 255 !important;
+    --foreground: 15 23 42 !important;
+    --foreground-secondary: 51 65 85 !important;
+    --foreground-muted: 100 116 139 !important;
+    --border: 226 232 240 !important;
+    --sidebar: 255 255 255 !important;
+    --sidebar-foreground: 15 23 42 !important;
+  }
+
+  /* Hide navigation and sidebar */
+  nav,
+  aside,
+  .sidebar,
+  .dashboard-sidebar,
+  .mobile-nav,
+  header:not(.print-header),
+  footer:not(.print-footer),
+  .no-print,
+  .print\\:hidden,
+  [class*="lg\\:fixed"],
+  [class*="lg\\:inset-y-0"] {
+    display: none !important;
+  }
+
+  /* Reset body and html */
+  html, body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Make main content full width - override motion div margins */
+  main,
+  .page-container,
+  .main-content,
+  [class*="lg\\:flex-col"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    padding: 0.5in !important;
+  }
+
+  /* Force print color adjustment */
+  * {
+    color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Report container - force light background */
+  .max-w-4xl {
+    background-color: white !important;
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+    margin: 0 auto !important;
+  }
+
+  /* Report sections - force light colors */
+  [style*="backgroundColor"] {
+    background-color: white !important;
+  }
+
+  [style*="color: rgb(var(--foreground))"] {
+    color: #0f172a !important;
+  }
+
+  [style*="color: rgb(var(--foreground-secondary))"] {
+    color: #334155 !important;
+  }
+
+  [style*="color: rgb(var(--foreground-muted))"] {
+    color: #64748b !important;
+  }
+
+  /* Ensure colored headers print correctly */
+  .bg-brand-primary {
+    background-color: #6366f1 !important;
+    color: white !important;
+  }
+
+  /* Page breaks */
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+
+  section {
+    page-break-inside: avoid;
+  }
+
+  /* Links - show URL */
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 10pt;
+    color: #666;
+  }
+}

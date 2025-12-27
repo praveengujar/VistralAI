@@ -1,0 +1,1242 @@
+// VistralAI Prisma Schema for MongoDB
+// This schema defines all 8 Brand 360 entities
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// User & Authentication
+// ============================================
+
+model User {
+  id                String           @id @default(auto()) @map("_id") @db.ObjectId
+  email             String           @unique
+  password          String
+  passwordChangedAt DateTime?
+  accountType       AccountType
+  subscription      SubscriptionTier @default(free)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  // Profile fields
+  name              String?
+  firstName         String?
+  lastName          String?
+  phone             String?
+  timezone          String?
+  locale            String?
+  avatarUrl         String?
+  lastLoginAt       DateTime?
+
+  // MFA fields
+  mfaEnabled        Boolean          @default(false)
+  mfaSecret         String?
+  mfaBackupCodes    String[]
+
+  // Relations
+  brandProfile BrandProfile?
+  sessions     Session[]
+  memberships  Membership[]
+
+  @@map("users")
+}
+
+model Organization {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  slug        String       @unique
+  logo        String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  memberships Membership[]
+
+  @@map("organizations")
+}
+
+model Membership {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String   @db.ObjectId
+  organizationId String   @db.ObjectId
+  role           String   @default("member")
+  status         String   @default("ACTIVE")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@map("memberships")
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @db.ObjectId
+  expires      DateTime
+  deviceType   String?
+  ipAddress    String?
+  userAgent    String?
+  lastActiveAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model AuditLog {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  action         String
+  category       String
+  status         String
+  userId         String?  @db.ObjectId
+  userEmail      String?
+  organizationId String?  @db.ObjectId
+  targetType     String?
+  targetId       String?
+  description    String?
+  metadata       Json?
+  ipAddress      String?
+  userAgent      String?
+  errorMessage   String?
+  createdAt      DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+enum AccountType {
+  brand
+  agency
+  enterprise
+}
+
+enum SubscriptionTier {
+  free
+  pro
+  enterprise
+}
+
+// ============================================
+// Brand Profile (Main entity)
+// ============================================
+
+model BrandProfile {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String         @unique @db.ObjectId
+  brandName      String
+  domain         String
+  descriptor     String         @default("")
+  category       String         @default("General")
+  competitors    String[] // Simple string array for competitor names
+  crawlingStatus CrawlingStatus @default(idle)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Embedded documents (MongoDB-native)
+  catalog      ProductCatalog?
+  integrations Integrations?
+
+  // Relations
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brandIdentity      BrandIdentity?
+  marketPosition     MarketPosition?
+  competitorProfiles CompetitorProfile[]
+  productDetails     ProductDetail[]
+  brandAssets        BrandAsset[]
+  uploadedDocuments  UploadedDocument[]
+
+  @@map("brand_profiles")
+}
+
+enum CrawlingStatus {
+  idle
+  processing
+  completed
+  failed
+}
+
+// Embedded type for ProductCatalog
+type ProductCatalog {
+  products CatalogProduct[]
+}
+
+// Embedded type for simple Product (in catalog)
+type CatalogProduct {
+  id         String
+  name       String
+  category   String
+  url        String
+  attributes Json?
+}
+
+// Embedded type for Integrations
+type Integrations {
+  gsc     Boolean @default(false)
+  ga4     Boolean @default(false)
+  shopify Boolean @default(false)
+}
+
+// ============================================
+// Brand 360 - Pillar 1: Brand Identity
+// ============================================
+
+model BrandIdentity {
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  brandId             String   @unique @db.ObjectId
+  mission             String?
+  vision              String?
+  values              String[]
+  brandStory          String?
+  uniqueSellingPoints String[]
+  brandPersonality    String?
+  tagline             String?
+  foundedYear         Int?
+  headquarters        String?
+
+  // AI extraction metadata
+  source               DataSource?
+  extractionConfidence Json? // Record<string, number>
+  extractedFromUrl     String?
+
+  // Embedded document
+  brandVoice BrandVoice?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relation
+  brandProfile BrandProfile @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@map("brand_identities")
+}
+
+enum DataSource {
+  manual
+  ai_generated @map("ai-generated")
+  hybrid
+}
+
+// Embedded type for BrandVoice
+type BrandVoice {
+  tone       String[]
+  keywords   String[]
+  avoidWords String[]
+}
+
+// ============================================
+// Brand 360 - Pillar 2: Market Position
+// ============================================
+
+model MarketPosition {
+  id                String           @id @default(auto()) @map("_id") @db.ObjectId
+  brandId           String           @unique @db.ObjectId
+  marketSegment     String?
+  geographicMarkets String[]
+  industryVerticals String[]
+  marketShare       Float?
+  positioning       String?
+  pricingStrategy   PricingStrategy?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  // Embedded documents
+  targetAudiences TargetAudience[]
+  marketSize      MarketSize?
+
+  // Relation
+  brandProfile BrandProfile @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@map("market_positions")
+}
+
+enum PricingStrategy {
+  premium
+  value
+  competitive
+  penetration
+}
+
+// Embedded type for TargetAudience
+type TargetAudience {
+  id             String
+  name           String
+  isPrimary      Boolean
+  demographics   Demographics?
+  psychographics Psychographics?
+}
+
+type Demographics {
+  ageRange   String?
+  gender     String?
+  income     String?
+  location   String[]
+  occupation String[]
+}
+
+type Psychographics {
+  interests  String[]
+  painPoints String[]
+  goals      String[]
+  behaviors  String[]
+}
+
+type MarketSize {
+  value    Float
+  currency String
+  year     Int
+}
+
+// ============================================
+// Brand 360 - Pillar 3: Competitors
+// ============================================
+
+model CompetitorProfile {
+  id                    String           @id @default(auto()) @map("_id") @db.ObjectId
+  brandId               String           @db.ObjectId
+  name                  String
+  domain                String
+  isPrimary             Boolean          @default(false)
+  strengths             String[]
+  weaknesses            String[]
+  marketShare           Float?
+  pricingPosition       PricingPosition?
+  differentiators       String[]
+  targetAudienceOverlap Float?
+
+  // AI extraction metadata
+  source             DataSource?
+  competitionType    CompetitionType?
+  confidenceScore    Float?
+  reasonForSelection String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relation
+  brandProfile BrandProfile @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@map("competitor_profiles")
+}
+
+enum PricingPosition {
+  higher
+  similar
+  lower
+}
+
+enum CompetitionType {
+  direct
+  indirect
+  aspirational
+}
+
+// ============================================
+// Brand 360 - Pillar 4: Products & Services
+// ============================================
+
+model ProductDetail {
+  id               String         @id @default(auto()) @map("_id") @db.ObjectId
+  brandId          String         @db.ObjectId
+  name             String
+  sku              String?
+  category         String
+  subcategory      String?
+  description      String         @default("")
+  shortDescription String?
+  features         String[]
+  benefits         String[]
+  useCases         String[]
+  targetAudience   String[] // References to TargetAudience names
+  url              String         @default("")
+  imageUrls        String[]
+  specifications   Json? // Record<string, string>
+  awards           String[]
+  certifications   String[]
+  isActive         Boolean        @default(true)
+  launchDate       DateTime?
+
+  // AI extraction metadata
+  source          ProductSource?
+  confidenceScore Float?
+
+  // Embedded document
+  pricing Pricing?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relation
+  brandProfile BrandProfile @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@map("product_details")
+}
+
+enum ProductSource {
+  csv
+  xlsx
+  shopify
+  website
+  manual
+}
+
+// Embedded type for Pricing
+type Pricing {
+  currency      String
+  amount        Float
+  billingPeriod BillingPeriod?
+}
+
+enum BillingPeriod {
+  one_time @map("one-time")
+  monthly
+  yearly
+}
+
+// ============================================
+// Brand Assets
+// ============================================
+
+model BrandAsset {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  brandId     String    @db.ObjectId
+  type        AssetType
+  name        String
+  description String?
+  fileUrl     String?
+  metadata    Json? // Type-specific metadata
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relation
+  brandProfile BrandProfile @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@map("brand_assets")
+}
+
+enum AssetType {
+  logo
+  color_palette
+  typography
+  imagery
+  document
+  other
+}
+
+// ============================================
+// Uploaded Documents
+// ============================================
+
+model UploadedDocument {
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  brandId         String           @db.ObjectId
+  fileName        String
+  fileType        DocumentType
+  fileSize        Int              @default(0)
+  fileUrl         String
+  status          ProcessingStatus @default(pending)
+  extractedData   Json? // Partial<Brand360Data>
+  processingError String?
+  uploadedAt      DateTime         @default(now())
+  processedAt     DateTime?
+
+  // Relation
+  brandProfile BrandProfile @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@map("uploaded_documents")
+}
+
+enum DocumentType {
+  pdf
+  docx
+  txt
+  csv
+}
+
+enum ProcessingStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
+// ============================================
+// AEO ENGINE - Brand360Profile (Main Entity)
+// ============================================
+
+model Brand360Profile {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  organizationId    String   @db.ObjectId // Links to existing BrandProfile.id
+
+  // Basic Brand Info (for display)
+  brandName         String?
+  foundingYear      Int?
+  founders          String[]
+  values            String[]
+
+  // Completion & Health Tracking
+  completionScore   Int      @default(0)
+  entityHealthScore Int      @default(0)
+  lastAnalyzedAt    DateTime?
+  lastAgentCrawlAt  DateTime?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Pillar 1: Semantic Entity
+  entityHome           EntityHome?
+  organizationSchema   OrganizationSchema?
+
+  // Pillar 2: Strategic Archetype
+  brandIdentityPrism   BrandIdentityPrism?
+  brandArchetype       BrandArchetype?
+  brandVoiceProfile    BrandVoiceProfile?
+
+  // Pillar 3: Comparative & Verified Claims
+  claimLocker          ClaimLocker?
+  competitorGraph      CompetitorGraph?
+  riskFactors          RiskFactors?
+
+  // Additional Relations
+  customerPersonas     CustomerPersona[]
+  products             Product[]
+  generatedPrompts     GeneratedPrompt[]
+  perceptionScans      PerceptionScan[]
+  perceptionResults    AIPerceptionResult[]
+  perceptionInsights   PerceptionInsight[]
+  correctionWorkflows  CorrectionWorkflow[]
+
+  @@index([organizationId])
+  @@map("brand360_profiles")
+}
+
+// ============================================
+// PILLAR 1: SEMANTIC ENTITY
+// ============================================
+
+// Entity Home - Knowledge Graph Foundation
+model EntityHome {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id        String   @unique @db.ObjectId
+
+  // Primary Identifier
+  canonicalUrl      String
+
+  // sameAs Properties - Links to authoritative sources
+  wikidataId        String?
+  wikipediaUrl      String?
+  crunchbaseUrl     String?
+  linkedinUrl       String?
+  twitterUrl        String?
+  facebookUrl       String?
+  youtubeUrl        String?
+  githubUrl         String?
+  instagramUrl      String?
+
+  // Verification Status
+  wikidataVerified  Boolean  @default(false)
+  schemaValidated   Boolean  @default(false)
+  socialConsistent  Boolean  @default(false)
+
+  // Knowledge Graph API Results (optional - for future use)
+  googleKgId        String?
+  googleKgScore     Float?
+  googleKgDescription String?
+
+  // Entity Disambiguation
+  disambiguationNotes String?
+  alternateNames    String[]
+  formerNames       String[]
+
+  // Health Metrics
+  lastKgApiCheck    DateTime?
+  kgNodeCount       Int      @default(0)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  brand360          Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+
+  @@map("entity_homes")
+}
+
+// Organization Schema - Schema.org Compliance
+model OrganizationSchema {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id        String   @unique @db.ObjectId
+
+  // Schema.org @type
+  organizationType  String   @default("Organization") // Organization, Corporation, LocalBusiness, etc.
+
+  // Core Properties
+  legalName         String
+  name              String
+  alternateName     String?
+  description       String?
+  slogan            String?
+
+  // Founding Information
+  foundingDate      DateTime?
+  foundingLocation  String?
+  founders          Json?    // [{name, url, role}]
+
+  // Contact Points
+  contactPoints     Json?    // [{type, email, phone, url}]
+
+  // Address
+  address           Json?    // {streetAddress, city, state, postalCode, country}
+
+  // Business Details
+  numberOfEmployees String?
+  naicsCode         String?
+  isicCode          String?
+
+  // Awards & Recognition
+  awards            String[]
+
+  // Parent/Subsidiary Relations
+  parentOrganization String?
+  subOrganizations  String[]
+
+  // Generated JSON-LD
+  jsonLdOutput      Json?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  brand360          Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+
+  @@map("organization_schemas")
+}
+
+// ============================================
+// PILLAR 2: STRATEGIC ARCHETYPE
+// ============================================
+
+// Kapferer Brand Identity Prism
+model BrandIdentityPrism {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id        String   @unique @db.ObjectId
+
+  // 1. PHYSIQUE - Tangible, visual attributes
+  physique          Json?    // {attributes: [], description}
+
+  // 2. PERSONALITY - Aaker Brand Personality Dimensions (scored 0-100)
+  personalityScores Json?    // {sincerity, excitement, competence, sophistication, ruggedness}
+  personalityTraits String[]
+
+  // 3. CULTURE - Core values and principles
+  cultureValues     String[]
+  cultureDescription String?
+
+  // 4. RELATIONSHIP - Mode of interaction with customer
+  relationshipType  String?
+  relationshipDescription String?
+
+  // 5. REFLECTION - Stereotypical user of the brand
+  reflectionProfile Json?    // {demographics, psychographics, lifestyle}
+
+  // 6. SELF-IMAGE - How customer sees themselves using product
+  selfImage         String?
+
+  // Prism Confidence
+  inferredByAgent   Boolean  @default(false)
+  confidence        Float?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  brand360          Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+
+  @@map("brand_identity_prisms")
+}
+
+// Brand Archetypes (Jung/Mark-based)
+model BrandArchetype {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id        String   @unique @db.ObjectId
+
+  // Primary Archetype
+  primaryArchetype  String   // innocent, sage, explorer, outlaw, magician, hero, lover, jester, everyman, caregiver, ruler, creator
+  primaryScore      Int      @default(0)
+
+  // Secondary Archetype
+  secondaryArchetype String?
+  secondaryScore    Int?
+
+  // Archetype-to-Prompt Mapping
+  expectedTone      String[]
+  expectedDepth     String   @default("moderate") // surface, moderate, deep
+  expectedCitations Boolean  @default(false)
+  expectedHumor     String   @default("none") // none, subtle, prominent
+
+  // All 12 Archetypes with scores
+  archetypeScores   Json?    // {innocent, sage, explorer, outlaw, magician, hero, lover, jester, everyman, caregiver, ruler, creator}
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  brand360          Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+
+  @@map("brand_archetypes")
+}
+
+// Enhanced Brand Voice
+model BrandVoiceProfile {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id        String   @unique @db.ObjectId
+
+  // Voice Spectrums (scored 1-10)
+  voiceSpectrums    Json?    // {formal_casual, serious_playful, respectful_irreverent, enthusiastic_matter_of_fact}
+
+  // Tone Guidelines
+  primaryTone       String?
+  secondaryTones    String[]
+
+  // Language Patterns
+  vocabularyLevel   String   @default("moderate") // simple, moderate, technical, academic
+  sentenceStyle     String   @default("moderate") // short_punchy, moderate, complex_nuanced
+
+  // Do's and Don'ts
+  approvedPhrases   String[]
+  bannedPhrases     String[]
+  bannedTopics      String[]
+
+  // Sample Voice (for embedding comparison)
+  voiceSamples      String[]
+
+  // Vector Embedding (for similarity matching)
+  voiceEmbedding    Json?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  brand360          Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+
+  @@map("brand_voice_profiles")
+}
+
+// ============================================
+// PILLAR 3: COMPARATIVE & VERIFIED CLAIMS
+// ============================================
+
+// Claim Locker Container
+model ClaimLocker {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id        String   @unique @db.ObjectId
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  brand360          Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+  claims            Claim[]
+
+  @@map("claim_lockers")
+}
+
+// Individual Verified Claims
+model Claim {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  claimLockerId     String   @db.ObjectId
+
+  // The Claim
+  claimText         String
+  claimType         String   @default("feature") // feature, performance, pricing, support, award
+
+  // Evidence
+  evidenceUrl       String?
+  evidenceType      String?  // case_study, whitepaper, third_party_review, benchmark
+  evidenceSource    String?
+
+  // Competitive Context
+  competitorContrast String?
+  comparedCompetitor String?
+
+  // Verification
+  verificationStatus String  @default("unverified") // unverified, verified, disputed
+  verifiedBy        String?
+  verifiedAt        DateTime?
+
+  // Hallucination Risk Assessment
+  hallucinationRisk String   @default("medium") // low, medium, high, critical
+  hallucinationRiskScore Float?
+  riskRationale     String?
+
+  // Usage in Prompts
+  useInPrompts      Boolean  @default(true)
+  promptCategories  String[]
+
+  isActive          Boolean  @default(true)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  claimLocker       ClaimLocker @relation(fields: [claimLockerId], references: [id], onDelete: Cascade)
+
+  @@index([claimLockerId])
+  @@map("claims")
+}
+
+// Competitor Graph Container
+model CompetitorGraph {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id        String   @unique @db.ObjectId
+
+  // Auto-discovery metadata
+  lastCrawled       DateTime?
+  discoverySource   String?  // g2, capterra, manual, agent
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  brand360          Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+  competitors       Competitor[]
+
+  @@map("competitor_graphs")
+}
+
+// Enhanced Competitor (for CompetitorGraph)
+model Competitor {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  competitorGraphId String   @db.ObjectId
+
+  // Basic Info
+  name              String
+  website           String?
+  description       String?
+  logoUrl           String?
+
+  // Classification
+  competitorType    String   @default("direct") // direct, indirect, aspirational
+  threatLevel       String   @default("medium") // low, medium, high, critical
+
+  // Positioning
+  marketPosition    String?  // leader, challenger, niche, emerging
+  pricingTier       String?  // luxury, premium, mid, value, free
+
+  // Comparative Analysis
+  strengths         String[]
+  weaknesses        String[]
+  differentiators   Json?    // [{ours, theirs, advantage}]
+
+  // AI Perception Tracking
+  avgMentionPosition Float?
+  shareOfVoice      Float?
+  sentimentScore    Float?
+  lastAnalyzed      DateTime?
+
+  // Discovery Source
+  discoveredBy      String   @default("manual") // manual, agent, g2, capterra
+  discoveredAt      DateTime @default(now())
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  competitorGraph   CompetitorGraph @relation(fields: [competitorGraphId], references: [id], onDelete: Cascade)
+
+  @@index([competitorGraphId])
+  @@map("competitors")
+}
+
+// Risk Factors for Adversarial Prompts
+model RiskFactors {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id        String   @unique @db.ObjectId
+
+  // Negative Keywords & Topics
+  negativeKeywords  String[]
+  sensitiveTopics   String[]
+
+  // Known Misconceptions
+  commonMisconceptions String[]
+
+  // Potential Attack Vectors
+  competitorAttackClaims String[]
+  pricingObjections String[]
+  featureGaps       String[]
+
+  // Crisis History
+  pastCrises        Json?    // [{date, description, resolution}]
+
+  // Guardrail Testing
+  jailbreakVulnerabilities String[]
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  brand360          Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+
+  @@map("risk_factors")
+}
+
+// ============================================
+// CUSTOMER PERSONAS (Enhanced)
+// ============================================
+
+model CustomerPersona {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id        String   @db.ObjectId
+
+  name              String
+  type              String   @default("primary") // primary, secondary, tertiary, anti
+  description       String
+
+  // Demographics
+  ageRange          String?
+  gender            String?
+  income            String?
+  education         String?
+  location          String?
+
+  // Professional Context
+  jobTitle          String?
+  jobFunction       String?
+  industry          String?
+  companySize       String?
+  seniorityLevel    String?
+
+  // Psychographics
+  values            String[]
+  interests         String[]
+  lifestyle         String?
+
+  // Behavioral - Critical for Prompt Generation
+  painPoints        String[]
+  goals             String[]
+  frustrationsWithCurrentSolutions String[]
+
+  // Decision Making
+  decisionCriteria  String[]
+  decisionProcess   String?
+  budgetAuthority   String?
+  purchaseTimeline  String?
+
+  // Information Behavior
+  informationSources String[]
+  trustedInfluencers String[]
+  contentPreferences String[]
+  searchBehavior    String?
+
+  // Questions They Ask - DIRECT PROMPT FUEL
+  commonQuestions   String[]
+  objections        String[]
+  buyingTriggers    String[]
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  brand360          Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+
+  @@index([brand360Id])
+  @@map("customer_personas")
+}
+
+// ============================================
+// PRODUCTS (Enhanced for AEO)
+// ============================================
+
+model Product {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id        String   @db.ObjectId
+
+  // Schema.org Product properties
+  name              String
+  description       String?
+  sku               String?
+  gtin              String?
+  mpn               String?
+
+  // Category & Classification
+  category          String?
+  subCategory       String?
+  productType       String   @default("Product") // Product, Service, SoftwareApplication
+
+  // Pricing
+  priceRange        String?
+  priceCurrency     String   @default("USD")
+  priceValidUntil   DateTime?
+  availability      String?  // InStock, OutOfStock, PreOrder
+
+  // Detailed Attributes
+  features          String[]
+  benefits          String[]
+  useCases          String[]
+  specifications    Json?
+
+  // Audience
+  audience          Json?
+  idealCustomer     String?
+
+  // Media
+  imageUrls         String[]
+  videoUrls         String[]
+
+  // Reviews aggregate
+  aggregateRating   Json?    // {ratingValue, reviewCount, bestRating}
+
+  // Competitive
+  competitorProducts Json?   // [{competitor, product, differentiator}]
+
+  isHero            Boolean  @default(false)
+  isActive          Boolean  @default(true)
+
+  // Generated Schema
+  jsonLdOutput      Json?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  brand360          Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+
+  @@index([brand360Id])
+  @@map("products")
+}
+
+// ============================================
+// PROMPT GENERATION ENGINE
+// ============================================
+
+model GeneratedPrompt {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id        String   @db.ObjectId
+
+  // 5 Strategic Categories
+  category          String   // navigational, functional, comparative, voice, adversarial
+  categoryLabel     String   // The Who, The How, The Which, The Vibe, The Risk
+
+  // Prompt Details
+  intent            String   // informational, commercial, transactional, navigational
+  template          String
+  renderedPrompt    String
+
+  // Targeting
+  targetPersona     String?
+  targetCompetitor  String?
+  targetClaim       String?
+  targetProduct     String?
+
+  // Expected Response Characteristics
+  expectedThemes    String[]
+  expectedTone      String?
+  expectedEntities  String[]
+  expectedCitations Boolean  @default(false)
+
+  // Adversarial Elements
+  adversarialTwist  String?
+  hallucinationTest Boolean  @default(false)
+
+  // Metadata
+  priority          Int      @default(0)
+  isActive          Boolean  @default(true)
+  isCustom          Boolean  @default(false)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  brand360          Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+  perceptionResults AIPerceptionResult[]
+
+  @@index([brand360Id])
+  @@index([category])
+  @@map("generated_prompts")
+}
+
+// ============================================
+// PERCEPTION SCAN & RESULTS
+// ============================================
+
+model PerceptionScan {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id        String   @db.ObjectId
+
+  status            String   @default("pending") // pending, running, completed, failed
+  platforms         String[] // claude, chatgpt, gemini, perplexity, google_aio
+
+  // Progress
+  promptCount       Int      @default(0)
+  completedCount    Int      @default(0)
+
+  // Timing
+  startedAt         DateTime?
+  completedAt       DateTime?
+
+  // Aggregated Scores
+  overallScore      Float?
+  platformScores    Json?    // {platform: score}
+
+  // Quadrant Position
+  quadrantPosition  String?  // dominant, vulnerable, niche, invisible
+
+  createdAt         DateTime @default(now())
+
+  brand360          Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+  results           AIPerceptionResult[]
+
+  @@index([brand360Id])
+  @@index([status])
+  @@map("perception_scans")
+}
+
+model AIPerceptionResult {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  promptId          String   @db.ObjectId
+  brand360Id        String   @db.ObjectId
+  scanId            String?  @db.ObjectId
+
+  // Platform
+  platform          String   // claude, chatgpt, gemini, perplexity, google_aio
+  model             String
+
+  // Response
+  response          String
+  responseTime      Int?
+  tokensUsed        Int?
+
+  // LLM-as-a-Judge Scores
+  faithfulnessScore Float?
+  faithfulnessErrors String[]
+
+  // Share of Voice
+  shareOfVoice      Float?
+  brandMentioned    Boolean  @default(false)
+  brandPosition     Int?
+  competitorsMentioned String[]
+  competitorPositions Json?
+
+  // Sentiment
+  overallSentiment  Float?
+  aspectSentiments  Json?
+
+  // Voice Alignment
+  voiceAlignmentScore Float?
+  voiceDeviations   String[]
+
+  // Hallucination Detection
+  hallucinationScore Float?
+  hallucinations    String[]
+
+  // Additional Analysis
+  keyThemes         String[]
+  missingInformation String[]
+  opportunities     String[]
+
+  // Visual Capture
+  screenshotUrl     String?
+  visualProminence  Json?
+
+  queriedAt         DateTime @default(now())
+
+  prompt            GeneratedPrompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  brand360          Brand360Profile @relation(fields: [brand360Id], references: [id])
+  scan              PerceptionScan? @relation(fields: [scanId], references: [id])
+
+  @@index([brand360Id])
+  @@index([promptId])
+  @@index([platform])
+  @@map("ai_perception_results")
+}
+
+// ============================================
+// INSIGHTS & AUTO-CORRECTION
+// ============================================
+
+model PerceptionInsight {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id        String   @db.ObjectId
+
+  // Insight Classification
+  category          String   // visibility, accuracy, sentiment, competitive, voice, hallucination
+  priority          String   // critical, high, medium, low
+
+  // The Insight
+  title             String
+  description       String
+  impact            String
+
+  // Recommendation
+  recommendation    String
+  effort            String   // low, medium, high
+
+  // Affected Areas
+  platforms         String[]
+  affectedPromptCategories String[]
+
+  // Metrics
+  currentValue      Float
+  targetValue       Float
+  unit              String
+
+  // Knowledge Gap Identification
+  knowledgeGap      String?
+  suggestedFix      String?
+
+  // Status
+  status            String   @default("open") // open, in_progress, resolved, dismissed
+  resolvedAt        DateTime?
+  dismissReason     String?
+
+  // Link to Correction Workflow
+  correctionWorkflowId String? @unique @db.ObjectId
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  brand360          Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+  correctionWorkflow CorrectionWorkflow? @relation("InsightToWorkflow", fields: [correctionWorkflowId], references: [id])
+
+  @@index([brand360Id])
+  @@index([category])
+  @@index([priority])
+  @@map("perception_insights")
+}
+
+// Auto-Correction Workflow
+model CorrectionWorkflow {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id        String   @db.ObjectId
+  insightId         String?  @db.ObjectId
+
+  // The Problem
+  problemType       String   // hallucination, missing_info, wrong_sentiment, competitor_confusion
+  problemDescription String
+
+  // Affected Platforms
+  affectedPlatforms String[]
+
+  // Generated Fixes
+  schemaOrgFix      String?
+  faqPageSuggestion String?
+  contentRecommendation String?
+  wikipediaEditSuggestion String?
+
+  // Implementation Status
+  status            String   @default("suggested") // suggested, approved, implemented, verified
+  approvedAt        DateTime?
+  implementedAt     DateTime?
+  verifiedAt        DateTime?
+  notes             String?
+
+  // Effectiveness Tracking
+  preFixScore       Float?
+  postFixScore      Float?
+  improvement       Float?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  brand360          Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+  insight           PerceptionInsight? @relation("InsightToWorkflow")
+
+  @@index([brand360Id])
+  @@map("correction_workflows")
+}

@@ -1,0 +1,66 @@
+# Google Cloud Build configuration for VistralAI
+
+steps:
+  # Step 1: Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/vistralai:latest'
+      - '.'
+    timeout: 1200s
+
+  # Step 2: Push the image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/vistralai:latest'
+
+  # Step 4: Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'vistralai'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/vistralai:latest'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--memory'
+      - '${_MEMORY}'
+      - '--cpu'
+      - '${_CPU}'
+      - '--timeout'
+      - '${_TIMEOUT}'
+      - '--min-instances'
+      - '${_MIN_INSTANCES}'
+      - '--max-instances'
+      - '${_MAX_INSTANCES}'
+      - '--set-env-vars'
+      - 'NODE_ENV=production,NEXTAUTH_URL=${_NEXTAUTH_URL},USE_FIRECRAWL=${_USE_FIRECRAWL},USE_REAL_API=${_USE_REAL_API},FIRECRAWL_INTERNAL_URL=${_FIRECRAWL_INTERNAL_URL},CONFIDENCE_THRESHOLD=${_CONFIDENCE_THRESHOLD},OPENAI_MODEL=${_OPENAI_MODEL}'
+      - '--set-secrets'
+      - 'NEXTAUTH_SECRET=nextauth-secret:1,OPENAI_API_KEY=openai-api-key:1'
+
+# Substitution variables with defaults
+substitutions:
+  _REGION: 'us-central1'
+  _MEMORY: '2Gi'
+  _CPU: '2'
+  _TIMEOUT: '3600'
+  _MIN_INSTANCES: '0'
+  _MAX_INSTANCES: '20'
+  _NEXTAUTH_URL: 'https://vistralai-819879828343.us-central1.run.app'
+  _USE_FIRECRAWL: 'true'
+  _USE_REAL_API: 'true'
+  _FIRECRAWL_INTERNAL_URL: 'https://firecrawl-api-wkmhoye3rq-uc.a.run.app'
+  _CONFIDENCE_THRESHOLD: '0.85'
+  _OPENAI_MODEL: 'gpt-4o-mini'
+
+images:
+  - 'gcr.io/$PROJECT_ID/vistralai:latest'
+
+timeout: 2400s

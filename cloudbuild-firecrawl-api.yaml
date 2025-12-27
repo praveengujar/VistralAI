@@ -1,0 +1,61 @@
+# Google Cloud Build configuration for Firecrawl API Service
+steps:
+  # Step 1: Build the API service image
+  # We need to build from the root of the firecrawl repo because of shared files
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/firecrawl-api:latest'
+      - '-f'
+      - 'firecrawl/apps/api/Dockerfile'
+      - './firecrawl'
+      - '--cache-from'
+      - 'gcr.io/$PROJECT_ID/firecrawl-api:latest'
+    env:
+      - 'DOCKER_BUILDKIT=1'
+    timeout: 1200s
+
+  # Step 2: Push the image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/firecrawl-api:latest'
+
+  # Step 3: Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'firecrawl-api'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/firecrawl-api:latest'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--no-allow-unauthenticated'
+      - '--memory'
+      - '1Gi'
+      - '--cpu'
+      - '1'
+      - '--timeout'
+      - '300'
+      - '--min-instances'
+      - '0'
+      - '--max-instances'
+      - '10'
+      - '--args'
+      - 'node,--import,./dist/src/otel.js,dist/src/index.js'
+      - '--set-env-vars'
+      - 'PLAYWRIGHT_MICROSERVICE_URL=${_PLAYWRIGHT_URL},USE_DB_AUTHENTICATION=false,HOST=0.0.0.0,LOGGING_LEVEL=info'
+
+substitutions:
+  _REGION: 'us-central1'
+  _PLAYWRIGHT_URL: 'https://firecrawl-playwright-wkmhoye3rq-uc.a.run.app/scrape'
+
+images:
+  - 'gcr.io/$PROJECT_ID/firecrawl-api:latest'
+
+timeout: 1800s

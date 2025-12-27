@@ -1,0 +1,62 @@
+# Google Cloud Build configuration for Firecrawl Service
+# Builds and deploys self-hosted Firecrawl mock service to Cloud Run
+
+steps:
+  # Step 1: Build the Firecrawl Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-f'
+      - 'Dockerfile.firecrawl'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/firecrawl:latest'
+      - '.'
+    timeout: 1800s
+
+  # Step 2: Push the Firecrawl image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/firecrawl:latest'
+
+  # Step 3: Deploy Firecrawl to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'firecrawl-service'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/firecrawl:latest'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--memory'
+      - '${_MEMORY}'
+      - '--cpu'
+      - '${_CPU}'
+      - '--timeout'
+      - '${_TIMEOUT}'
+      - '--min-instances'
+      - '${_MIN_INSTANCES}'
+      - '--max-instances'
+      - '${_MAX_INSTANCES}'
+      - '--set-env-vars'
+      - 'NODE_ENV=production,LOG_LEVEL=${_LOG_LEVEL}'
+      - '--no-allow-unauthenticated'
+
+# Substitution variables with defaults
+substitutions:
+  _REGION: 'us-central1'
+  _MEMORY: '1Gi'
+  _CPU: '1'
+  _TIMEOUT: '300'
+  _MIN_INSTANCES: '0'
+  _MAX_INSTANCES: '10'
+  _LOG_LEVEL: 'info'
+
+images:
+  - 'gcr.io/$PROJECT_ID/firecrawl:latest'
+
+timeout: 3600s

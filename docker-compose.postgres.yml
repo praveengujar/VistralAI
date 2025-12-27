@@ -1,0 +1,65 @@
+# ============================================
+# Docker Compose for PostgreSQL (VistralAI Enterprise)
+# ============================================
+# Production-ready PostgreSQL for enterprise features
+# Run with: docker-compose -f docker-compose.postgres.yml up -d
+#
+# Services:
+#   - postgres: PostgreSQL 16 database (port 5432)
+#   - pgadmin: Web UI for PostgreSQL (port 5050)
+
+services:
+  # ============================================
+  # PostgreSQL Database
+  # ============================================
+  postgres:
+    image: postgres:17-alpine
+    container_name: vistralai-postgres
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: vistralai
+      POSTGRES_PASSWORD: vistralai_dev_password
+      POSTGRES_DB: vistralai
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - vistralai-postgres-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U vistralai -d vistralai']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ============================================
+  # pgAdmin (Web UI - Optional)
+  # ============================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: vistralai-pgadmin
+    restart: unless-stopped
+    ports:
+      - '5050:80'
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@vistralai.com
+      PGADMIN_DEFAULT_PASSWORD: admin_password
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - vistralai-postgres-network
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  vistralai-postgres-network:
+    driver: bridge

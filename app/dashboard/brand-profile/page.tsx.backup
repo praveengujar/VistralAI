@@ -1,0 +1,478 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import ProfileStrengthMeter from '@/components/brand-360/ProfileStrengthMeter';
+import WebsiteAnalyzer from '@/components/brand-360/WebsiteAnalyzer';
+import ProductCatalogConnector from '@/components/brand-360/ProductCatalogConnector';
+import DocumentUpload from '@/components/brand-360/DocumentUpload';
+import { ROUTES } from '@/lib/constants';
+import { Brand360Data } from '@/types';
+import {
+  Building2,
+  Target,
+  Users,
+  Package,
+  Globe,
+  ShoppingCart,
+  FileText,
+  ChevronRight,
+  CheckCircle2,
+  AlertCircle,
+  Sparkles,
+} from 'lucide-react';
+
+export default function BrandProfilePage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [brand360Data, setBrand360Data] = useState<Brand360Data | null>(null);
+  const [brandId, setBrandId] = useState<string | null>(null);
+  const [brandDomain, setBrandDomain] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeModal, setActiveModal] = useState<'website' | 'catalog' | 'documents' | null>(null);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push(ROUTES.LOGIN);
+    }
+  }, [status, router]);
+
+  useEffect(() => {
+    const fetchBrandProfile = async () => {
+      if (status === 'authenticated' && session?.user?.id) {
+        try {
+          // First get the brand profile to get brandId
+          const brandProfileRes = await fetch(`/api/brand-profile?userId=${session.user.id}`);
+
+          if (!brandProfileRes.ok) {
+            // Profile doesn't exist yet - this is okay for new users
+            if (brandProfileRes.status === 404) {
+              console.log('No brand profile found yet - user needs to create one');
+              setIsLoading(false);
+              return;
+            }
+            throw new Error(`Failed to fetch brand profile: ${brandProfileRes.status}`);
+          }
+
+          const brandProfileData = await brandProfileRes.json();
+
+          if (brandProfileData.profile) {
+            const id = brandProfileData.profile.id;
+            const domain = brandProfileData.profile.domain;
+            setBrandId(id);
+            setBrandDomain(domain);
+
+            // Then fetch Brand 360 data
+            const res = await fetch(`/api/brand-360?brandId=${id}`);
+
+            if (res.ok) {
+              const data = await res.json();
+              if (data.data) {
+                setBrand360Data(data.data);
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching brand 360 data:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchBrandProfile();
+  }, [status, session]);
+
+  const handleComplete = async () => {
+    // Refresh Brand 360 data after any update
+    if (brandId) {
+      const res = await fetch(`/api/brand-360?brandId=${brandId}`);
+      const data = await res.json();
+      if (data.data) {
+        setBrand360Data(data.data);
+      }
+    }
+    setActiveModal(null);
+  };
+
+  if (status === 'loading' || isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading Brand Profile...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  const pillars = [
+    {
+      id: 'identity',
+      title: 'Brand Identity',
+      description: 'Mission, vision, values, and brand voice',
+      icon: Building2,
+      completion: brand360Data?.completionStatus.identity || 0,
+      color: 'blue',
+    },
+    {
+      id: 'marketPosition',
+      title: 'Market Position',
+      description: 'Target audience, market analysis, positioning',
+      icon: Target,
+      completion: brand360Data?.completionStatus.marketPosition || 0,
+      color: 'green',
+    },
+    {
+      id: 'competitors',
+      title: 'Competitors',
+      description: 'Competitor profiles and differentiation',
+      icon: Users,
+      completion: brand360Data?.completionStatus.competitors || 0,
+      color: 'purple',
+    },
+    {
+      id: 'products',
+      title: 'Products & Services',
+      description: 'Detailed product catalog and features',
+      icon: Package,
+      completion: brand360Data?.completionStatus.products || 0,
+      color: 'orange',
+    },
+  ];
+
+  return (
+    <DashboardLayout>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Brand 360° Profile</h1>
+          <p className="mt-2 text-gray-600">
+            Build a comprehensive knowledge base to improve AI visibility insights
+          </p>
+        </div>
+
+        {/* No Brand Profile Message */}
+        {!brandId && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <div className="flex items-start">
+              <AlertCircle className="h-6 w-6 text-blue-600 mr-3 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                  Complete Your Onboarding First
+                </h3>
+                <p className="text-sm text-blue-800 mb-3">
+                  Before you can build your Brand 360° profile, you need to complete the onboarding process
+                  to set up your brand basics (name, domain, category, etc.).
+                </p>
+                <button
+                  onClick={() => router.push(ROUTES.ONBOARDING)}
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium"
+                >
+                  Go to Onboarding
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Profile Strength Overview */}
+        {brandId && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+            <ProfileStrengthMeter
+              overall={brand360Data?.profileStrength || 0}
+              pillars={brand360Data?.completionStatus || {
+                identity: 0,
+                marketPosition: 0,
+                competitors: 0,
+                products: 0,
+              }}
+            />
+          </div>
+        )}
+
+        {/* Build Your Profile - Three Options */}
+        {brandId && (!brand360Data || brand360Data.profileStrength < 80) && (
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Build Your Profile</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Option 1: Analyze Website (PRIMARY) */}
+              <div className="bg-gradient-to-br from-primary-50 to-purple-50 rounded-lg border-2 border-primary-200 p-6 relative">
+                <div className="absolute top-4 right-4">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-600 text-white">
+                    Recommended
+                  </span>
+                </div>
+                <div className="w-12 h-12 bg-primary-600 rounded-lg flex items-center justify-center mb-4">
+                  <Globe className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Analyze Website
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Automatically extract brand information from your website using AI
+                </p>
+                <ul className="text-xs text-gray-600 space-y-1 mb-4">
+                  <li className="flex items-center">
+                    <CheckCircle2 className="h-3 w-3 text-green-600 mr-1.5" />
+                    Brand identity & values
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle2 className="h-3 w-3 text-green-600 mr-1.5" />
+                    Product catalog
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle2 className="h-3 w-3 text-green-600 mr-1.5" />
+                    Market positioning
+                  </li>
+                </ul>
+                <button
+                  onClick={() => setActiveModal('website')}
+                  className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700"
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Start Analysis
+                </button>
+              </div>
+
+              {/* Option 2: Connect Catalog (SECONDARY) */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6 hover:border-primary-300 transition-colors">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                  <ShoppingCart className="h-6 w-6 text-green-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Connect Catalog
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Import products from Shopify, CSV, or other platforms
+                </p>
+                <ul className="text-xs text-gray-600 space-y-1 mb-4">
+                  <li className="flex items-center">
+                    <CheckCircle2 className="h-3 w-3 text-green-600 mr-1.5" />
+                    Shopify integration
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle2 className="h-3 w-3 text-green-600 mr-1.5" />
+                    CSV upload
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle2 className="h-3 w-3 text-green-600 mr-1.5" />
+                    Auto-sync products
+                  </li>
+                </ul>
+                <button
+                  onClick={() => setActiveModal('catalog')}
+                  className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  <Package className="h-4 w-4 mr-2" />
+                  Connect Catalog
+                </button>
+              </div>
+
+              {/* Option 3: Upload Documents (ADDITIONAL) */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6 hover:border-primary-300 transition-colors">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                  <FileText className="h-6 w-6 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Upload Documents
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Add supplementary information from brand guidelines or PDFs
+                </p>
+                <ul className="text-xs text-gray-600 space-y-1 mb-4">
+                  <li className="flex items-center">
+                    <CheckCircle2 className="h-3 w-3 text-green-600 mr-1.5" />
+                    Brand guidelines
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle2 className="h-3 w-3 text-green-600 mr-1.5" />
+                    Marketing docs
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle2 className="h-3 w-3 text-green-600 mr-1.5" />
+                    AI extraction
+                  </li>
+                </ul>
+                <button
+                  onClick={() => setActiveModal('documents')}
+                  className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Upload Files
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modals */}
+        {activeModal === 'website' && brandId && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-2xl font-bold text-gray-900">Analyze Your Website</h2>
+                  <button
+                    onClick={() => setActiveModal(null)}
+                    className="text-gray-400 hover:text-gray-600 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+                <WebsiteAnalyzer
+                  brandId={brandId}
+                  websiteUrl={`https://${brandDomain}`}
+                  onComplete={handleComplete}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeModal === 'catalog' && brandId && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-2xl font-bold text-gray-900">Product Catalog Connector</h2>
+                  <button
+                    onClick={() => setActiveModal(null)}
+                    className="text-gray-400 hover:text-gray-600 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+                <ProductCatalogConnector brandId={brandId} onComplete={handleComplete} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeModal === 'documents' && brandId && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-2xl font-bold text-gray-900">Upload Documents</h2>
+                  <button
+                    onClick={() => setActiveModal(null)}
+                    className="text-gray-400 hover:text-gray-600 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+                <DocumentUpload brandId={brandId} onComplete={handleComplete} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Four Pillars */}
+        {brandId && (
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Profile Pillars</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {pillars.map((pillar) => {
+                const Icon = pillar.icon;
+                const isComplete = pillar.completion === 100;
+                const isPartial = pillar.completion > 0 && pillar.completion < 100;
+                const isEmpty = pillar.completion === 0;
+
+                return (
+                  <div
+                    key={pillar.id}
+                    className="bg-white rounded-lg border border-gray-200 hover:border-primary-300 hover:shadow-md transition-all cursor-pointer"
+                    onClick={() => router.push(`${ROUTES.BRAND_PROFILE}/edit/${pillar.id}`)}
+                  >
+                    <div className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-10 h-10 bg-${pillar.color}-100 rounded-lg flex items-center justify-center`}>
+                            <Icon className={`h-5 w-5 text-${pillar.color}-600`} />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-900">{pillar.title}</h3>
+                          </div>
+                        </div>
+                        <div>
+                          {isComplete && (
+                            <CheckCircle2 className="h-6 w-6 text-green-500" />
+                          )}
+                          {isPartial && (
+                            <AlertCircle className="h-6 w-6 text-yellow-500" />
+                          )}
+                        </div>
+                      </div>
+
+                      <p className="text-sm text-gray-600 mb-4">{pillar.description}</p>
+
+                      {/* Progress Bar */}
+                      <div className="mb-4">
+                        <div className="flex justify-between text-sm text-gray-600 mb-1">
+                          <span>Completion</span>
+                          <span className="font-medium">{pillar.completion}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className={`bg-${pillar.color}-600 rounded-full h-2 transition-all`}
+                            style={{ width: `${pillar.completion}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">
+                          {isEmpty ? 'Not started' : isComplete ? 'Complete' : 'In progress'}
+                        </span>
+                        <ChevronRight className="h-5 w-5 text-gray-400" />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Quick Stats */}
+        {brandId && brand360Data && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Profile Summary</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="text-2xl font-bold text-gray-900">
+                  {brand360Data.identity?.values?.length || 0}
+                </div>
+                <div className="text-sm text-gray-600 mt-1">Brand Values</div>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="text-2xl font-bold text-gray-900">
+                  {brand360Data.marketPosition?.targetAudiences?.length || 0}
+                </div>
+                <div className="text-sm text-gray-600 mt-1">Target Audiences</div>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="text-2xl font-bold text-gray-900">
+                  {brand360Data.competitors?.length || 0}
+                </div>
+                <div className="text-sm text-gray-600 mt-1">Competitors</div>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="text-2xl font-bold text-gray-900">
+                  {brand360Data.products?.length || 0}
+                </div>
+                <div className="text-sm text-gray-600 mt-1">Products</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
+  );
+}

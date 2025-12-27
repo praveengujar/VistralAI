@@ -1,0 +1,51 @@
+# Google Cloud Build configuration for Firecrawl Playwright Service
+steps:
+  # Step 1: Build the Playwright service image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/firecrawl-playwright:latest'
+      - './firecrawl/apps/playwright-service-ts'
+    timeout: 1200s
+
+  # Step 2: Push the image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/firecrawl-playwright:latest'
+
+  # Step 3: Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'firecrawl-playwright'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/firecrawl-playwright:latest'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--no-allow-unauthenticated'
+      - '--memory'
+      - '2Gi'
+      - '--cpu'
+      - '1'
+      - '--timeout'
+      - '300'
+      - '--min-instances'
+      - '0'
+      - '--max-instances'
+      - '10'
+      - '--port'
+      - '3000'
+
+substitutions:
+  _REGION: 'us-central1'
+
+images:
+  - 'gcr.io/$PROJECT_ID/firecrawl-playwright:latest'
+
+timeout: 1800s

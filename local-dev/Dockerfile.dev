@@ -1,0 +1,33 @@
+# Development Dockerfile for local Mac development
+# This is optimized for fast iteration and hot-reloading
+
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install dependencies for node-gyp (needed for bcrypt and other native modules)
+RUN apk add --no-cache \
+    libc6-compat \
+    python3 \
+    make \
+    g++
+
+# Copy package files
+COPY package.json package-lock.json* ./
+
+# Install all dependencies (including devDependencies for development)
+RUN npm ci
+
+# Copy the rest of the application
+COPY . .
+
+# Expose Next.js default port
+EXPOSE 3000
+
+# Set development environment
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Start development server with hot reloading
+CMD ["npm", "run", "dev"]
