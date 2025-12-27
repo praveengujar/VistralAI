@@ -57,6 +57,29 @@ services:
     restart: unless-stopped
 
   # ============================================
+  # RabbitMQ (for Firecrawl extract worker)
+  # ============================================
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: vistralai-rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - vistralai-network
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', 'check_running']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================
   # Playwright Service (for Firecrawl)
   # ============================================
   playwright:
@@ -99,6 +122,9 @@ services:
       POSTGRES_PASSWORD: 'postgres'
       POSTGRES_DB: 'postgres'
 
+      # RabbitMQ connection (for extract worker)
+      NUQ_RABBITMQ_URL: 'amqp://guest:guest@rabbitmq:5672'
+
       # Firecrawl configuration
       NUM_WORKERS_PER_QUEUE: '4'
       PORT: '3000'
@@ -120,6 +146,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
       playwright:
         condition: service_started
     networks:
@@ -138,6 +166,8 @@ volumes:
   postgres_data:
     driver: local
   redis_data:
+    driver: local
+  rabbitmq_data:
     driver: local
   firecrawl_data:
     driver: local
