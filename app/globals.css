@@ -137,7 +137,7 @@
     --primary-foreground: 21 32 43; /* #15202B */
     --primary-hover: 165 180 252; /* #a5b4fc */
 
-    /* ---- Status Colors (Adjusted for Dim Mode) ---- */
+    /* ---- Status Colors (Adjusted for Evening mode) ---- */
     --success: 52 211 153; /* #34d399 */
     --success-foreground: 21 32 43;
     --success-background: 6 78 59; /* #064e3b */
@@ -216,7 +216,7 @@
     --foreground-inverse: 0 0 0; /* #000000 */
 
     /* ---- Border Colors ---- */
-    --border: 47 51 54; /* #2f3336 - Twitter Lights Out border */
+    --border: 47 51 54; /* #2f3336 - Night mode border */
     --border-secondary: 62 65 68; /* #3e4144 */
     --border-focus: 129 140 248; /* #818cf8 */
 
@@ -327,7 +327,7 @@
     color: rgb(var(--foreground));
   }
 
-  /* Scrollbar styling - Light mode */
+  /* Scrollbar styling - Morning mode */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -813,7 +813,7 @@ textarea::placeholder {
   opacity: 1 !important;
 }
 
-/* Autofill styling - Light mode */
+/* Autofill styling - Morning mode */
 :root input:-webkit-autofill,
 :root input:-webkit-autofill:hover,
 :root input:-webkit-autofill:focus,

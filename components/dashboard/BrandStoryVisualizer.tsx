@@ -56,25 +56,29 @@ const BrandStoryVisualizer: React.FC<BrandStoryVisualizerProps> = ({ storyNodes 
                         {/* Node Point */}
                         <motion.button
                             onClick={() => setSelectedNode(node)}
-                            className={`w-16 h-16 rounded-full border-4 flex items-center justify-center transition-all duration-300 z-10 relative
-                ${selectedNode?.id === node.id ? 'scale-125 border-brand-primary shadow-lg' : 'hover:border-brand-primary/50'}
+                            className={`w-20 h-20 rounded-full border-4 flex items-center justify-center transition-all duration-300 z-10 relative
+                ${selectedNode?.id === node.id ? 'scale-125 shadow-lg' : 'hover:opacity-80'}
+                ${node.aiConsistency >= 80 ? 'border-status-success' :
+                  node.aiConsistency >= 50 ? 'border-status-warning' : 'border-status-danger'}
               `}
-                            style={{ backgroundColor: 'rgb(var(--surface))', borderColor: selectedNode?.id === node.id ? undefined : 'rgb(var(--border))' }}
+                            style={{ backgroundColor: 'rgb(var(--surface))' }}
                             whileHover={{ scale: 1.1 }}
                         >
-                            <div className={`w-3 h-3 rounded-full ${node.aiConsistency >= 80 ? 'bg-status-success' :
-                                    node.aiConsistency >= 50 ? 'bg-status-warning' : 'bg-status-danger'
-                                }`} />
+                            <span className={`text-lg font-bold ${node.aiConsistency >= 80 ? 'text-status-success' :
+                                    node.aiConsistency >= 50 ? 'text-status-warning' : 'text-status-danger'
+                                }`}>
+                                {node.aiConsistency}
+                            </span>
                         </motion.button>
 
                         {/* Label */}
-                        <div className="absolute top-20 left-1/2 -translate-x-1/2 text-center w-32">
+                        <div className="absolute top-24 left-1/2 -translate-x-1/2 text-center w-32">
                             <div className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: 'rgb(var(--foreground-muted))' }}>{node.stage}</div>
                             <div className="text-sm font-medium" style={{ color: 'rgb(var(--foreground))' }}>{node.title}</div>
                         </div>
 
                         {/* Hover Card (if not selected) */}
-                        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-48 p-4 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20" style={{ backgroundColor: 'rgb(var(--surface))', border: '1px solid rgb(var(--border))' }}>
+                        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 w-48 p-4 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20" style={{ backgroundColor: 'rgb(var(--surface))', border: '1px solid rgb(var(--border))' }}>
                             <div className="text-xs font-bold mb-2" style={{ color: 'rgb(var(--foreground-muted))' }}>AI Consistency: {node.aiConsistency}%</div>
                             <div className="flex gap-1">
                                 {Object.entries(node.platforms).map(([platform, active]) => (

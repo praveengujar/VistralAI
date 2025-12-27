@@ -14,13 +14,13 @@ interface ThemeOption {
 const themeOptions: ThemeOption[] = [
   {
     value: 'light',
-    label: 'Light',
+    label: 'Morning',
     icon: Sun,
     description: 'Light background with dark text',
   },
   {
     value: 'dark',
-    label: 'Dark',
+    label: 'Night',
     icon: Moon,
     description: 'Dark background with light text',
   },

@@ -142,21 +142,21 @@ export function ThemeSettings() {
   }> = [
     {
       value: 'light',
-      label: 'Light',
+      label: 'Morning',
       description: 'Classic bright appearance',
       icon: Sun,
       preview: 'light',
     },
     {
       value: 'dim',
-      label: 'Dim',
+      label: 'Evening',
       description: 'Soft dark blue, easy on eyes',
       icon: Sparkles,
       preview: 'dim',
     },
     {
       value: 'dark',
-      label: 'Lights Out',
+      label: 'Night',
       description: 'Pure black for AMOLED',
       icon: Moon,
       preview: 'dark',
@@ -205,7 +205,7 @@ export function ThemeSettings() {
           className="font-medium"
           style={{ color: 'rgb(var(--foreground))' }}
         >
-          {resolvedTheme === 'dim' ? 'Dim' : resolvedTheme === 'dark' ? 'Lights Out' : 'Light'}
+          {resolvedTheme === 'dim' ? 'Evening' : resolvedTheme === 'dark' ? 'Night' : 'Morning'}
         </span>{' '}
         theme
       </p>
