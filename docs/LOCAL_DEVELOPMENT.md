@@ -6,35 +6,37 @@ Complete guide to run VistralAI locally with all dependencies.
 
 **Hybrid Development Setup:**
 - **VistralAI**: Runs with `npm run dev` (fast hot-reload)
-- **Firecrawl + Redis + Playwright**: Run in Docker (isolated services)
+- **MongoDB + Redis**: Run in Docker (data layer)
+- **Firecrawl + Playwright**: Optional Docker services for web crawling
 
 ## Prerequisites
 
 - **Node.js 18+** - [Download](https://nodejs.org/)
 - **Docker Desktop** - [Download](https://www.docker.com/products/docker-desktop/)
-- **OpenAI API Key** - [Get one](https://platform.openai.com/api-keys)
+- **Anthropic API Key** - [Get one](https://console.anthropic.com/)
 
 ## Quick Start
 
 ### 1. Start Docker Services
 
 ```bash
-# Start Firecrawl, Redis, and Playwright
-docker-compose up -d
+# Start MongoDB, Redis, and admin UIs
+docker-compose -f docker-compose.mongodb.yml up -d
 
 # Check services are running
-docker-compose ps
+docker-compose -f docker-compose.mongodb.yml ps
 
 # View logs (optional)
-docker-compose logs -f
+docker-compose -f docker-compose.mongodb.yml logs -f
 ```
 
 **Expected output:**
 ```
 NAME                    STATUS
-vistralai-firecrawl     Up (healthy)
-vistralai-playwright    Up (healthy)
+vistralai-mongodb       Up (healthy)
 vistralai-redis         Up (healthy)
+vistralai-mongo-express Up
+vistralai-redis-commander Up
 ```
 
 ### 2. Install Dependencies
@@ -56,8 +58,11 @@ npm run dev
 | Service | URL | Description |
 |---------|-----|-------------|
 | **VistralAI** | http://localhost:3000 | Main application |
-| **Firecrawl** | http://localhost:3002 | Web scraping API |
+| **MongoDB** | localhost:27017 | Primary database |
+| **Mongo Express** | http://localhost:8081 | MongoDB admin UI |
 | **Redis** | localhost:6379 | Cache and queue |
+| **Redis Commander** | http://localhost:8082 | Redis admin UI |
+| **Firecrawl** | http://localhost:3002 | Web scraping API (optional) |
 
 ## Verify Setup
 
@@ -65,15 +70,19 @@ npm run dev
 
 ```bash
 # All services should be healthy
-docker-compose ps
+docker-compose -f docker-compose.mongodb.yml ps
 
-# Test Firecrawl directly
-curl http://localhost:3002/
-# Should return: "ok"
+# Test MongoDB
+docker exec vistralai-mongodb mongosh -u vistralai -p vistralai_dev_password --authenticationDatabase admin --eval "db.runCommand({ping:1})"
+# Should return: { ok: 1 }
 
 # Test Redis
 docker exec vistralai-redis redis-cli ping
 # Should return: "PONG"
+
+# Access admin UIs
+# MongoDB: http://localhost:8081
+# Redis: http://localhost:8082
 ```
 
 ### 2. Test VistralAI
@@ -88,26 +97,40 @@ docker exec vistralai-redis redis-cli ping
 
 ```bash
 # Start services
-docker-compose up -d
+docker-compose -f docker-compose.mongodb.yml up -d
 
 # Stop services
-docker-compose down
+docker-compose -f docker-compose.mongodb.yml down
 
 # Restart services
-docker-compose restart
+docker-compose -f docker-compose.mongodb.yml restart
 
 # View logs
-docker-compose logs -f firecrawl
-docker-compose logs -f redis
-
-# Rebuild services (if images updated)
-docker-compose up -d --build
+docker-compose -f docker-compose.mongodb.yml logs -f mongodb
+docker-compose -f docker-compose.mongodb.yml logs -f redis
 
 # Clean up everything (including volumes)
-docker-compose down -v
+docker-compose -f docker-compose.mongodb.yml down -v
+
+# Start Firecrawl services (for web crawling)
+docker-compose up -d
 ```
 
 ## Troubleshooting
+
+### MongoDB connection issues
+
+```bash
+# Check MongoDB logs
+docker-compose -f docker-compose.mongodb.yml logs mongodb
+
+# Verify replica set status
+docker exec vistralai-mongodb mongosh -u vistralai -p vistralai_dev_password --authenticationDatabase admin --eval "rs.status()"
+
+# Restart MongoDB with fresh data
+docker-compose -f docker-compose.mongodb.yml down -v
+docker-compose -f docker-compose.mongodb.yml up -d
+```
 
 ### Firecrawl not responding
 
@@ -131,15 +154,15 @@ lsof -i :3000
 # Kill the process
 kill -9 <PID>
 
-# Or change ports in docker-compose.yml
+# Or change ports in docker-compose.mongodb.yml
 ```
 
 ### Docker services won't start
 
 ```bash
 # Clean up and restart
-docker-compose down -v
-docker-compose up -d
+docker-compose -f docker-compose.mongodb.yml down -v
+docker-compose -f docker-compose.mongodb.yml up -d
 
 # If still failing, check Docker Desktop is running
 # and has enough resources (8GB RAM recommended)
@@ -188,6 +211,18 @@ docker-compose logs -f firecrawl
 LOGGING_LEVEL: 'debug'
 ```
 
+**MongoDB:**
+```bash
+# Connect to MongoDB shell
+docker exec vistralai-mongodb mongosh -u vistralai -p vistralai_dev_password --authenticationDatabase admin vistralai
+
+# List collections
+show collections
+
+# Query brand profiles
+db.Brand360Profile.find().pretty()
+```
+
 **Redis:**
 ```bash
 # Connect to Redis CLI
@@ -198,6 +233,8 @@ KEYS *
 
 # Get a key value
 GET somekey
+
+# Or use Redis Commander at http://localhost:8082
 ```
 
 ## Configuration
@@ -207,16 +244,21 @@ GET somekey
 Edit `.env.local` to configure:
 
 ```env
-# Enable/disable features
-USE_FIRECRAWL=true        # Use real Firecrawl (vs mock)
-USE_REAL_API=true         # Use real OpenAI API (vs mock)
+# Database Mode
+DATABASE_MODE=mongodb     # Options: mongodb, postgres, mock
 
 # Service URLs
+DATABASE_URL=mongodb://vistralai:vistralai_dev_password@localhost:27017/vistralai?authSource=admin&replicaSet=rs0
 FIRECRAWL_INTERNAL_URL=http://localhost:3002
 REDIS_URL=redis://localhost:6379
 
 # API Keys
-OPENAI_API_KEY=sk-...     # Your OpenAI API key
+ANTHROPIC_API_KEY=sk-ant-...     # Your Anthropic API key
+FIRECRAWL_API_KEY=fc-...         # Firecrawl API key (if using cloud)
+
+# Auth
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-secret-key
 ```
 
 ### Firecrawl Settings
@@ -245,6 +287,9 @@ npm test -- --coverage
 
 ```bash
 # Stop Docker services
+docker-compose -f docker-compose.mongodb.yml down
+
+# Stop Firecrawl services (if running)
 docker-compose down
 
 # Stop VistralAI
@@ -274,9 +319,11 @@ docker-compose down
 
 If you encounter issues:
 
-1. Check logs: `docker-compose logs -f`
+1. Check logs: `docker-compose -f docker-compose.mongodb.yml logs -f`
 2. Verify .env.local configuration
-3. Restart services: `docker-compose restart`
-4. Clean slate: `docker-compose down -v && docker-compose up -d`
+3. Restart services: `docker-compose -f docker-compose.mongodb.yml restart`
+4. Clean slate: `docker-compose -f docker-compose.mongodb.yml down -v && docker-compose -f docker-compose.mongodb.yml up -d`
 
-Happy coding! 🚀
+---
+
+**Last Updated**: December 2024

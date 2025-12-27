@@ -11,9 +11,10 @@
 3. [Error Handling](#error-handling)
 4. [Core Resources](#core-resources)
 5. [Brand 360° API](#brand-360-api)
-6. [Onboarding API](#onboarding-api)
-7. [Queue Management API](#queue-management-api)
-8. [Admin API](#admin-api)
+6. [AEO (Perception) API](#aeo-perception-api)
+7. [Onboarding API](#onboarding-api)
+8. [Queue Management API](#queue-management-api)
+9. [Admin API](#admin-api)
 
 ---
 
@@ -501,6 +502,375 @@ GET /brand-360/products?brandId=brand_123
 
 ---
 
+## AEO (Perception) API
+
+### Perception Scans
+
+#### Create Perception Scan
+```
+POST /aeo/perception-scan
+```
+
+**Request**:
+```json
+{
+  "brand360Id": "brand360_123",
+  "platforms": ["claude", "chatgpt", "gemini", "perplexity", "google_aio"],
+  "promptCount": 10
+}
+```
+
+**Response** (202):
+```json
+{
+  "success": true,
+  "data": {
+    "scanId": "scan_123",
+    "status": "pending",
+    "platforms": ["claude", "chatgpt", "gemini"],
+    "createdAt": "2024-12-27T10:00:00Z"
+  }
+}
+```
+
+#### List Perception Scans
+```
+GET /aeo/perception-scan?brand360Id=brand360_123
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "scan_123",
+      "status": "completed",
+      "platforms": ["claude", "chatgpt", "gemini"],
+      "metrics": {
+        "faithfulness": 85,
+        "shareOfVoice": 72,
+        "sentiment": 0.65,
+        "voiceAlignment": 78,
+        "hallucination": 92
+      },
+      "quadrant": "dominant",
+      "createdAt": "2024-12-27T10:00:00Z"
+    }
+  ]
+}
+```
+
+#### Get Scan Details
+```
+GET /aeo/perception-scan/{scanId}
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "id": "scan_123",
+    "brand360Id": "brand360_123",
+    "status": "completed",
+    "platforms": ["claude", "chatgpt", "gemini"],
+    "metrics": {
+      "faithfulness": 85,
+      "shareOfVoice": 72,
+      "sentiment": 0.65,
+      "voiceAlignment": 78,
+      "hallucination": 92
+    },
+    "quadrant": "dominant",
+    "platformResults": [
+      {
+        "platform": "claude",
+        "metrics": { "faithfulness": 88, "shareOfVoice": 75 }
+      }
+    ],
+    "createdAt": "2024-12-27T10:00:00Z",
+    "completedAt": "2024-12-27T10:05:00Z"
+  }
+}
+```
+
+### Prompts
+
+#### Generate Prompts
+```
+POST /aeo/prompts/generate
+```
+
+**Request**:
+```json
+{
+  "brand360Id": "brand360_123",
+  "count": 10,
+  "categories": ["product", "brand", "competitor"]
+}
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "prompts": [
+      {
+        "id": "prompt_123",
+        "text": "What are the best AI visibility platforms?",
+        "category": "product",
+        "intent": "discovery"
+      }
+    ],
+    "count": 10
+  }
+}
+```
+
+#### List Prompts
+```
+GET /aeo/prompts?brand360Id=brand360_123
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "prompt_123",
+      "text": "What are the best AI visibility platforms?",
+      "category": "product",
+      "usageCount": 5,
+      "createdAt": "2024-12-27T10:00:00Z"
+    }
+  ]
+}
+```
+
+### Insights
+
+#### List Insights
+```
+GET /aeo/insights?brand360Id=brand360_123
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "insight_123",
+      "scanId": "scan_123",
+      "type": "hallucination",
+      "severity": "high",
+      "platform": "chatgpt",
+      "description": "Incorrect founding year mentioned",
+      "evidence": "Response stated 2020, actual is 2024",
+      "dismissed": false,
+      "createdAt": "2024-12-27T10:00:00Z"
+    }
+  ]
+}
+```
+
+#### Dismiss Insight
+```
+POST /aeo/insights/{insightId}/dismiss
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "id": "insight_123",
+    "dismissed": true,
+    "dismissedAt": "2024-12-27T10:00:00Z"
+  }
+}
+```
+
+### Corrections
+
+#### List Corrections
+```
+GET /aeo/corrections?brand360Id=brand360_123
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "workflowId": "workflow_123",
+      "insightId": "insight_123",
+      "status": "pending",
+      "fixType": "schema_org",
+      "suggestion": {
+        "type": "schema_org",
+        "content": "Add Organization schema with correct founding date"
+      },
+      "createdAt": "2024-12-27T10:00:00Z"
+    }
+  ]
+}
+```
+
+#### Create Correction
+```
+POST /aeo/corrections
+```
+
+**Request**:
+```json
+{
+  "insightId": "insight_123",
+  "fixType": "schema_org"
+}
+```
+
+**Response** (201):
+```json
+{
+  "success": true,
+  "data": {
+    "workflowId": "workflow_123",
+    "status": "pending",
+    "suggestion": {
+      "type": "schema_org",
+      "content": "..."
+    }
+  }
+}
+```
+
+#### Verify Correction
+```
+POST /aeo/corrections/{workflowId}/verify
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "workflowId": "workflow_123",
+    "status": "verified",
+    "verifiedAt": "2024-12-27T10:00:00Z"
+  }
+}
+```
+
+#### Approve Correction
+```
+POST /aeo/corrections/{workflowId}/approve
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "workflowId": "workflow_123",
+    "status": "approved",
+    "approvedAt": "2024-12-27T10:00:00Z"
+  }
+}
+```
+
+### Reports
+
+#### Get Report Summary
+```
+GET /aeo/reports/summary?brand360Id=brand360_123
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "brand360Id": "brand360_123",
+    "latestScan": {
+      "id": "scan_123",
+      "quadrant": "dominant",
+      "metrics": { "faithfulness": 85, "shareOfVoice": 72 }
+    },
+    "trends": {
+      "faithfulness": { "current": 85, "previous": 80, "change": 5 },
+      "shareOfVoice": { "current": 72, "previous": 68, "change": 4 }
+    },
+    "openInsights": 3,
+    "pendingCorrections": 2
+  }
+}
+```
+
+#### Export Report
+```
+POST /aeo/reports/export
+```
+
+**Request**:
+```json
+{
+  "brand360Id": "brand360_123",
+  "format": "pdf",
+  "dateRange": {
+    "start": "2024-12-01",
+    "end": "2024-12-27"
+  }
+}
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "reportId": "report_123",
+    "downloadUrl": "/api/reports/download/report_123",
+    "expiresAt": "2024-12-28T10:00:00Z"
+  }
+}
+```
+
+### Magic Import
+
+#### Start Magic Import
+```
+POST /aeo/magic-import
+```
+
+**Request**:
+```json
+{
+  "organizationId": "org_123",
+  "websiteUrl": "https://example.com"
+}
+```
+
+**Response** (202):
+```json
+{
+  "success": true,
+  "data": {
+    "importId": "import_123",
+    "status": "started",
+    "stages": ["crawl", "analyze", "competitors", "profile"],
+    "currentStage": "crawl",
+    "progress": 0
+  }
+}
+```
+
+---
+
 ## Onboarding API
 
 ### Start Website Analysis
@@ -893,6 +1263,6 @@ Future versions will be available as `/api/v2`, `/api/v3`, etc. with backward co
 
 ---
 
-**Last Updated**: November 2024
+**Last Updated**: December 2024
 **Status**: Production Ready
-**Version**: 1.0
+**Version**: 1.1

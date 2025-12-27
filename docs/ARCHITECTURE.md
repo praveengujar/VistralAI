@@ -1,126 +1,387 @@
 # VistralAI Architecture Documentation
 
 ## 1. Overview
-VistralAI is an advanced brand intelligence and market analysis platform designed to help businesses understand their digital footprint, monitor competitors, and identify growth opportunities. The system leverages autonomous AI agents to crawl the web, analyze brand content, and generate strategic insights using Large Language Models (LLMs).
+
+VistralAI is an advanced AI Engine Optimization (AEO) platform designed to help businesses understand how AI systems perceive their brand. The system leverages autonomous AI agents to crawl the web, analyze brand content, evaluate AI perception across multiple LLM platforms, and generate strategic insights.
 
 ## 2. Technology Stack
 
 ### Frontend & Application Layer
-- **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
+- **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS, Lucide React (Icons)
 - **UI Components**: Radix UI primitives, Custom Design System
-- **State Management**: React Hooks, SWR (for data fetching)
+- **State Management**: React Query (TanStack Query v5)
+- **Real-time**: Socket.io for live updates
 - **Authentication**: NextAuth.js (Credentials & OAuth)
 
 ### Backend & API Layer
 - **Runtime**: Node.js (via Next.js API Routes)
 - **API Architecture**: RESTful endpoints (`app/api/*`)
 - **Validation**: Zod schemas
+- **Middleware**: Custom middleware for auth, rate limiting, error handling
+
+### Database Layer
+- **Primary Database**: MongoDB 7.0 (with Prisma ORM)
+- **Database Adapter**: Supports MongoDB, PostgreSQL, Mock modes via `DATABASE_MODE`
+- **Caching**: Redis 7 with in-memory fallback
+- **Session Storage**: NextAuth with database sessions
 
 ### AI & Data Services
-- **Web Scraping**: [Firecrawl](https://github.com/mendableai/firecrawl) (Self-hosted microservices)
-  - **API Service**: Manages crawl jobs, queues, and rate limits.
-  - **Playwright Service**: Headless browser automation for rendering JavaScript-heavy sites.
-- **LLM Provider**: Anthropic Claude 3.5 Sonnet (via SDK)
-- **Message Broker & Caching**: Redis (BullMQ for job queues, caching)
+- **Web Scraping**: Firecrawl (Self-hosted microservices)
+  - **API Service**: Manages crawl jobs, queues, and rate limits
+  - **Playwright Service**: Headless browser automation for JS-heavy sites
+- **LLM Provider**: Anthropic Claude (via SDK)
+- **Multi-Platform Evaluation**: Claude, ChatGPT, Gemini, Perplexity, Google AIO
 
 ### Infrastructure (Google Cloud Platform)
 - **Compute**: Google Cloud Run (Serverless Containers)
 - **Build System**: Google Cloud Build
-- **Networking**: Serverless VPC Access Connector (for Redis communication)
+- **Database**: MongoDB Atlas or self-hosted
+- **Caching**: Redis (Memorystore or self-hosted)
+- **Networking**: Serverless VPC Access Connector
 - **Secrets**: Google Secret Manager
 
 ---
 
 ## 3. System Architecture
 
-The system follows a microservices-inspired architecture where the main application delegates heavy scraping tasks to a dedicated, self-hosted Firecrawl instance.
-
-```mermaid
-graph TD
-    User[User] -->|HTTPS| App[VistralAI App (Next.js)]
-    
-    subgraph "VistralAI Cloud Run Service"
-        App -->|API Routes| Backend[Next.js API]
-    end
-    
-    subgraph "AI & External Services"
-        Backend -->|Analyze| Claude[Anthropic Claude API]
-    end
-    
-    subgraph "Firecrawl Ecosystem (GCP)"
-        Backend -->|POST /v1/crawl| FirecrawlAPI[Firecrawl API Service]
-        FirecrawlAPI -->|Job Queue| Redis[(Redis Instance)]
-        Redis -->|Job| FirecrawlWorker[Firecrawl Worker]
-        FirecrawlWorker -->|Scrape Request| Playwright[Playwright Service]
-    end
-    
-    Playwright -->|HTTP/JS| TargetWeb[Target Website]
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                              Frontend (Next.js)                          │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │
+│  │  Dashboard  │  │  Brand 360  │  │  AEO Panel  │  │  Reports    │    │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘    │
+│         └─────────────────┼─────────────────┼───────────────┘           │
+│                           │                 │                            │
+│                    React Query Hooks    Socket.io Client                 │
+└───────────────────────────┼─────────────────┼────────────────────────────┘
+                            │                 │
+┌───────────────────────────┼─────────────────┼────────────────────────────┐
+│                       API Layer (Next.js API Routes)                     │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │  Middleware: Auth → Rate Limit → Error Handler                   │    │
+│  └─────────────────────────────────────────────────────────────────┘    │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │
+│  │ /brand-360  │  │    /aeo     │  │ /onboarding │  │   /admin    │    │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘    │
+└─────────┼────────────────┼────────────────┼────────────────┼─────────────┘
+          │                │                │                │
+┌─────────┼────────────────┼────────────────┼────────────────┼─────────────┐
+│         │           Agent System (lib/services/agents/)     │             │
+│  ┌──────┴──────┐  ┌──────┴──────┐  ┌──────┴──────┐  ┌──────┴──────┐    │
+│  │   Crawler   │  │  VibeCheck  │  │ Perception  │  │ Correction  │    │
+│  │    Agent    │  │    Agent    │  │  Evaluator  │  │  Generator  │    │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘    │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────────┐     │
+│  │  Competitor │  │   Prompt    │  │    Magic Import              │     │
+│  │    Agent    │  │  Generator  │  │    Orchestrator              │     │
+│  └─────────────┘  └─────────────┘  └─────────────────────────────┘     │
+└─────────────────────────────────────────────────────────────────────────┘
+          │                │                │                │
+┌─────────┼────────────────┼────────────────┼────────────────┼─────────────┐
+│                        Data Layer                                         │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐          │
+│  │    MongoDB      │  │     Redis       │  │   Firecrawl     │          │
+│  │  (Primary DB)   │  │   (Cache)       │  │  (Web Scraping) │          │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘          │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## 4. Core Components
 
-### A. VistralAI Application (`/app`)
-The core monolithic application handling user interface, authentication, and business logic.
-- **Dashboard**: Provides real-time insights, brand health scores, and reporting.
-- **Brand 360 Engine**: Orchestrates the analysis workflow by calling Firecrawl to gather data and Claude to interpret it.
+### A. Database Layer (`lib/db/`)
 
-### B. Firecrawl Services (`/firecrawl`)
-A self-hosted instance of the Firecrawl open-source project, customized for VistralAI.
-1.  **API Service**: The entry point for crawling requests. It handles authentication, validation, and pushes jobs to Redis.
-2.  **Playwright Service**: A specialized microservice running Playwright. It receives instructions to visit a URL, render the page (executing client-side JS), and return the HTML/Markdown content.
+**Database Adapter Pattern**
+```typescript
+// lib/db/index.ts - Switch via DATABASE_MODE env var
+DATABASE_MODE = 'mongodb' | 'postgres' | 'mock'
+```
 
-### C. Redis
-Acts as the backbone for the scraping infrastructure:
-- **BullMQ Queues**: Manages asynchronous crawl jobs (extract, scrape, map).
-- **Rate Limiting**: Ensures the system respects website `robots.txt` and API limits.
-- **Caching**: Stores intermediate crawl results.
+**Operations Structure** (`lib/db/operations/`)
+| File | Purpose |
+|------|---------|
+| `brand360-ops.ts` | Brand360 profile CRUD |
+| `perception-ops.ts` | AEO perception scans and insights |
+| `product-ops.ts` | Product management |
+| `competitor-ops.ts` | Competitor data |
+| `asset-ops.ts` | Asset/media management |
+| `aggregate-ops.ts` | Aggregation queries |
+| `user-ops.ts` | User account operations |
+| `transforms.ts` | Data transformation utilities |
+
+### B. Agent System (`lib/services/agents/`)
+
+| Agent | Purpose |
+|-------|---------|
+| `CrawlerAgent` | Web crawling + Schema.org extraction |
+| `VibeCheckAgent` | Brand personality analysis |
+| `CompetitorAgent` | Competitor discovery and positioning |
+| `PromptGeneratorAgent` | AI prompt generation for testing |
+| `PerceptionEvaluatorAgent` | LLM-as-a-Judge evaluation |
+| `PerceptionScanOrchestrator` | Coordinates full scan workflow |
+| `CorrectionGeneratorAgent` | Generates fix suggestions for issues |
+| `MagicImportOrchestrator` | Coordinates brand onboarding flow |
+
+### C. Caching Layer (`lib/cache/`)
+
+**Redis with In-Memory Fallback**
+```typescript
+import { cacheGet, cacheSet, withCache } from '@/lib/cache/redis';
+import { cacheKeys, cacheTTL } from '@/lib/cache/keys';
+
+const data = await withCache(
+  cacheKeys.brand360.profile(orgId),
+  fetchFn,
+  { ttl: cacheTTL.standard }
+);
+```
+
+**TTL Presets**
+| Preset | Duration | Use Case |
+|--------|----------|----------|
+| short | 1 min | Frequently changing |
+| standard | 5 min | Default |
+| medium | 15 min | Moderately stable |
+| long | 1 hour | Stable data |
+| extended | 24 hours | Rarely changing |
+
+### D. Real-time Updates (`lib/realtime/`)
+
+**Socket.io Server Events**
+| Event | Direction | Purpose |
+|-------|-----------|---------|
+| `scan:started` | Server → Client | Scan initiated |
+| `scan:progress` | Server → Client | Progress update (%) |
+| `scan:complete` | Server → Client | Scan finished |
+| `scan:error` | Server → Client | Scan failed |
+| `insight:new` | Server → Client | New insight created |
+| `correction:update` | Server → Client | Correction workflow update |
+
+**Client Hooks**
+```typescript
+import { useSocket } from '@/lib/realtime/socket-client';
+
+const { socket, isConnected } = useSocket({
+  brand360Id,
+  onScanProgress: (data) => { /* handle progress */ },
+  onScanComplete: (data) => { /* handle completion */ }
+});
+```
+
+### E. API Middleware (`lib/api/middleware.ts`)
+
+```typescript
+import { withMiddleware, successResponse, errorResponse } from '@/lib/api/middleware';
+
+export const GET = withMiddleware(
+  async (req) => {
+    const data = await fetchData();
+    return successResponse(data);
+  },
+  { requireAuth: true, rateLimit: { maxRequests: 50 } }
+);
+```
 
 ---
 
 ## 5. Key Workflows
 
-### Website Analysis Workflow
-1.  **Initiation**: User enters a brand URL (e.g., `https://langchain.com`) in the Dashboard.
-2.  **Request**: The frontend sends a POST request to `/api/brand-360/analyze-website`.
-3.  **Crawl Dispatch**: The API route calls the internal Firecrawl instance (`FIRECRAWL_INTERNAL_URL`).
-4.  **Execution**:
-    *   Firecrawl API pushes the job to Redis.
-    *   A worker picks up the job and requests the Playwright service to scrape the page.
-    *   Playwright renders the page and returns the content (converted to Markdown).
-5.  **Analysis**: The raw Markdown is sent to Anthropic Claude with a specific prompt to extract brand values, products, and market positioning.
-6.  **Presentation**: The structured JSON response is returned to the frontend and visualized in the Brand Profile.
+### A. Magic Import (Brand Onboarding)
+
+```
+Website URL
+    │
+    ▼
+┌───────────────────┐
+│   CrawlerAgent    │ ─── Scrape website + Schema.org
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│  VibeCheckAgent   │ ─── Analyze brand personality
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│ CompetitorAgent   │ ─── Discover competitors
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│ Brand360 Profile  │ ─── Store in MongoDB
+└───────────────────┘
+```
+
+### B. AEO Perception Scan
+
+```
+Brand360 Profile
+    │
+    ▼
+┌───────────────────┐
+│ PromptGenerator   │ ─── Create test prompts
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────────────────────────────────┐
+│         Multi-Platform Query Execution         │
+│  Claude │ ChatGPT │ Gemini │ Perplexity │ AIO │
+└────────────────────┬──────────────────────────┘
+                     │
+                     ▼
+┌───────────────────────────────────────────────┐
+│          PerceptionEvaluatorAgent             │
+│  ┌─────────────┐ ┌─────────────┐             │
+│  │ Faithfulness│ │Share of Voice│             │
+│  ├─────────────┤ ├─────────────┤             │
+│  │  Sentiment  │ │Voice Alignment│            │
+│  ├─────────────┤ ├─────────────┤             │
+│  │Hallucination│ │   Quadrant  │             │
+│  └─────────────┘ └─────────────┘             │
+└────────────────────┬──────────────────────────┘
+                     │
+                     ▼
+┌───────────────────────────────────────────────┐
+│              Perception Insights              │
+│   DOMINANT │ VULNERABLE │ NICHE │ INVISIBLE   │
+└───────────────────────────────────────────────┘
+```
+
+### C. Corrections Workflow
+
+```
+Perception Insight (issue detected)
+    │
+    ▼
+┌───────────────────────────────────────────────┐
+│        CorrectionGeneratorAgent               │
+│  ┌─────────────┐ ┌─────────────┐             │
+│  │ Schema.org  │ │     FAQ     │             │
+│  ├─────────────┤ ├─────────────┤             │
+│  │   Content   │ │  Wikipedia  │             │
+│  └─────────────┘ └─────────────┘             │
+└────────────────────┬──────────────────────────┘
+                     │
+                     ▼
+┌───────────────────────────────────────────────┐
+│           Correction Workflow                  │
+│   pending → verified → approved                │
+└───────────────────────────────────────────────┘
+```
 
 ---
 
-## 6. Deployment & Infrastructure
+## 6. AEO Metrics
 
-The project is deployed on **Google Cloud Run** for scalability and zero-maintenance server management.
+| Metric | Range | Meaning |
+|--------|-------|---------|
+| Faithfulness | 0-100 | Accuracy to ground truth |
+| Share of Voice | 0-100 | Brand visibility in responses |
+| Sentiment | -1 to 1 | Overall sentiment |
+| Voice Alignment | 0-100 | Matches brand tone |
+| Hallucination | 0-100 | 100 = no hallucinations |
 
-| Service Name | Description | Internal Port | Public Access |
-| :--- | :--- | :--- | :--- |
-| `vistralai` | Main Next.js App | 3000 | Yes (HTTPS) |
-| `firecrawl-api` | Scraping API Controller | 3002 | Yes (Protected) |
-| `firecrawl-playwright` | Headless Browser Service | 3000 | No (Internal Only) |
+### Quadrant Positioning
+```
+              HIGH VISIBILITY
+                    │
+         VULNERABLE │ DOMINANT
+      (amber)       │    (green)
+                    │
+LOW ACCURACY ───────┼─────── HIGH ACCURACY
+                    │
+        INVISIBLE   │   NICHE
+           (red)    │   (blue)
+                    │
+              LOW VISIBILITY
+```
 
-### Networking
-- **VPC Connector**: A VPC Access Connector (`vistralai-connector`) is used to allow Cloud Run services to communicate with the private Redis instance hosted on a Compute Engine VM or Memorystore.
-- **Environment Variables**: Critical configuration (Redis URLs, Service URLs) is managed via Cloud Run environment variables and Secret Manager.
+---
 
-## 7. Local Development
+## 7. Deployment & Infrastructure
 
-To run the full stack locally:
+### Docker Services (Local Development)
 
-1.  **Prerequisites**: Node.js 18+, Docker (optional for Redis), Google Cloud SDK.
-2.  **Environment Setup**:
-    *   Configure `.env.local` with `NEXTAUTH_URL`, `ANTHROPIC_API_KEY`, and `FIRECRAWL_API_KEY` (if using cloud) or `FIRECRAWL_INTERNAL_URL` (if self-hosted).
-3.  **Running the App**:
-    ```bash
-    npm run dev
-    # Runs on http://localhost:3000
-    ```
-4.  **Running Firecrawl (Optional)**:
-    *   If debugging scraping internals, you can run the Firecrawl services locally using their respective `docker-compose` or `npm run dev` scripts in the `firecrawl/` directory.
+**docker-compose.mongodb.yml** (Data Layer)
+| Service | Port | Description |
+|---------|------|-------------|
+| MongoDB | 27017 | Primary database |
+| Mongo Express | 8081 | MongoDB admin UI |
+| Redis | 6379 | Cache and queue |
+| Redis Commander | 8082 | Redis admin UI |
+
+**docker-compose.yml** (Firecrawl Services)
+| Service | Port | Description |
+|---------|------|-------------|
+| Firecrawl API | 3002 | Web scraping API |
+| Playwright | 3000 | Browser automation |
+| PostgreSQL | 5432 | Firecrawl queue storage |
+
+### Cloud Run Services (Production)
+| Service | Port | Public |
+|---------|------|--------|
+| vistralai | 3000 | Yes |
+| firecrawl-api | 3002 | Protected |
+| firecrawl-playwright | 3000 | Internal |
+
+---
+
+## 8. Local Development
+
+```bash
+# Start data services
+docker-compose -f docker-compose.mongodb.yml up -d
+
+# Run application
+npm run dev
+
+# Optional: Start Firecrawl for web crawling
+docker-compose up -d
+```
+
+**Environment Variables**
+```env
+DATABASE_MODE=mongodb
+DATABASE_URL=mongodb://vistralai:vistralai_dev_password@localhost:27017/vistralai?authSource=admin&replicaSet=rs0
+REDIS_URL=redis://localhost:6379
+ANTHROPIC_API_KEY=sk-ant-...
+NEXTAUTH_URL=http://localhost:3000
+```
+
+---
+
+## 9. Directory Structure
+
+```
+lib/
+├── api/              # API middleware
+├── auth/             # Authentication (NextAuth, MFA)
+├── cache/            # Redis caching layer
+├── db/               # Database adapter & operations
+│   └── operations/   # Domain-specific DB operations
+├── hooks/            # Performance hooks
+├── query/            # React Query hooks
+├── realtime/         # Socket.io client/server
+├── services/
+│   ├── agents/       # AI agent system
+│   ├── crawler/      # Web crawling
+│   ├── llm/          # LLM integration
+│   └── queue/        # Job queue system
+├── theme/            # Theme management
+└── utils/            # Lazy loading utilities
+
+app/
+├── api/              # API routes
+│   ├── aeo/          # AEO/perception endpoints
+│   ├── brand-360/    # Brand profile endpoints
+│   ├── onboarding/   # Onboarding flow
+│   └── admin/        # Admin endpoints
+└── (dashboard)/      # Dashboard pages
+```
+
+---
+
+**Last Updated**: December 2024

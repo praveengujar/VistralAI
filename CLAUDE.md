@@ -51,6 +51,7 @@ DATABASE_MODE = 'mongodb' | 'postgres' | 'mock'
 | standard | 5 min | Default |
 | medium | 15 min | Moderately stable |
 | long | 1 hour | Stable data |
+| extended | 24 hours | Rarely changing |
 
 ### Usage
 ```typescript
@@ -95,6 +96,7 @@ export const GET = withMiddleware(async (req) => {
 | `scan:complete` | Server → Client | Scan finished |
 | `scan:error` | Server → Client | Scan failed |
 | `insight:new` | Server → Client | New insight created |
+| `correction:update` | Server → Client | Correction workflow update |
 
 ### Client Hooks
 ```typescript
@@ -197,8 +199,11 @@ Low Accuracy + Low Visibility = INVISIBLE (red)
 | CrawlerAgent | `lib/services/agents/CrawlerAgent.ts` | Web crawl + Schema.org |
 | VibeCheckAgent | `lib/services/agents/VibeCheckAgent.ts` | Brand personality |
 | CompetitorAgent | `lib/services/agents/CompetitorAgent.ts` | Competitor discovery |
+| PromptGeneratorAgent | `lib/services/agents/PromptGeneratorAgent.ts` | AI prompt generation |
 | PerceptionEvaluatorAgent | `lib/services/agents/PerceptionEvaluatorAgent.ts` | LLM-as-a-Judge |
-| MagicImportOrchestrator | `lib/services/agents/MagicImportOrchestrator.ts` | Coordinates flow |
+| PerceptionScanOrchestrator | `lib/services/agents/PerceptionScanOrchestrator.ts` | Coordinates scan flow |
+| CorrectionGeneratorAgent | `lib/services/agents/CorrectionGeneratorAgent.ts` | Fix suggestions |
+| MagicImportOrchestrator | `lib/services/agents/MagicImportOrchestrator.ts` | Coordinates onboarding |
 
 ---
 
