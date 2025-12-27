@@ -148,7 +148,26 @@ const data = await withCache(
 | long | 1 hour | Stable data |
 | extended | 24 hours | Rarely changing |
 
-### D. Real-time Updates (`lib/realtime/`)
+### D. Feature Flags (`lib/config/features.ts`)
+
+| Flag | Default | Purpose |
+|------|---------|---------|
+| `USE_FIRECRAWL` | true | Use Firecrawl for web crawling |
+| `USE_REAL_API` | true | Use real LLM API calls |
+| `CONFIDENCE_THRESHOLD` | 0.85 | Minimum confidence for auto-approval |
+| `FIRECRAWL_MAX_PAGES` | 20 | Max pages to crawl per domain |
+| `FIRECRAWL_TIMEOUT_MS` | 30000 | Crawl timeout in milliseconds |
+
+### E. UI State Components (`components/ui/`)
+
+| Component | Purpose |
+|-----------|---------|
+| `EmptyState` | Display when no data exists |
+| `LoadingState` | Display during data fetching |
+| `ErrorState` | Display on error with retry |
+| `DataWrapper` | Combines all states in one wrapper |
+
+### F. Real-time Updates (`lib/realtime/`)
 
 **Socket.io Server Events**
 | Event | Direction | Purpose |

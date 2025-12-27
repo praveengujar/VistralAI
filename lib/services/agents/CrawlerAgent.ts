@@ -106,7 +106,7 @@ export class CrawlerAgent {
    */
   async crawlMultiple(
     websiteUrl: string,
-    maxPages: number = 5
+    maxPages: number = 20
   ): Promise<AgentResult<CrawlerAgentResult>> {
     const startTime = Date.now();
 

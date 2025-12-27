@@ -37,9 +37,9 @@ export const FEATURES = {
   /**
    * Enable real Claude API calls for brand intelligence extraction
    * When disabled, uses mock data generators
-   * Default: false (mock data for fast iteration)
+   * Default: true (use real API for production-ready data)
    */
-  USE_REAL_API: parseEnv(process.env.USE_REAL_API, false),
+  USE_REAL_API: parseEnv(process.env.USE_REAL_API, true),
 
   /**
    * Confidence threshold for extraction review queue
