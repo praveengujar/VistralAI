@@ -9,6 +9,8 @@ AI Visibility Optimization Platform — Monitor and optimize how AI platforms pe
 - **Real-Time Updates**: WebSocket-powered scan progress and insights
 - **Correction Workflows**: AI-generated fixes for perception issues
 - **Brand 360 Profile**: Comprehensive semantic ground truth engine
+- **Target Audience & Personas**: AI-generated customer personas with pain points
+- **Market Positioning**: Positioning statements, value propositions, and proof points
 - **Interactive Dashboards**: Quadrant positioning, radar charts, trend analysis
 
 ## Tech Stack
@@ -72,15 +74,21 @@ FIRECRAWL_INTERNAL_URL=http://localhost:3002
 
 ```
 app/                  # Next.js App Router pages
+├── api/brand-360/    # Brand 360 API routes
+│   ├── audience/     # Target audience endpoints
+│   ├── personas/     # Customer personas CRUD
+│   └── positioning/  # Market positioning endpoints
 components/           # React components
+├── audience/         # PersonaCard, PersonaForm
+└── positioning/      # PositioningStatement, ValuePropositionCards
 lib/
 ├── api/              # API middleware
 ├── cache/            # Redis caching layer
 ├── db/operations/    # Database operations
 ├── hooks/            # Custom React hooks
-├── query/            # React Query setup
+├── query/            # React Query setup (hooks.ts, audienceHooks.ts)
 ├── realtime/         # WebSocket support
-├── services/         # Business logic & agents
+├── services/agents/  # AI agents (ProductExtractor, AudiencePositioning)
 └── utils/            # Utilities & lazy loading
 prisma/               # Database schema
 ```

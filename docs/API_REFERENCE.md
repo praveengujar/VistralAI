@@ -500,6 +500,170 @@ GET /brand-360/products?brandId=brand_123
 }
 ```
 
+### Target Audience
+
+#### Get Target Audience
+```
+GET /brand-360/audience?brand360Id=brand360_123
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "audience": {
+      "id": "audience_123",
+      "primaryMarket": "B2B",
+      "geographicFocus": "North America",
+      "targetIndustries": ["Technology", "Finance"],
+      "targetJobTitles": ["CMO", "VP Marketing"]
+    },
+    "personas": [...]
+  }
+}
+```
+
+#### Update Target Audience
+```
+PUT /brand-360/audience
+```
+
+**Request**:
+```json
+{
+  "brand360Id": "brand360_123",
+  "primaryMarket": "B2B",
+  "geographicFocus": "Global",
+  "targetIndustries": ["Technology", "Finance", "Healthcare"]
+}
+```
+
+### Customer Personas
+
+#### List Personas
+```
+GET /brand-360/personas?brand360Id=brand360_123
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "persona_123",
+      "name": "Enterprise Emma",
+      "title": "VP of Marketing",
+      "archetype": "Decision Maker",
+      "type": "primary",
+      "painPoints": [
+        {
+          "title": "AI Visibility Gap",
+          "severity": "high",
+          "description": "Cannot track how AI platforms represent brand"
+        }
+      ]
+    }
+  ]
+}
+```
+
+#### Create Persona
+```
+POST /brand-360/personas
+```
+
+**Request**:
+```json
+{
+  "brand360Id": "brand360_123",
+  "name": "Enterprise Emma",
+  "title": "VP of Marketing",
+  "archetype": "Decision Maker",
+  "type": "primary",
+  "ageRange": "35-50",
+  "industry": "Technology",
+  "primaryGoals": ["Increase brand visibility", "Monitor AI perception"],
+  "painPoints": [
+    {
+      "title": "AI Visibility Gap",
+      "description": "Cannot track AI representation",
+      "severity": "high"
+    }
+  ]
+}
+```
+
+#### Get Persona
+```
+GET /brand-360/personas/{id}
+```
+
+#### Update Persona
+```
+PUT /brand-360/personas/{id}
+```
+
+#### Delete Persona
+```
+DELETE /brand-360/personas/{id}
+```
+
+### Market Positioning
+
+#### Get Market Positioning
+```
+GET /brand-360/positioning?brand360Id=brand360_123
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "id": "positioning_123",
+    "positioningStatement": "For enterprise marketers who need AI visibility...",
+    "targetAudienceSummary": "Enterprise marketing leaders",
+    "categoryDefinition": "AI Visibility Platform",
+    "primaryBenefit": "Understand and optimize AI perception",
+    "primaryDifferentiator": "Only platform with LLM-as-a-Judge evaluation",
+    "valuePropositions": [...],
+    "proofPoints": [...],
+    "positioningAxes": [...]
+  }
+}
+```
+
+#### Update Market Positioning
+```
+PUT /brand-360/positioning
+```
+
+**Request**:
+```json
+{
+  "brand360Id": "brand360_123",
+  "positioningStatement": "For enterprise marketers...",
+  "targetAudienceSummary": "Enterprise marketing leaders",
+  "primaryBenefit": "AI visibility and optimization",
+  "valuePropositions": [
+    {
+      "headline": "See How AI Sees You",
+      "type": "Primary",
+      "functionalValue": "Real-time perception tracking"
+    }
+  ],
+  "proofPoints": [
+    {
+      "type": "Statistic",
+      "title": "85% Accuracy Improvement",
+      "metricValue": "85%"
+    }
+  ]
+}
+```
+
 ---
 
 ## AEO (Perception) API

@@ -13,11 +13,13 @@ npm run dev
 lib/db/operations/    - Database operations (9 files)
 lib/cache/            - Redis caching layer
 lib/realtime/         - WebSocket support
-lib/query/            - React Query hooks
+lib/query/            - React Query hooks (hooks.ts, audienceHooks.ts)
 lib/api/              - API middleware
 lib/hooks/            - Performance hooks
 lib/utils/            - Lazy loading utilities
 components/ui/        - State components (EmptyState, LoadingState, ErrorState, DataWrapper)
+components/audience/  - PersonaCard, PersonaForm
+components/positioning/ - PositioningStatement, ValuePropositionCards, ProofPointsList
 ```
 
 ---
@@ -27,6 +29,11 @@ components/ui/        - State components (EmptyState, LoadingState, ErrorState, 
 ### Data Flow
 ```
 Website URL → Firecrawl → BrandIntelligence → Brand360Profile → MongoDB → Redis Cache
+
+Magic Import Flow:
+  CrawlerAgent → VibeCheckAgent → CompetitorAgent → ProductExtractorAgent → AudiencePositioningAgent
+                                                                              ↓
+                                                    TargetAudience + CustomerPersonas + MarketPositioning
 ```
 
 ### Database Adapter
@@ -123,13 +130,32 @@ const { latestInsight } = useInsightSocket({ brand360Id });
 | `useAEOInsights(brand360Id)` | Perception insights |
 | `useAEOPrompts(brand360Id)` | Generated prompts |
 
+### Audience & Positioning Hooks (lib/query/audienceHooks.ts)
+| Hook | Purpose |
+|------|---------|
+| `useTargetAudience(brand360Id)` | Fetch target audience with personas |
+| `usePersonas(brand360Id)` | List customer personas |
+| `usePersona(personaId)` | Single persona details |
+| `useMarketPositioning(brand360Id)` | Fetch positioning data |
+| `useUpdateTargetAudience()` | Mutation for audience updates |
+| `useCreatePersona()` | Mutation to create persona |
+| `useUpdatePersona()` | Mutation to update persona |
+| `useDeletePersona()` | Mutation to delete persona |
+| `useUpdatePositioning()` | Mutation for positioning updates |
+
 ### Query Keys
 ```typescript
 import { queryKeys } from '@/lib/query/hooks';
+import { audienceQueryKeys } from '@/lib/query/audienceHooks';
 
 queryKeys.brand360.profile(orgId)
 queryKeys.aeo.scans(brand360Id)
 queryKeys.aeo.insights(brand360Id)
+
+// Audience & Positioning
+audienceQueryKeys.audience(brand360Id)
+audienceQueryKeys.personas(brand360Id)
+audienceQueryKeys.positioning(brand360Id)
 ```
 
 ---
@@ -200,6 +226,8 @@ Low Accuracy + Low Visibility = INVISIBLE (red)
 | CrawlerAgent | `lib/services/agents/CrawlerAgent.ts` | Web crawl + Schema.org |
 | VibeCheckAgent | `lib/services/agents/VibeCheckAgent.ts` | Brand personality |
 | CompetitorAgent | `lib/services/agents/CompetitorAgent.ts` | Competitor discovery |
+| ProductExtractorAgent | `lib/services/agents/ProductExtractorAgent.ts` | Product/service extraction |
+| AudiencePositioningAgent | `lib/services/agents/AudiencePositioningAgent.ts` | Target audience & positioning |
 | PromptGeneratorAgent | `lib/services/agents/PromptGeneratorAgent.ts` | AI prompt generation |
 | PerceptionEvaluatorAgent | `lib/services/agents/PerceptionEvaluatorAgent.ts` | LLM-as-a-Judge |
 | PerceptionScanOrchestrator | `lib/services/agents/PerceptionScanOrchestrator.ts` | Coordinates scan flow |
