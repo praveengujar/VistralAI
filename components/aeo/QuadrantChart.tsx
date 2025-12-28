@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { QuadrantPosition } from '@/lib/services/agents/types';
+import { useChartTheme } from '@/lib/hooks/useChartTheme';
 
 interface QuadrantChartProps {
   accuracy: number; // 0-100
@@ -42,6 +43,7 @@ export function QuadrantChart({
   size = 'md',
 }: QuadrantChartProps) {
   const config = SIZE_CONFIG[size];
+  const chartTheme = useChartTheme();
 
   // Calculate position within the chart (0-100 maps to 0-100% of chart area)
   const position = useMemo(() => {
@@ -136,7 +138,7 @@ export function QuadrantChart({
               y1={`${previousPos.y}%`}
               x2={`${position.x}%`}
               y2={`${position.y}%`}
-              stroke="#6366f1"
+              stroke={chartTheme.colors[0]}
               strokeWidth="2"
               strokeDasharray="4"
               initial={{ pathLength: 0, opacity: 0 }}
@@ -148,7 +150,7 @@ export function QuadrantChart({
               cx={`${previousPos.x}%`}
               cy={`${previousPos.y}%`}
               r="4"
-              fill="#94a3b8"
+              fill={chartTheme.neutralColor}
               opacity="0.5"
             />
           </svg>

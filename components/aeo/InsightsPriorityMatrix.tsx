@@ -21,7 +21,7 @@ const PRIORITY_CONFIG = {
   critical: { color: 'bg-error-500', text: 'text-error-700', badge: 'bg-error-100' },
   high: { color: 'bg-warning-500', text: 'text-warning-700', badge: 'bg-warning-100' },
   medium: { color: 'bg-accent-500', text: 'text-accent-700', badge: 'bg-accent-100' },
-  low: { color: 'bg-gray-400', text: 'text-gray-600', badge: 'bg-gray-100' },
+  low: { color: 'bg-foreground-muted', text: 'text-foreground-secondary', badge: 'bg-background-secondary' },
 };
 
 const EFFORT_CONFIG = {
@@ -64,10 +64,10 @@ export function InsightsPriorityMatrix({
 
   if (insights.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+      <div className="flex flex-col items-center justify-center py-8 text-foreground-muted">
         <span className="text-2xl mb-2">✨</span>
         <p className="text-sm">No active insights</p>
-        <p className="text-xs text-gray-400">Run a perception scan to generate insights</p>
+        <p className="text-xs text-foreground-muted">Run a perception scan to generate insights</p>
       </div>
     );
   }
@@ -81,7 +81,7 @@ export function InsightsPriorityMatrix({
         return (
           <div
             key={insight.id}
-            className={`flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:bg-gray-50 transition-colors ${
+            className={`flex items-start gap-3 p-3 rounded-lg border border-border hover:border-border-secondary hover:bg-surface-hover transition-colors ${
               onInsightClick ? 'cursor-pointer' : ''
             }`}
             onClick={() => onInsightClick?.(insight.id)}
@@ -94,7 +94,7 @@ export function InsightsPriorityMatrix({
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">{insight.title}</p>
+              <p className="text-sm font-medium text-foreground truncate">{insight.title}</p>
               <div className="flex items-center gap-2 mt-1">
                 <span
                   className={`text-xs px-2 py-0.5 rounded-full ${priorityConfig.badge} ${priorityConfig.text}`}
@@ -112,7 +112,7 @@ export function InsightsPriorityMatrix({
             {/* Arrow */}
             {onInsightClick && (
               <svg
-                className="w-4 h-4 text-gray-400"
+                className="w-4 h-4 text-foreground-muted"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

@@ -268,7 +268,7 @@ export default function NewOnboardingWizard() {
                       ? 'bg-primary-600 border-primary-600'
                       : currentStep === step.id
                       ? 'border-primary-600 text-primary-600'
-                      : 'border-gray-300 text-gray-400'
+                      : 'border-border-secondary text-foreground-muted'
                   }`}
                 >
                   {currentStep > step.id ? (
@@ -280,7 +280,7 @@ export default function NewOnboardingWizard() {
                 {index < NEW_ONBOARDING_STEPS.length - 1 && (
                   <div
                     className={`flex-1 h-1 mx-2 ${
-                      currentStep > step.id ? 'bg-primary-600' : 'bg-gray-300'
+                      currentStep > step.id ? 'bg-primary-600' : 'bg-border-secondary'
                     }`}
                   />
                 )}
@@ -288,8 +288,8 @@ export default function NewOnboardingWizard() {
               <p
                 className={`mt-2 text-xs font-medium ${
                   currentStep >= step.id
-                    ? 'text-gray-900'
-                    : 'text-gray-400'
+                    ? 'text-foreground'
+                    : 'text-foreground-muted'
                 }`}
               >
                 {step.title}
@@ -300,11 +300,11 @@ export default function NewOnboardingWizard() {
       </div>
 
       {/* Form Content */}
-      <div className="bg-white shadow-lg rounded-lg p-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+      <div className="bg-surface shadow-lg rounded-lg p-8">
+        <h2 className="text-2xl font-bold text-foreground mb-2">
           {NEW_ONBOARDING_STEPS[currentStep - 1].title}
         </h2>
-        <p className="text-gray-600 mb-8">
+        <p className="text-foreground-secondary mb-8">
           {NEW_ONBOARDING_STEPS[currentStep - 1].description}
         </p>
 
@@ -387,7 +387,7 @@ export default function NewOnboardingWizard() {
             type="button"
             onClick={handleBack}
             disabled={currentStep === 1}
-            className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 border border-border-secondary rounded-md text-foreground-secondary hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Back
           </button>

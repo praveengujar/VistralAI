@@ -114,10 +114,10 @@ export default function ProfileReviewCards({
   const ConfidenceBadge = ({ confidence }: { confidence?: number }) => {
     if (!confidence) return null;
     const percentage = Math.round(confidence * 100);
-    let color = 'bg-red-100 text-red-800';
-    if (percentage >= 80) color = 'bg-green-100 text-green-800';
-    else if (percentage >= 60) color = 'bg-yellow-100 text-yellow-800';
-    else if (percentage >= 40) color = 'bg-orange-100 text-orange-800';
+    let color = 'bg-error-background text-error';
+    if (percentage >= 80) color = 'bg-success-background text-success';
+    else if (percentage >= 60) color = 'bg-warning-background text-warning';
+    else if (percentage >= 40) color = 'bg-warning-background text-warning';
 
     return (
       <span className={`text-xs px-2 py-1 rounded-full ${color} font-medium`}>
@@ -137,24 +137,24 @@ export default function ProfileReviewCards({
     if (isEditing) {
       return (
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">{label}</label>
+          <label className="text-sm font-medium text-foreground-secondary">{label}</label>
           <textarea
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             rows={2}
-            className="w-full px-3 py-2 border border-primary-500 rounded text-gray-900 placeholder:text-gray-500"
+            className="w-full px-3 py-2 border border-primary-500 rounded bg-input text-foreground placeholder:text-foreground-muted"
             placeholder={`Enter ${label.toLowerCase()}`}
           />
           <div className="flex gap-2">
             <button
               onClick={onSave}
-              className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 flex items-center gap-1"
+              className="px-3 py-1 bg-success-600 text-white text-sm rounded hover:bg-success-700 flex items-center gap-1"
             >
               <Check className="w-4 h-4" /> Save
             </button>
             <button
               onClick={onCancel}
-              className="px-3 py-1 bg-gray-300 text-gray-700 text-sm rounded hover:bg-gray-400 flex items-center gap-1"
+              className="px-3 py-1 bg-surface-hover text-foreground-secondary text-sm rounded hover:bg-surface-active flex items-center gap-1"
             >
               <X className="w-4 h-4" /> Cancel
             </button>
@@ -166,14 +166,14 @@ export default function ProfileReviewCards({
     return (
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-medium text-gray-500 uppercase">{label}</p>
-          <p className="text-sm text-gray-700 mt-1">
+          <p className="text-xs font-medium text-foreground-muted uppercase">{label}</p>
+          <p className="text-sm text-foreground-secondary mt-1">
             {Array.isArray(value) ? value.join(', ') : value || '—'}
           </p>
         </div>
         <button
           onClick={() => onEdit(value)}
-          className="p-1 hover:bg-gray-100 rounded text-gray-600 hover:text-primary-600"
+          className="p-1 hover:bg-surface-hover rounded text-foreground-muted hover:text-primary-600"
           title="Edit"
         >
           <Edit2 className="w-4 h-4" />
@@ -185,12 +185,12 @@ export default function ProfileReviewCards({
   return (
     <div className="space-y-4">
       {/* Brand Identity Card */}
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-surface border border-border rounded-lg shadow-sm overflow-hidden">
         <button
           onClick={() => toggleCardExpanded('identity')}
-          className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition"
+          className="w-full px-6 py-4 flex items-center justify-between hover:bg-surface-hover transition"
         >
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-foreground">
             Brand Identity
           </h3>
           <ChevronDown
@@ -201,7 +201,7 @@ export default function ProfileReviewCards({
         </button>
 
         {expandedCard === 'identity' && identityCard && (
-          <div className="px-6 py-4 border-t border-gray-200 space-y-6">
+          <div className="px-6 py-4 border-t border-border space-y-6">
             <EditableField
               label="Mission"
               value={identityCard.mission}
@@ -296,12 +296,12 @@ export default function ProfileReviewCards({
       </div>
 
       {/* Competitors Card */}
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-surface border border-border rounded-lg shadow-sm overflow-hidden">
         <button
           onClick={() => toggleCardExpanded('competitors')}
-          className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition"
+          className="w-full px-6 py-4 flex items-center justify-between hover:bg-surface-hover transition"
         >
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-foreground">
             Competitors ({competitors.length})
           </h3>
           <ChevronDown
@@ -312,21 +312,21 @@ export default function ProfileReviewCards({
         </button>
 
         {expandedCard === 'competitors' && (
-          <div className="px-6 py-4 border-t border-gray-200 space-y-4">
+          <div className="px-6 py-4 border-t border-border space-y-4">
             {competitors.length === 0 ? (
-              <p className="text-gray-500 text-sm">No competitors added</p>
+              <p className="text-foreground-muted text-sm">No competitors added</p>
             ) : (
               competitors.map((competitor, idx) => (
                 <div
                   key={idx}
-                  className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+                  className="p-4 bg-background-secondary rounded-lg border border-border"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h4 className="font-medium text-gray-900">
+                      <h4 className="font-medium text-foreground">
                         {competitor.name}
                       </h4>
-                      <p className="text-sm text-gray-600 mt-1">
+                      <p className="text-sm text-foreground-secondary mt-1">
                         {competitor.competitionType === 'direct'
                           ? '🔴 Direct Competitor'
                           : competitor.competitionType === 'indirect'
@@ -336,7 +336,7 @@ export default function ProfileReviewCards({
                     </div>
                     <ConfidenceBadge confidence={competitor.confidence} />
                   </div>
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-foreground-secondary">
                     {competitor.rationale || '—'}
                   </p>
                 </div>
@@ -347,12 +347,12 @@ export default function ProfileReviewCards({
       </div>
 
       {/* Products Card */}
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-surface border border-border rounded-lg shadow-sm overflow-hidden">
         <button
           onClick={() => toggleCardExpanded('products')}
-          className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition"
+          className="w-full px-6 py-4 flex items-center justify-between hover:bg-surface-hover transition"
         >
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-foreground">
             Products & Services ({products.length})
           </h3>
           <ChevronDown
@@ -363,36 +363,36 @@ export default function ProfileReviewCards({
         </button>
 
         {expandedCard === 'products' && (
-          <div className="px-6 py-4 border-t border-gray-200 space-y-4">
+          <div className="px-6 py-4 border-t border-border space-y-4">
             {products.length === 0 ? (
-              <p className="text-gray-500 text-sm">
+              <p className="text-foreground-muted text-sm">
                 No products detected. You can add them manually.
               </p>
             ) : (
               products.map((product, idx) => (
                 <div
                   key={idx}
-                  className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+                  className="p-4 bg-background-secondary rounded-lg border border-border"
                 >
-                  <h4 className="font-medium text-gray-900">
+                  <h4 className="font-medium text-foreground">
                     {product.name}
                   </h4>
                   {product.category && (
-                    <p className="text-xs text-gray-600 mt-1">
+                    <p className="text-xs text-foreground-secondary mt-1">
                       Category: {product.category}
                     </p>
                   )}
                   {product.description && (
-                    <p className="text-sm text-gray-700 mt-2">
+                    <p className="text-sm text-foreground-secondary mt-2">
                       {product.description}
                     </p>
                   )}
                   {product.features && product.features.length > 0 && (
                     <div className="mt-2">
-                      <p className="text-xs font-medium text-gray-600">
+                      <p className="text-xs font-medium text-foreground-secondary">
                         Features:
                       </p>
-                      <ul className="text-sm text-gray-600 list-disc list-inside mt-1">
+                      <ul className="text-sm text-foreground-secondary list-disc list-inside mt-1">
                         {product.features.map((f, i) => (
                           <li key={i}>{f}</li>
                         ))}

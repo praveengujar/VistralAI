@@ -12,6 +12,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { LLMPlatform } from '@/lib/services/agents/types';
+import { useChartTheme } from '@/lib/hooks/useChartTheme';
 
 interface PlatformScore {
   platform: LLMPlatform;
@@ -54,6 +55,7 @@ export function PlatformComparisonChart({
   showComparison = false,
   height = 250,
 }: PlatformComparisonChartProps) {
+  const chartTheme = useChartTheme();
   const chartData = data.map((item) => ({
     name: PLATFORM_LABELS[item.platform],
     platform: item.platform,
@@ -70,17 +72,17 @@ export function PlatformComparisonChart({
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
           barCategoryGap="20%"
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.gridColor} vertical={false} />
           <XAxis
             dataKey="name"
-            tick={{ fill: '#6b7280', fontSize: 12 }}
-            axisLine={{ stroke: '#e5e7eb' }}
+            tick={{ fill: chartTheme.axisLabelColor, fontSize: 12 }}
+            axisLine={{ stroke: chartTheme.gridColor }}
             tickLine={false}
           />
           <YAxis
             domain={[0, 100]}
-            tick={{ fill: '#9ca3af', fontSize: 11 }}
-            axisLine={{ stroke: '#e5e7eb' }}
+            tick={{ fill: chartTheme.axisColor, fontSize: 11 }}
+            axisLine={{ stroke: chartTheme.gridColor }}
             tickLine={false}
             tickFormatter={(value) => `${value}`}
           />
@@ -88,11 +90,11 @@ export function PlatformComparisonChart({
           {benchmark && (
             <ReferenceLine
               y={benchmark}
-              stroke="#94a3b8"
+              stroke={chartTheme.neutralColor}
               strokeDasharray="4 4"
               label={{
                 value: `Benchmark: ${benchmark}`,
-                fill: '#94a3b8',
+                fill: chartTheme.neutralColor,
                 fontSize: 10,
                 position: 'right',
               }}
@@ -147,7 +149,7 @@ export function PlatformComparisonChart({
           {showComparison && (
             <Bar
               dataKey="previousScore"
-              fill="#e5e7eb"
+              fill={chartTheme.gridColor}
               radius={[4, 4, 0, 0]}
               name="Previous"
             />

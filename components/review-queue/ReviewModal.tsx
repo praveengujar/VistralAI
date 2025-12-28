@@ -99,22 +99,22 @@ export default function ReviewModal({
   const overallConfidence = Math.round((review.overallConfidence || 0) * 100);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-surface rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-border">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Review Extraction</h2>
-            <p className="text-sm text-gray-600 mt-1">
+            <h2 className="text-xl font-bold text-foreground">Review Extraction</h2>
+            <p className="text-sm text-foreground-secondary mt-1">
               Job: <span className="font-mono">{review.jobId}</span>
             </p>
           </div>
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+            className="p-2 hover:bg-surface-hover rounded-lg transition-colors disabled:opacity-50"
           >
-            <X className="h-5 w-5 text-gray-600" />
+            <X className="h-5 w-5 text-foreground-muted" />
           </button>
         </div>
 
@@ -134,11 +134,11 @@ export default function ReviewModal({
           </div>
 
           {/* Data Type and Count */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-sm text-gray-600 mb-2">
+          <div className="bg-background-secondary rounded-lg p-4">
+            <p className="text-sm text-foreground-secondary mb-2">
               <span className="font-medium">Type:</span> {review.dataType}
             </p>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-foreground-secondary">
               <span className="font-medium">Fields to Review:</span> {review.fieldReviews.length}
             </p>
           </div>
@@ -152,7 +152,7 @@ export default function ReviewModal({
 
           {/* Field Reviews */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-4">Fields</h3>
+            <h3 className="font-semibold text-foreground mb-4">Fields</h3>
             <div className="space-y-4">
               {review.fieldReviews.map((field) => (
                 <FieldReviewCard
@@ -169,32 +169,32 @@ export default function ReviewModal({
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Review Notes (optional)
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Add any additional notes about this review..."
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              className="w-full p-3 border border-border-secondary rounded-lg bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
               rows={3}
             />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-200 p-6 bg-gray-50 flex gap-3">
+        <div className="border-t border-border p-6 bg-background-secondary flex gap-3">
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="flex-1 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2 bg-surface border border-border-secondary text-foreground-secondary rounded-lg hover:bg-surface-hover font-medium transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={isLoading}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
           >
             <Save className="h-4 w-4" />
             {isLoading ? 'Submitting...' : 'Submit Review'}

@@ -162,14 +162,14 @@ PROD-002,Another Product,Accessories,Another description,49.99,USD,https://examp
   return (
     <div className="space-y-6">
       {/* Tabs */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-border">
         <nav className="-mb-px flex space-x-8">
           <button
             onClick={() => setActiveTab('upload')}
             className={`py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'upload'
                 ? 'border-primary-500 text-primary-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-foreground-muted hover:text-foreground-secondary hover:border-border-secondary'
             }`}
           >
             <Upload className="inline-block h-5 w-5 mr-2" />
@@ -180,7 +180,7 @@ PROD-002,Another Product,Accessories,Another description,49.99,USD,https://examp
             className={`py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'integrate'
                 ? 'border-primary-500 text-primary-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-foreground-muted hover:text-foreground-secondary hover:border-border-secondary'
             }`}
           >
             <LinkIcon className="inline-block h-5 w-5 mr-2" />
@@ -197,7 +197,7 @@ PROD-002,Another Product,Accessories,Another description,49.99,USD,https://examp
               <div
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleDrop}
-                className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-gray-400 transition-colors"
+                className="border-2 border-dashed border-border-secondary rounded-lg p-12 text-center hover:border-border transition-colors"
               >
                 <input
                   type="file"
@@ -206,11 +206,11 @@ PROD-002,Another Product,Accessories,Another description,49.99,USD,https://examp
                   accept=".csv"
                   onChange={handleFileInput}
                 />
-                <Package className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <Package className="h-12 w-12 mx-auto text-foreground-muted mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">
                   Upload Product Catalog
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-sm text-foreground-secondary mb-4">
                   Drop your CSV file here or{' '}
                   <label
                     htmlFor="catalog-upload"
@@ -219,7 +219,7 @@ PROD-002,Another Product,Accessories,Another description,49.99,USD,https://examp
                     browse
                   </label>
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-foreground-muted">
                   CSV format only • Up to 10,000 products
                 </p>
               </div>
@@ -250,31 +250,31 @@ PROD-002,Another Product,Accessories,Another description,49.99,USD,https://examp
           )}
 
           {uploadStatus === 'uploading' && (
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <div className="bg-surface border border-border rounded-lg p-6">
               <div className="flex items-center space-x-3 mb-4">
                 <Loader2 className="h-6 w-6 text-primary-600 animate-spin" />
                 <div>
-                  <h4 className="font-medium text-gray-900">Uploading catalog...</h4>
-                  <p className="text-sm text-gray-600">{uploadedFile?.name}</p>
+                  <h4 className="font-medium text-foreground">Uploading catalog...</h4>
+                  <p className="text-sm text-foreground-secondary">{uploadedFile?.name}</p>
                 </div>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-background-tertiary rounded-full h-2">
                 <div
                   className="bg-primary-600 rounded-full h-2 transition-all"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
-              <p className="text-sm text-gray-600 mt-2">{uploadProgress}%</p>
+              <p className="text-sm text-foreground-secondary mt-2">{uploadProgress}%</p>
             </div>
           )}
 
           {uploadStatus === 'processing' && (
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <div className="bg-surface border border-border rounded-lg p-6">
               <div className="flex items-center space-x-3">
                 <Loader2 className="h-6 w-6 text-blue-600 animate-spin" />
                 <div>
-                  <h4 className="font-medium text-gray-900">Processing products...</h4>
-                  <p className="text-sm text-gray-600">
+                  <h4 className="font-medium text-foreground">Processing products...</h4>
+                  <p className="text-sm text-foreground-secondary">
                     Extracting product information and validating data
                   </p>
                 </div>
@@ -326,7 +326,7 @@ PROD-002,Another Product,Accessories,Another description,49.99,USD,https://examp
       {/* Connect Platform Tab */}
       {activeTab === 'integrate' && (
         <div className="space-y-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-foreground-secondary">
             Connect your e-commerce platform to automatically sync your product catalog
           </p>
 
@@ -337,15 +337,15 @@ PROD-002,Another Product,Accessories,Another description,49.99,USD,https://examp
                 className={`border rounded-lg p-6 ${
                   integration.status === 'connected'
                     ? 'border-green-300 bg-green-50'
-                    : 'border-gray-200 bg-white'
+                    : 'border-border bg-surface'
                 }`}
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center space-x-3">
                     <div className="text-3xl">{integration.icon}</div>
                     <div>
-                      <h4 className="font-medium text-gray-900">{integration.name}</h4>
-                      <p className="text-sm text-gray-600">{integration.description}</p>
+                      <h4 className="font-medium text-foreground">{integration.name}</h4>
+                      <p className="text-sm text-foreground-secondary">{integration.description}</p>
                     </div>
                   </div>
                   {integration.status === 'connected' && (
@@ -363,13 +363,13 @@ PROD-002,Another Product,Accessories,Another description,49.99,USD,https://examp
                 )}
 
                 {integration.status === 'coming_soon' && (
-                  <div className="mt-3 px-4 py-2 bg-gray-100 text-gray-500 rounded-md text-sm font-medium text-center">
+                  <div className="mt-3 px-4 py-2 bg-background-tertiary text-foreground-muted rounded-md text-sm font-medium text-center">
                     Coming Soon
                   </div>
                 )}
 
                 {integration.status === 'connected' && (
-                  <button className="w-full mt-3 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm font-medium">
+                  <button className="w-full mt-3 px-4 py-2 bg-surface border border-border-secondary text-foreground-secondary rounded-md hover:bg-surface-hover text-sm font-medium">
                     Manage Connection
                   </button>
                 )}
