@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -28,10 +28,79 @@ import {
   X,
 } from 'lucide-react';
 
+// Helper to check if data is new Brand360Profile format
+function isNewProfileFormat(data: any): boolean {
+  return !!(data?.brandIdentityPrism || data?.brandArchetype || data?.brandVoiceProfile || data?.completionScore !== undefined);
+}
+
+// Calculate completion status from new Brand360Profile format
+function calculateCompletionStatus(data: any) {
+  if (!data) return { identity: 0, marketPosition: 0, competitors: 0, products: 0 };
+
+  // For new format, calculate based on what's populated
+  if (isNewProfileFormat(data)) {
+    const identityScore = (
+      (data.brandIdentityPrism ? 40 : 0) +
+      (data.brandArchetype ? 30 : 0) +
+      (data.brandVoiceProfile ? 30 : 0)
+    );
+
+    const marketScore = (
+      (data.customerPersonas?.length > 0 ? 50 : 0) +
+      (data.organizationSchema ? 50 : 0)
+    );
+
+    const competitorsScore = data.competitorGraph?.competitors?.length
+      ? Math.min(data.competitorGraph.competitors.length * 25, 100)
+      : 0;
+
+    const productsScore = data.products?.length
+      ? Math.min(data.products.length * 20, 100)
+      : 0;
+
+    return {
+      identity: identityScore,
+      marketPosition: marketScore,
+      competitors: competitorsScore,
+      products: productsScore,
+    };
+  }
+
+  // Legacy format
+  return data.completionStatus || { identity: 0, marketPosition: 0, competitors: 0, products: 0 };
+}
+
+// Get profile strength from either format
+function getProfileStrength(data: any): number {
+  if (!data) return 0;
+  if (isNewProfileFormat(data)) {
+    return data.completionScore || 0;
+  }
+  return data.profileStrength || 0;
+}
+
+// Union type for both legacy and new format
+type BrandProfileData = Brand360Data | {
+  id: string;
+  organizationId: string;
+  completionScore?: number;
+  entityHealthScore?: number;
+  brandIdentityPrism?: any;
+  brandArchetype?: any;
+  brandVoiceProfile?: any;
+  organizationSchema?: any;
+  entityHome?: any;
+  competitorGraph?: { competitors: any[] };
+  customerPersonas?: any[];
+  products?: any[];
+  claimLocker?: any;
+  [key: string]: any;
+};
+
 export default function BrandProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [brand360Data, setBrand360Data] = useState<Brand360Data | null>(null);
+  const [brand360Data, setBrand360Data] = useState<BrandProfileData | null>(null);
   const [brandId, setBrandId] = useState<string | null>(null);
   const [brandDomain, setBrandDomain] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
@@ -160,13 +229,8 @@ export default function BrandProfilePage() {
         {brandId && (
           <div className="card p-6 mb-8">
             <ProfileStrengthMeter
-              overall={brand360Data?.profileStrength || 0}
-              pillars={brand360Data?.completionStatus || {
-                identity: 0,
-                marketPosition: 0,
-                competitors: 0,
-                products: 0,
-              }}
+              overall={getProfileStrength(brand360Data)}
+              pillars={calculateCompletionStatus(brand360Data)}
             />
           </div>
         )}
@@ -353,16 +417,16 @@ export default function BrandProfilePage() {
         {brandId && brand360Data?.products && brand360Data.products.length > 0 && (
           <div className="mb-8">
             <BrandOfferingsShowcase
-              products={brand360Data.products.map(p => ({
+              products={brand360Data.products.map((p: any) => ({
                 id: p.id,
                 name: p.name,
                 category: p.category,
                 brandStory: p.description,
-                aiStory: p.features.join(', '),
+                aiStory: p.features?.join(', ') || '',
                 mentions: 0,
                 accuracy: 0,
                 trend: 'stable',
-                price: p.pricing.amount
+                price: p.price || p.pricing?.amount || 0
               }))}
             />
           </div>
@@ -374,10 +438,28 @@ export default function BrandProfilePage() {
             <h2 className="section-title mb-6">Profile Summary</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: 'Brand Values', value: brand360Data.identity?.values?.length || 0, icon: Building2 },
-                { label: 'Target Audiences', value: brand360Data.marketPosition?.targetAudiences?.length || 0, icon: Target },
-                { label: 'Competitors', value: brand360Data.competitors?.length || 0, icon: Users },
-                { label: 'Products', value: brand360Data.products?.length || 0, icon: Package },
+                {
+                  label: 'Brand Values',
+                  value: isNewProfileFormat(brand360Data)
+                    ? ((brand360Data as any).brandIdentityPrism?.cultureValues?.length || 0)
+                    : ((brand360Data as any).identity?.values?.length || 0),
+                  icon: Building2
+                },
+                {
+                  label: 'Target Audiences',
+                  value: isNewProfileFormat(brand360Data)
+                    ? ((brand360Data as any).customerPersonas?.length || 0)
+                    : ((brand360Data as any).marketPosition?.targetAudiences?.length || 0),
+                  icon: Target
+                },
+                {
+                  label: 'Competitors',
+                  value: isNewProfileFormat(brand360Data)
+                    ? ((brand360Data as any).competitorGraph?.competitors?.length || 0)
+                    : ((brand360Data as any).competitors?.length || 0),
+                  icon: Users
+                },
+                { label: 'Products', value: (brand360Data as any).products?.length || 0, icon: Package },
               ].map((stat) => {
                 const Icon = stat.icon;
                 return (

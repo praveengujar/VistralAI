@@ -514,11 +514,20 @@ model Brand360Profile {
   // Additional Relations
   customerPersonas     CustomerPersona[]
   products             Product[]
+  productCatalog       AEOProductCatalog?
   generatedPrompts     GeneratedPrompt[]
   perceptionScans      PerceptionScan[]
   perceptionResults    AIPerceptionResult[]
   perceptionInsights   PerceptionInsight[]
   correctionWorkflows  CorrectionWorkflow[]
+
+  // Target Audience & Market Positioning
+  targetAudienceProfile TargetAudienceProfile?
+  marketPositioning    AEOMarketPositioning?
+
+  // Completion tracking for audience/positioning
+  audienceCompletionScore    Float?   @default(0)
+  positioningCompletionScore Float?   @default(0)
 
   @@index([organizationId])
   @@map("brand360_profiles")
@@ -891,58 +900,475 @@ model CustomerPersona {
   id                String   @id @default(auto()) @map("_id") @db.ObjectId
   brand360Id        String   @db.ObjectId
 
-  name              String
+  // ---- Identity ----
+  name              String   // "Marketing Mary", "Developer Dave"
+  title             String?  // Job title or role
+  archetype         String?  // "The Innovator", "The Pragmatist", etc.
+  avatarUrl         String?
   type              String   @default("primary") // primary, secondary, tertiary, anti
-  description       String
+  description       String?
 
-  // Demographics
+  // ---- Demographics ----
   ageRange          String?
   gender            String?
   income            String?
   education         String?
   location          String?
 
-  // Professional Context
+  // ---- Professional Context (B2B) ----
   jobTitle          String?
   jobFunction       String?
   industry          String?
-  companySize       String?
-  seniorityLevel    String?
+  companySize       String?  // "Startup", "SMB", "Enterprise"
+  seniorityLevel    String?  // "IC", "Manager", "Director", "VP", "C-Level"
+  department        String?
+  reportingTo       String?  // Who they report to
+  teamSize          Int?     // Number of direct reports
+  budget            String?  // Budget authority level
 
-  // Psychographics
-  values            String[]
+  // ---- Psychographics ----
+  personality       String?  // Brief personality description
+  values            String[] // Core values
+  motivations       String[] // What drives them
+  frustrations      String[] // What annoys them
+  aspirations       String[] // Goals and dreams
   interests         String[]
   lifestyle         String?
 
-  // Behavioral - Critical for Prompt Generation
-  painPoints        String[]
-  goals             String[]
+  // ---- Pain Points (Enhanced - now with PainPoint model relation) ----
+  painPointsSummary String[] // Quick list for backward compatibility
+  primaryGoals      String[] // Main objectives
+  secondaryGoals    String[]
+  kpis              String[] // How they measure success
   frustrationsWithCurrentSolutions String[]
 
-  // Decision Making
+  // ---- Buying Behavior ----
+  buyingRole        String?  // "Decision Maker", "Influencer", "User", "Gatekeeper"
+  buyingCriteria    String[] // What matters in purchase decisions
+  purchaseTimeline  String?  // "Immediate", "1-3 months", "3-6 months", "6-12 months"
+  budgetCycle       String?  // "Q1", "Fiscal Year End", "As needed"
+  preferredVendorType String? // "Established", "Innovative", "Local"
   decisionCriteria  String[]
   decisionProcess   String?
   budgetAuthority   String?
-  purchaseTimeline  String?
 
-  // Information Behavior
-  informationSources String[]
+  // ---- Information Sources ----
+  informationSources String[] // Where they get info
+  trustedPublications String[]
+  socialPlatforms   String[]
+  influencers       String[] // People/brands they follow
+  communities       String[] // Slack, Discord, forums, etc.
   trustedInfluencers String[]
   contentPreferences String[]
   searchBehavior    String?
 
-  // Questions They Ask - DIRECT PROMPT FUEL
+  // ---- Technology Profile ----
+  techSavviness     String?  // "Low", "Medium", "High", "Expert"
+  currentTools      String[] // Tools they currently use
+  preferredChannels String[] // Email, Slack, Phone, etc.
+  devicePreference  String?  // "Desktop", "Mobile", "Both"
+
+  // ---- Objections & Barriers ----
+  commonObjections  String[] // Typical pushback
+  purchaseBarriers  String[] // What stops them from buying
+  riskTolerance     String?  // "Low", "Medium", "High"
+
+  // ---- Brand Relationship ----
+  awarenessLevel    String?  // "Unaware", "Problem Aware", "Solution Aware", "Product Aware", "Most Aware"
+  currentSolution   String?  // What they use today
+  switchingCost     String?  // "Low", "Medium", "High"
+
+  // ---- Messaging ----
+  keyMessages       String[] // Messages that resonate
+  toneThatResonates String?  // "Professional", "Casual", "Technical", etc.
+  triggerWords      String[] // Words that get attention
+  avoidWords        String[] // Words that turn them off
+
+  // ---- Quotes / Voice of Customer ----
+  sampleQuotes      String[] // Representative quotes
+
+  // ---- Questions They Ask - DIRECT PROMPT FUEL ----
   commonQuestions   String[]
   objections        String[]
   buyingTriggers    String[]
+
+  // ---- Product Mapping ----
+  relevantProducts  String[] // Product IDs this persona cares about
+  relevantUseCases  String[] // Use cases that matter
+
+  // ---- Scoring ----
+  priority          Int      @default(1) // 1 = Primary, 2 = Secondary, 3 = Tertiary
+  revenueImpact     String?  // "High", "Medium", "Low"
+  volumeImpact      String?  // "High", "Medium", "Low"
+  strategicFit      Float?   // 0-100 how well they fit ideal customer profile
+
+  // ---- Metadata ----
+  importSource      String   @default("manual")
+  extractionConfidence Float?
+  needsReview       Boolean  @default(false)
+  isActive          Boolean  @default(true)
 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
   brand360          Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+  painPoints        PainPoint[]
 
   @@index([brand360Id])
+  @@index([priority])
   @@map("customer_personas")
+}
+
+// ============================================
+// TARGET AUDIENCE & MARKET POSITIONING (Enhanced AEO)
+// ============================================
+
+// Target Audience Profile - Main container for audience data
+model TargetAudienceProfile {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id            String   @unique @db.ObjectId
+
+  // Overview
+  primaryMarket         String?  // B2B, B2C, B2B2C, D2C
+  geographicFocus       String[] // ["North America", "Europe", "Global"]
+  totalAddressableMarket String? // TAM description
+  servicableMarketShare String?  // SAM/SOM description
+
+  // Industry Verticals (for B2B)
+  targetIndustries      String[]
+  excludedIndustries    String[]
+
+  // Company Size Targeting (for B2B)
+  targetCompanySize     String[] // ["Startup", "SMB", "Mid-Market", "Enterprise"]
+  minEmployeeCount      Int?
+  maxEmployeeCount      Int?
+  minRevenue            Float?
+  maxRevenue            Float?
+  revenueCurrency       String   @default("USD")
+
+  // Decision Makers (for B2B)
+  targetJobTitles       String[]
+  targetDepartments     String[]
+
+  // Consumer Demographics (for B2C)
+  ageRangeMin           Int?
+  ageRangeMax           Int?
+  genderFocus           String?  // "All", "Male", "Female", "Non-binary"
+  incomeLevel           String?  // "Low", "Middle", "Upper-Middle", "High", "Affluent"
+  educationLevel        String?
+
+  // Extraction metadata
+  importSource          String   @default("manual") // manual, website, ai
+  extractionConfidence  Float?
+  lastUpdatedAt         DateTime @updatedAt
+
+  createdAt             DateTime @default(now())
+
+  brand360              Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+  segments              AEOMarketSegment[]
+
+  @@map("target_audience_profiles")
+}
+
+// Pain Points - Critical for AEO prompt generation
+model PainPoint {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  personaId             String   @db.ObjectId
+
+  // Pain point details
+  title                 String   // Short title
+  description           String   // Full description
+  category              String?  // "Efficiency", "Cost", "Quality", "Risk", etc.
+  severity              String   @default("Medium") // "Critical", "High", "Medium", "Low"
+  frequency             String?  // "Daily", "Weekly", "Monthly", "Occasionally"
+
+  // Impact
+  businessImpact        String?  // How it affects their business
+  emotionalImpact       String?  // How it makes them feel
+  currentWorkaround     String?  // How they handle it today
+
+  // Solution mapping
+  addressedByProduct    Boolean  @default(false)
+  solutionDescription   String?  // How our product solves it
+
+  // For prompt generation
+  promptCategory        String?  // Which prompt category this feeds
+  samplePrompts         String[] // Example prompts about this pain
+
+  createdAt             DateTime @default(now())
+
+  persona               CustomerPersona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+
+  @@index([personaId])
+  @@index([severity])
+  @@map("pain_points")
+}
+
+// Market Segments
+model AEOMarketSegment {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  targetAudienceId      String   @db.ObjectId
+  brand360Id            String   @db.ObjectId
+
+  // Segment identity
+  name                  String
+  description           String?
+
+  // Segment criteria
+  segmentationType      String   // "Demographic", "Firmographic", "Behavioral", "Psychographic", "Geographic"
+  criteria              Json?    // Flexible criteria definition
+
+  // Size & opportunity
+  estimatedSize         String?  // "10,000 companies", "5M consumers"
+  growthRate            String?  // "15% YoY"
+  marketShare           Float?   // Current market share in this segment
+
+  // Strategic importance
+  priority              Int      @default(1)
+  revenueContribution   Float?   // % of revenue from this segment
+  growthPotential       String?  // "High", "Medium", "Low"
+  competitiveIntensity  String?  // "High", "Medium", "Low"
+
+  // Personas in segment
+  personaIds            String[] @db.ObjectId
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  targetAudience        TargetAudienceProfile @relation(fields: [targetAudienceId], references: [id], onDelete: Cascade)
+
+  @@index([brand360Id])
+  @@index([priority])
+  @@map("aeo_market_segments")
+}
+
+// Market Positioning - Strategic positioning framework
+model AEOMarketPositioning {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id            String   @unique @db.ObjectId
+
+  // ---- Core Positioning Statement ----
+  positioningStatement  String?  // Classic positioning statement
+
+  // ---- Positioning Components ----
+  targetAudienceSummary String?  // Who we're for
+  categoryDefinition    String?  // What category we compete in
+  primaryBenefit        String?  // Main value we provide
+  competitiveAlternative String? // What we're better than
+  reasonToBelieve       String?  // Why they should believe us
+
+  // ---- Category Strategy ----
+  categoryType          String?  // "Existing", "Adjacent", "New Category"
+  categoryPosition      String?  // "Leader", "Challenger", "Niche", "Disruptor"
+  categoryCreation      String?  // If creating new category, describe it
+
+  // ---- Competitive Positioning ----
+  competitiveStance     String?  // "Offensive", "Defensive", "Flanking", "Guerrilla"
+  primaryDifferentiator String?  // Main thing that sets us apart
+  secondaryDifferentiators String[]
+
+  // ---- Strategic Narrative ----
+  beforeState           String?  // What life is like before using product
+  afterState            String?  // What life is like after using product
+  transformationStory   String?  // The journey from before to after
+
+  // ---- Messaging Framework ----
+  elevatorPitch         String?  // 30-second pitch
+  boilerplate           String?  // Standard company description
+  headlines             String[] // Key headlines/taglines
+
+  // ---- Pricing Position ----
+  pricingPosition       String?  // "Premium", "Mid-Market", "Value", "Freemium"
+  pricingRationale      String?  // Why this pricing strategy
+
+  // ---- Market Dynamics ----
+  marketMaturity        String?  // "Emerging", "Growing", "Mature", "Declining"
+  marketTrends          String[] // Key trends affecting positioning
+  disruptionRisk        String?  // "High", "Medium", "Low"
+
+  // ---- Metadata ----
+  importSource          String   @default("manual")
+  extractionConfidence  Float?
+  lastReviewedAt        DateTime?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  brand360              Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+  valuePropositions     ValueProposition[]
+  positioningAxes       PositioningAxis[]
+  proofPoints           ProofPoint[]
+
+  @@map("aeo_market_positionings")
+}
+
+// Value Propositions
+model ValueProposition {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  positioningId         String   @db.ObjectId
+
+  // Core VP
+  headline              String   // Compelling headline
+  subheadline           String?  // Supporting statement
+  description           String?  // Full description
+
+  // Structure
+  type                  String   @default("Primary") // "Primary", "Secondary", "Product-Specific"
+  forPersona            String?  // Specific persona this VP is for
+  forProduct            String?  // Specific product this VP is for
+
+  // Value Framework
+  functionalValue       String?  // What it does
+  emotionalValue        String?  // How it makes them feel
+  socialValue           String?  // How it affects their image
+  economicValue         String?  // Financial benefit
+
+  // Proof
+  supportingProof       String[] // Evidence that backs this up
+  customerQuote         String?  // Customer testimonial
+
+  // Metrics (if quantifiable)
+  metricValue           String?  // "50% faster", "3x ROI"
+  metricContext         String?  // Context for the metric
+
+  priority              Int      @default(1)
+  isActive              Boolean  @default(true)
+
+  createdAt             DateTime @default(now())
+
+  positioning           AEOMarketPositioning @relation(fields: [positioningId], references: [id], onDelete: Cascade)
+
+  @@index([positioningId])
+  @@map("value_propositions")
+}
+
+// Positioning Axes - For perceptual mapping
+model PositioningAxis {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  positioningId         String   @db.ObjectId
+
+  // Axis definition
+  name                  String   // e.g., "Ease of Use", "Price", "Features"
+  description           String?
+
+  // Axis endpoints
+  lowEndLabel           String   // e.g., "Simple", "Affordable", "Basic"
+  highEndLabel          String   // e.g., "Complex", "Premium", "Full-Featured"
+
+  // Brand position on this axis (0-100)
+  brandPosition         Float    // Where we sit on this axis
+
+  // Competitor positions
+  competitorPositions   Json?    // [{competitor: "X", position: 75}]
+
+  // Strategic importance
+  importance            String   @default("Medium") // "High", "Medium", "Low"
+  isDefining            Boolean  @default(false) // Is this a key differentiator?
+
+  createdAt             DateTime @default(now())
+
+  positioning           AEOMarketPositioning @relation(fields: [positioningId], references: [id], onDelete: Cascade)
+
+  @@index([positioningId])
+  @@map("positioning_axes")
+}
+
+// Proof Points - Evidence supporting positioning claims
+model ProofPoint {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  positioningId         String   @db.ObjectId
+
+  // Proof content
+  type                  String   // "Statistic", "Case Study", "Award", "Certification", "Testimonial", "Media Mention"
+  title                 String
+  description           String?
+
+  // Metrics
+  metricValue           String?  // "500+ customers", "99.9% uptime"
+  metricContext         String?
+
+  // Source
+  source                String?  // Where this proof comes from
+  sourceUrl             String?
+  dateAchieved          DateTime?
+
+  // Usage
+  useInMessaging        Boolean  @default(true)
+  primaryClaimSupported String?  // Which claim does this support
+
+  // Verification
+  isVerified            Boolean  @default(false)
+  verificationNotes     String?
+
+  priority              Int      @default(1)
+
+  createdAt             DateTime @default(now())
+
+  positioning           AEOMarketPositioning @relation(fields: [positioningId], references: [id], onDelete: Cascade)
+
+  @@index([positioningId])
+  @@index([type])
+  @@map("proof_points")
+}
+
+// ============================================
+// PRODUCT CATALOG (Enhanced)
+// ============================================
+
+model AEOProductCatalog {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id            String   @unique @db.ObjectId
+
+  // Catalog metadata
+  catalogName           String
+  catalogDescription    String?
+
+  // Import source tracking
+  importSource          String   @default("manual") // manual, website, shopify, csv, api
+  lastImportAt          DateTime?
+  lastImportSource      String?
+
+  // Shopify connection
+  shopifyConnected      Boolean  @default(false)
+  shopifyStoreUrl       String?
+  shopifyAccessToken    String?  // Should be encrypted in production
+  shopifySyncEnabled    Boolean  @default(false)
+  shopifyLastSyncAt     DateTime?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  brand360              Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+  categories            AEOProductCategory[]
+  products              Product[]
+
+  @@map("aeo_product_catalogs")
+}
+
+model AEOProductCategory {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  catalogId             String   @db.ObjectId
+
+  name                  String
+  slug                  String
+  description           String?
+  parentId              String?  @db.ObjectId
+  level                 Int      @default(0)
+  sortOrder             Int      @default(0)
+
+  // Schema.org mapping
+  schemaType            String?  // Product, Service, SoftwareApplication, etc.
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  catalog               AEOProductCatalog @relation(fields: [catalogId], references: [id], onDelete: Cascade)
+  products              Product[]
+
+  @@unique([catalogId, slug])
+  @@index([catalogId])
+  @@index([parentId])
+  @@map("aeo_product_categories")
 }
 
 // ============================================
@@ -950,60 +1376,167 @@ model CustomerPersona {
 // ============================================
 
 model Product {
-  id                String   @id @default(auto()) @map("_id") @db.ObjectId
-  brand360Id        String   @db.ObjectId
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id            String   @db.ObjectId
+  catalogId             String?  @db.ObjectId
+  categoryId            String?  @db.ObjectId
 
-  // Schema.org Product properties
-  name              String
-  description       String?
-  sku               String?
-  gtin              String?
-  mpn               String?
+  // ---- Core Identity ----
+  name                  String
+  slug                  String?
+  description           String?
+  shortDescription      String?
 
-  // Category & Classification
-  category          String?
-  subCategory       String?
-  productType       String   @default("Product") // Product, Service, SoftwareApplication
+  // ---- External IDs ----
+  sku                   String?
+  gtin                  String?  // Global Trade Item Number (UPC, EAN, ISBN)
+  mpn                   String?  // Manufacturer Part Number
+  externalId            String?  // Shopify product ID, etc.
+  externalVariantId     String?  // For variant tracking
+
+  // ---- Classification ----
+  productType           String   @default("Product") // Product, Service, SoftwareApplication, Subscription
+  category              String?
+  subCategory           String?
+  tags                  String[]
+
+  // ---- Pricing ----
+  price                 Float?
+  compareAtPrice        Float?   // Original/MSRP price
+  priceCurrency         String   @default("USD")
+  priceRange            String?  // $, $$, $$$, $$$$
+  pricingModel          String?  // one-time, subscription, freemium, usage-based
+  billingPeriod         String?  // monthly, yearly, etc.
+
+  // ---- Availability ----
+  availability          String   @default("InStock") // InStock, OutOfStock, PreOrder, Discontinued
+  availabilityDate      DateTime?
+  inventoryQuantity     Int?
+
+  // ---- Features & Benefits (Critical for AEO) ----
+  features              String[]
+  benefits              String[]
+  specifications        Json?    // Technical specs as key-value
+
+  // ---- Use Cases (Critical for Prompt Generation) ----
+  useCases              String[]
+  targetAudience        String?
+  idealCustomer         String?
+
+  // ---- Proof Points ----
+  aggregateRating       Json?    // {ratingValue, reviewCount, bestRating}
+  awards                String[]
+  certifications        String[]
+
+  // ---- Media ----
+  imageUrl              String?
+  imageUrls             String[]
+  videoUrls             String[]
+
+  // ---- Competitive ----
+  competitorProducts    Json?    // [{competitor, product, differentiator}]
+  uniqueSellingPoints   String[]
+
+  // ---- Import Metadata ----
+  importSource          String   @default("manual") // manual, website, shopify, csv
+  importedAt            DateTime?
+  lastSyncAt            DateTime?
+  sourceUrl             String?  // Original product page URL
+
+  // ---- Status ----
+  isHero                Boolean  @default(false)
+  isActive              Boolean  @default(true)
+  isFeatured            Boolean  @default(false)
+
+  // ---- AI Extraction Metadata ----
+  extractionConfidence  Float?   // 0-1 confidence score
+  needsReview           Boolean  @default(false)
+  reviewNotes           String?
+
+  // ---- Schema.org Output ----
+  jsonLdOutput          Json?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  brand360              Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+  catalog               AEOProductCatalog? @relation(fields: [catalogId], references: [id])
+  categoryRef           AEOProductCategory? @relation(fields: [categoryId], references: [id])
+  variants              ProductVariant[]
+
+  @@unique([brand360Id, slug])
+  @@index([brand360Id])
+  @@index([catalogId])
+  @@index([externalId])
+  @@index([sku])
+  @@map("products")
+}
+
+model ProductVariant {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId             String   @db.ObjectId
+
+  name                  String
+  sku                   String?
+  externalId            String?  // Shopify variant ID
+
+  // Variant attributes
+  attributes            Json     // {size: "Large", color: "Blue"}
 
   // Pricing
-  priceRange        String?
-  priceCurrency     String   @default("USD")
-  priceValidUntil   DateTime?
-  availability      String?  // InStock, OutOfStock, PreOrder
+  price                 Float?
+  compareAtPrice        Float?
 
-  // Detailed Attributes
-  features          String[]
-  benefits          String[]
-  useCases          String[]
-  specifications    Json?
-
-  // Audience
-  audience          Json?
-  idealCustomer     String?
+  // Inventory
+  inventoryQuantity     Int?
+  availability          String   @default("InStock")
 
   // Media
-  imageUrls         String[]
-  videoUrls         String[]
+  imageUrl              String?
 
-  // Reviews aggregate
-  aggregateRating   Json?    // {ratingValue, reviewCount, bestRating}
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
-  // Competitive
-  competitorProducts Json?   // [{competitor, product, differentiator}]
+  product               Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  isHero            Boolean  @default(false)
-  isActive          Boolean  @default(true)
+  @@unique([productId, externalId])
+  @@index([productId])
+  @@index([externalId])
+  @@map("product_variants")
+}
 
-  // Generated Schema
-  jsonLdOutput      Json?
+// Import job tracking
+model ProductImportJob {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id            String   @db.ObjectId
 
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  // Job details
+  source                String   // website, csv, xlsx, shopify
+  status                String   @default("pending") // pending, processing, completed, failed, completed_with_errors
 
-  brand360          Brand360Profile @relation(fields: [brand360Id], references: [id], onDelete: Cascade)
+  // File details (for CSV/XLSX)
+  fileName              String?
+  fileUrl               String?
+
+  // Progress
+  totalItems            Int      @default(0)
+  processedItems        Int      @default(0)
+  successItems          Int      @default(0)
+  failedItems           Int      @default(0)
+
+  // Results
+  errors                Json?    // [{row, field, error}]
+  warnings              Json?    // [{row, field, warning}]
+
+  // Timing
+  startedAt             DateTime?
+  completedAt           DateTime?
+
+  createdAt             DateTime @default(now())
 
   @@index([brand360Id])
-  @@map("products")
+  @@index([status])
+  @@map("product_import_jobs")
 }
 
 // ============================================

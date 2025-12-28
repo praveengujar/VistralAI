@@ -13,6 +13,8 @@ import { PrismaClient } from '@prisma/client';
 import { CrawlerAgent } from './CrawlerAgent';
 import { VibeCheckAgent } from './VibeCheckAgent';
 import { CompetitorAgent } from './CompetitorAgent';
+import { ProductExtractorAgent } from './ProductExtractorAgent';
+import { AudiencePositioningAgent } from './AudiencePositioningAgent';
 import {
   MagicImportResult,
   MagicImportOptions,
@@ -26,11 +28,15 @@ export class MagicImportOrchestrator {
   private crawlerAgent: CrawlerAgent;
   private vibeCheckAgent: VibeCheckAgent;
   private competitorAgent: CompetitorAgent;
+  private productExtractorAgent: ProductExtractorAgent;
+  private audiencePositioningAgent: AudiencePositioningAgent;
 
   constructor() {
     this.crawlerAgent = new CrawlerAgent();
     this.vibeCheckAgent = new VibeCheckAgent();
     this.competitorAgent = new CompetitorAgent();
+    this.productExtractorAgent = new ProductExtractorAgent();
+    this.audiencePositioningAgent = new AudiencePositioningAgent();
   }
 
   /**
@@ -51,6 +57,9 @@ export class MagicImportOrchestrator {
       organizationSchema: false,
       brandIdentity: false,
       competitors: 0,
+      products: 0,
+      personas: 0,
+      positioning: false,
     };
 
     const onProgress = options.onProgress || (() => {});
@@ -124,8 +133,8 @@ export class MagicImportOrchestrator {
           errors.push(`EntityHome save error: ${err}`);
         }
 
-        // Save Organization Schema
-        if (crawlResult.data.organizationSchema.name) {
+        // Save Organization Schema (use brandName as fallback if Schema.org name is empty)
+        if (crawlResult.data.organizationSchema.name || brandName) {
           try {
             await prisma.organizationSchema.upsert({
               where: { brand360Id: brand360.id },
@@ -383,7 +392,337 @@ export class MagicImportOrchestrator {
       }
     }
 
-    // Step 5: Calculate scores
+    // Step 5: Run Product Extractor Agent
+    if (!options.skipProducts && websiteContent) {
+      onProgress('products', 0, 'Extracting products and services...');
+      stages.push({ name: 'products', status: 'running' });
+
+      const productResult = await this.productExtractorAgent.extract(
+        websiteUrl,
+        websiteContent,
+        brandName,
+        { onProgress }
+      );
+
+      if (productResult.success && productResult.data) {
+        stages[stages.length - 1] = {
+          name: 'products',
+          status: 'completed',
+          confidence: productResult.confidence,
+          duration: productResult.duration,
+        };
+
+        // Create or get Product Catalog
+        try {
+          const catalog = await prisma.aEOProductCatalog.upsert({
+            where: { brand360Id: brand360.id },
+            create: {
+              brand360Id: brand360.id,
+              catalogName: `${brandName} Products`,
+              importSource: 'website',
+              lastImportAt: new Date(),
+            },
+            update: {
+              lastImportAt: new Date(),
+              lastImportSource: 'website',
+            },
+          });
+
+          // Create categories first
+          const categoryMap = new Map<string, string>();
+          for (const category of productResult.data.categories) {
+            const dbCategory = await prisma.aEOProductCategory.upsert({
+              where: {
+                catalogId_slug: {
+                  catalogId: catalog.id,
+                  slug: category.slug,
+                },
+              },
+              create: {
+                catalogId: catalog.id,
+                name: category.name,
+                slug: category.slug,
+                description: category.description,
+                level: category.level,
+              },
+              update: {
+                name: category.name,
+                description: category.description,
+              },
+            });
+            categoryMap.set(category.slug, dbCategory.id);
+          }
+
+          // Save products
+          for (const product of productResult.data.products) {
+            const categoryId = product.category
+              ? categoryMap.get(product.category.toLowerCase().replace(/[^a-z0-9]+/g, '-'))
+              : undefined;
+
+            // Get price from first tier if available
+            const firstTier = product.pricingTiers?.[0];
+            const productPrice = firstTier?.price;
+            const productCurrency = firstTier?.currency || 'USD';
+
+            await prisma.product.upsert({
+              where: {
+                brand360Id_slug: {
+                  brand360Id: brand360.id,
+                  slug: product.slug,
+                },
+              },
+              create: {
+                brand360Id: brand360.id,
+                catalogId: catalog.id,
+                categoryId,
+                name: product.name,
+                slug: product.slug,
+                description: product.description,
+                shortDescription: product.shortDescription,
+                features: product.features || [],
+                benefits: product.benefits || [],
+                useCases: product.useCases || [],
+                targetAudience: product.targetAudience,
+                pricingModel: product.pricingModel,
+                price: productPrice,
+                priceCurrency: productCurrency,
+                jsonLdOutput: product.schemaOrg as object,
+                importSource: 'website',
+                extractionConfidence: product.confidence,
+                lastSyncAt: new Date(),
+              },
+              update: {
+                description: product.description,
+                shortDescription: product.shortDescription,
+                features: product.features || [],
+                benefits: product.benefits || [],
+                useCases: product.useCases || [],
+                pricingModel: product.pricingModel,
+                price: productPrice,
+                priceCurrency: productCurrency,
+                jsonLdOutput: product.schemaOrg as object,
+                extractionConfidence: product.confidence,
+                lastSyncAt: new Date(),
+              },
+            });
+          }
+
+          discoveries.products = productResult.data.products.length;
+        } catch (err) {
+          errors.push(`Product save error: ${err}`);
+        }
+
+        onProgress('products', 100, 'Product extraction complete');
+      } else {
+        stages[stages.length - 1] = {
+          name: 'products',
+          status: 'failed',
+          error: productResult.errors?.join(', '),
+        };
+        errors.push(`Product Extractor Agent: ${productResult.errors?.join(', ')}`);
+      }
+    }
+
+    // Step 6: Run Audience & Positioning Agent
+    onProgress('audience', 0, 'Extracting target audience and positioning...');
+    stages.push({ name: 'audience', status: 'running' });
+
+    // Get competitor names and brand values for context
+    const competitorGraph = await prisma.competitorGraph.findUnique({
+      where: { brand360Id: brand360.id },
+      include: { competitors: true },
+    });
+    const competitorNames = competitorGraph?.competitors.map((c) => c.name) || [];
+
+    const brandIdentityPrism = await prisma.brandIdentityPrism.findUnique({
+      where: { brand360Id: brand360.id },
+    });
+    const brandValues = brandIdentityPrism?.cultureValues || [];
+
+    const products = await prisma.product.findMany({
+      where: { brand360Id: brand360.id },
+      take: 20,
+    });
+    const productNames = products.map((p) => p.name);
+
+    const audienceResult = await this.audiencePositioningAgent.extract(
+      websiteUrl,
+      brandName,
+      {
+        products: productNames,
+        competitors: competitorNames,
+        brandValues,
+      },
+      { onProgress }
+    );
+
+    if (audienceResult.success && audienceResult.data) {
+      stages[stages.length - 1] = {
+        name: 'audience',
+        status: 'completed',
+        confidence: audienceResult.confidence,
+        duration: audienceResult.duration,
+      };
+
+      // Create Target Audience Profile
+      try {
+        const targetAudienceData = audienceResult.data.targetAudience;
+        const targetAudience = await prisma.targetAudienceProfile.upsert({
+          where: { brand360Id: brand360.id },
+          create: {
+            brand360Id: brand360.id,
+            primaryMarket: targetAudienceData.primaryMarket,
+            geographicFocus: targetAudienceData.geographicFocus,
+            targetIndustries: targetAudienceData.targetIndustries,
+            targetCompanySize: targetAudienceData.targetCompanySize,
+            targetJobTitles: targetAudienceData.targetJobTitles,
+            targetDepartments: targetAudienceData.targetDepartments,
+            ageRangeMin: targetAudienceData.ageRange?.min,
+            ageRangeMax: targetAudienceData.ageRange?.max,
+            incomeLevel: targetAudienceData.incomeLevel,
+            importSource: 'website',
+            extractionConfidence: audienceResult.data.confidence,
+          },
+          update: {
+            primaryMarket: targetAudienceData.primaryMarket,
+            geographicFocus: targetAudienceData.geographicFocus,
+            targetIndustries: targetAudienceData.targetIndustries,
+            targetCompanySize: targetAudienceData.targetCompanySize,
+            targetJobTitles: targetAudienceData.targetJobTitles,
+            targetDepartments: targetAudienceData.targetDepartments,
+            extractionConfidence: audienceResult.data.confidence,
+          },
+        });
+
+        // Create Personas with Pain Points
+        for (const persona of audienceResult.data.personas) {
+          const createdPersona = await prisma.customerPersona.create({
+            data: {
+              brand360Id: brand360.id,
+              name: persona.name,
+              title: persona.title,
+              archetype: persona.archetype,
+              type: persona.priority === 1 ? 'primary' : persona.priority === 2 ? 'secondary' : 'tertiary',
+              ageRange: persona.demographics.ageRange,
+              location: persona.demographics.location,
+              companySize: persona.demographics.companySize,
+              industry: persona.demographics.industry,
+              seniorityLevel: persona.demographics.seniorityLevel,
+              personality: persona.psychographics.personality,
+              values: persona.psychographics.values,
+              motivations: persona.psychographics.motivations,
+              frustrations: persona.psychographics.frustrations,
+              primaryGoals: persona.goals,
+              buyingRole: persona.buyingBehavior.role,
+              buyingCriteria: persona.buyingBehavior.criteria,
+              purchaseTimeline: persona.buyingBehavior.timeline,
+              informationSources: persona.informationSources,
+              currentSolution: persona.currentSolution,
+              commonObjections: persona.objections,
+              keyMessages: persona.keyMessages,
+              priority: persona.priority,
+              importSource: 'website',
+              extractionConfidence: persona.confidence,
+              needsReview: persona.confidence < 0.7,
+            },
+          });
+
+          // Create Pain Points
+          for (const painPoint of persona.painPoints) {
+            await prisma.painPoint.create({
+              data: {
+                personaId: createdPersona.id,
+                title: painPoint.title,
+                description: painPoint.description,
+                severity: painPoint.severity,
+                category: painPoint.category,
+              },
+            });
+          }
+        }
+        discoveries.personas = audienceResult.data.personas.length;
+      } catch (err) {
+        errors.push(`Target Audience save error: ${err}`);
+      }
+
+      // Create Market Positioning
+      try {
+        const pos = audienceResult.data.positioning;
+        const positioning = await prisma.aEOMarketPositioning.upsert({
+          where: { brand360Id: brand360.id },
+          create: {
+            brand360Id: brand360.id,
+            positioningStatement: pos.positioningStatement,
+            targetAudienceSummary: pos.targetAudienceSummary,
+            categoryDefinition: pos.categoryDefinition,
+            primaryBenefit: pos.primaryBenefit,
+            competitiveAlternative: pos.competitiveAlternative,
+            reasonToBelieve: pos.reasonToBelieve,
+            categoryPosition: pos.categoryPosition,
+            primaryDifferentiator: pos.primaryDifferentiator,
+            secondaryDifferentiators: pos.secondaryDifferentiators,
+            elevatorPitch: pos.elevatorPitch,
+            pricingPosition: pos.pricingPosition,
+            beforeState: pos.beforeState,
+            afterState: pos.afterState,
+            importSource: 'website',
+            extractionConfidence: audienceResult.data.confidence,
+          },
+          update: {
+            positioningStatement: pos.positioningStatement,
+            targetAudienceSummary: pos.targetAudienceSummary,
+            categoryDefinition: pos.categoryDefinition,
+            primaryBenefit: pos.primaryBenefit,
+            competitiveAlternative: pos.competitiveAlternative,
+            reasonToBelieve: pos.reasonToBelieve,
+            categoryPosition: pos.categoryPosition,
+            primaryDifferentiator: pos.primaryDifferentiator,
+            secondaryDifferentiators: pos.secondaryDifferentiators,
+            elevatorPitch: pos.elevatorPitch,
+            extractionConfidence: audienceResult.data.confidence,
+          },
+        });
+
+        // Create Value Propositions
+        for (const vp of pos.valuePropositions || []) {
+          await prisma.valueProposition.create({
+            data: {
+              positioningId: positioning.id,
+              headline: vp.headline,
+              description: vp.description,
+              type: vp.type || 'Primary',
+            },
+          });
+        }
+
+        // Create Proof Points
+        for (const proof of pos.proofPoints || []) {
+          await prisma.proofPoint.create({
+            data: {
+              positioningId: positioning.id,
+              type: proof.type,
+              title: proof.title,
+              metricValue: proof.metricValue,
+            },
+          });
+        }
+
+        discoveries.positioning = true;
+      } catch (err) {
+        errors.push(`Market Positioning save error: ${err}`);
+      }
+
+      onProgress('audience', 100, 'Audience and positioning complete');
+    } else {
+      stages[stages.length - 1] = {
+        name: 'audience',
+        status: 'failed',
+        error: audienceResult.errors?.join(', '),
+      };
+      errors.push(`Audience Positioning Agent: ${audienceResult.errors?.join(', ')}`);
+    }
+
+    // Step 7: Calculate scores
     const completionScore = await this.calculateCompletionScore(brand360.id);
     const entityHealthScore = await this.calculateEntityHealthScore(brand360.id);
 
