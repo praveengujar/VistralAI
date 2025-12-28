@@ -119,6 +119,8 @@ DATABASE_MODE = 'mongodb' | 'postgres' | 'mock'
 | `CrawlerAgent` | Web crawling + Schema.org extraction |
 | `VibeCheckAgent` | Brand personality analysis |
 | `CompetitorAgent` | Competitor discovery and positioning |
+| `ProductExtractorAgent` | Product/service extraction with pricing |
+| `AudiencePositioningAgent` | Target audience & market positioning extraction |
 | `PromptGeneratorAgent` | AI prompt generation for testing |
 | `PerceptionEvaluatorAgent` | LLM-as-a-Judge evaluation |
 | `PerceptionScanOrchestrator` | Coordinates full scan workflow |
@@ -229,9 +231,23 @@ Website URL
 └─────────┬─────────┘
           │
           ▼
-┌───────────────────┐
-│ Brand360 Profile  │ ─── Store in MongoDB
-└───────────────────┘
+┌─────────────────────────┐
+│ ProductExtractorAgent   │ ─── Extract products/services with pricing
+└─────────┬───────────────┘
+          │
+          ▼
+┌─────────────────────────────┐
+│ AudiencePositioningAgent    │ ─── Generate personas + positioning
+└─────────┬───────────────────┘
+          │
+          ▼
+┌───────────────────────────────────────────┐
+│            Brand360 Profile               │
+│  ┌─────────────┐  ┌─────────────────────┐│
+│  │ Personas    │  │ Market Positioning  ││
+│  │ Pain Points │  │ Value Propositions  ││
+│  └─────────────┘  └─────────────────────┘│
+└───────────────────────────────────────────┘
 ```
 
 ### B. AEO Perception Scan
@@ -383,9 +399,13 @@ lib/
 │   └── operations/   # Domain-specific DB operations
 ├── hooks/            # Performance hooks
 ├── query/            # React Query hooks
+│   ├── hooks.ts      # Core query hooks
+│   └── audienceHooks.ts # Audience & positioning hooks
 ├── realtime/         # Socket.io client/server
 ├── services/
 │   ├── agents/       # AI agent system
+│   │   ├── ProductExtractorAgent.ts
+│   │   └── AudiencePositioningAgent.ts
 │   ├── crawler/      # Web crawling
 │   ├── llm/          # LLM integration
 │   └── queue/        # Job queue system
@@ -396,9 +416,22 @@ app/
 ├── api/              # API routes
 │   ├── aeo/          # AEO/perception endpoints
 │   ├── brand-360/    # Brand profile endpoints
+│   │   ├── audience/ # Target audience API
+│   │   ├── personas/ # Customer personas CRUD
+│   │   └── positioning/ # Market positioning API
 │   ├── onboarding/   # Onboarding flow
 │   └── admin/        # Admin endpoints
-└── (dashboard)/      # Dashboard pages
+└── dashboard/
+    └── brand-profile/
+        ├── audience/     # Audience page
+        └── positioning/  # Positioning page
+
+components/
+├── audience/         # Audience UI components
+│   ├── PersonaCard.tsx
+│   └── PersonaForm.tsx
+└── positioning/      # Positioning UI components
+    └── PositioningStatement.tsx
 ```
 
 ---
