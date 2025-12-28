@@ -296,6 +296,7 @@ export interface MagicImportResult {
     organizationSchema: boolean;
     brandIdentity: boolean;
     competitors: number;
+    products: number;
   };
   stages: MagicImportStage[];
   errors: string[];
@@ -317,7 +318,9 @@ export interface MagicImportOptions {
   skipCrawler?: boolean;
   skipVibeCheck?: boolean;
   skipCompetitors?: boolean;
+  skipProducts?: boolean;
   maxPages?: number;
+  maxProducts?: number;
   onProgress?: AgentProgressCallback;
 }
 
@@ -752,4 +755,162 @@ export interface IndustryBenchmark {
   quadrantDistribution: Record<QuadrantPosition, number>;
   topPerformers?: string[];
   updatedAt: Date;
+}
+
+// ============================================
+// Product Extractor Agent Types
+// ============================================
+
+export interface ProductExtractorResult {
+  products: ExtractedProduct[];
+  categories: ProductCategory[];
+  productPageUrls: string[];
+  rawExtraction: object;
+}
+
+export interface ExtractedProduct {
+  name: string;
+  slug: string;
+  description?: string;
+  shortDescription?: string;
+  category?: string;
+  subcategory?: string;
+  features: string[];
+  benefits: string[];
+  useCases: string[];
+  targetAudience?: string;
+  pricingModel?: ProductPricingModel;
+  pricingTiers?: ProductPricingTier[];
+  competitors?: string[];
+  differentiators?: string[];
+  sourceUrl?: string;
+  confidence: number;
+  schemaOrg?: object;
+}
+
+export type ProductPricingModel =
+  | 'free'
+  | 'freemium'
+  | 'subscription'
+  | 'one_time'
+  | 'usage_based'
+  | 'enterprise'
+  | 'contact_sales';
+
+export interface ProductPricingTier {
+  name: string;
+  price?: number;
+  currency?: string;
+  billingPeriod?: 'monthly' | 'annual' | 'one_time';
+  features?: string[];
+  isPopular?: boolean;
+}
+
+export interface ProductCategory {
+  name: string;
+  slug: string;
+  description?: string;
+  parentSlug?: string;
+  level: number;
+  productCount: number;
+}
+
+export interface ProductExtractorOptions {
+  maxProducts?: number;
+  extractPricing?: boolean;
+  extractCompetitors?: boolean;
+  onProgress?: AgentProgressCallback;
+}
+
+// ============================================
+// Audience & Positioning Agent Types
+// ============================================
+
+export interface AudiencePositioningResult {
+  targetAudience: ExtractedTargetAudience;
+  personas: ExtractedPersona[];
+  positioning: ExtractedPositioning;
+  confidence: number;
+}
+
+export interface ExtractedTargetAudience {
+  primaryMarket: string; // B2B, B2C, B2B2C, D2C
+  geographicFocus: string[];
+  targetIndustries: string[];
+  targetCompanySize: string[];
+  targetJobTitles: string[];
+  targetDepartments: string[];
+  ageRange?: { min: number; max: number };
+  incomeLevel?: string;
+}
+
+export interface ExtractedPersona {
+  name: string;
+  title: string;
+  archetype: string;
+  demographics: {
+    ageRange: string;
+    location?: string;
+    companySize?: string;
+    industry?: string;
+    seniorityLevel?: string;
+  };
+  psychographics: {
+    personality: string;
+    values: string[];
+    motivations: string[];
+    frustrations: string[];
+  };
+  painPoints: {
+    title: string;
+    description: string;
+    severity: string;
+    category: string;
+  }[];
+  goals: string[];
+  buyingBehavior: {
+    role: string;
+    criteria: string[];
+    timeline: string;
+  };
+  informationSources: string[];
+  currentSolution?: string;
+  objections: string[];
+  keyMessages: string[];
+  priority: number;
+  confidence: number;
+}
+
+export interface ExtractedPositioning {
+  positioningStatement: string;
+  targetAudienceSummary?: string;
+  categoryDefinition: string;
+  primaryBenefit: string;
+  competitiveAlternative: string;
+  reasonToBelieve: string;
+  categoryPosition: string;
+  primaryDifferentiator: string;
+  secondaryDifferentiators: string[];
+  valuePropositions: {
+    headline: string;
+    description: string;
+    type: string;
+  }[];
+  elevatorPitch: string;
+  pricingPosition: string;
+  beforeState: string;
+  afterState: string;
+  proofPoints: {
+    type: string;
+    title: string;
+    metricValue?: string;
+  }[];
+}
+
+export interface AudiencePositioningOptions {
+  skipAudience?: boolean;
+  skipPersonas?: boolean;
+  skipPositioning?: boolean;
+  maxPersonas?: number;
+  onProgress?: AgentProgressCallback;
 }

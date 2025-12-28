@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTerminology } from '@/hooks/useTerminology';
 import { motion } from 'framer-motion';
 import { Edit2, Sparkles, Check, ChevronRight } from 'lucide-react';
@@ -8,24 +8,94 @@ interface BrandStoryCanvasProps {
     onUpdate: (section: string, data: any) => void;
 }
 
+// Normalize data from either legacy Brand360Data or new Brand360Profile format
+function normalizeBrandData(brandData: any) {
+    if (!brandData) return null;
+
+    // Check if this is the new Brand360Profile format (has brandIdentityPrism)
+    const isNewFormat = !!brandData.brandIdentityPrism || !!brandData.brandArchetype || !!brandData.brandVoiceProfile;
+
+    if (isNewFormat) {
+        const prism = brandData.brandIdentityPrism || {};
+        const archetype = brandData.brandArchetype || {};
+        const voice = brandData.brandVoiceProfile || {};
+        const schema = brandData.organizationSchema || {};
+
+        return {
+            identity: {
+                vision: prism.selfImage || schema.slogan || null,
+                mission: prism.cultureDescription || schema.description || null,
+                values: prism.cultureValues || [],
+                brandVoice: {
+                    tone: voice.secondaryTones || archetype.expectedTone || [],
+                    keywords: voice.approvedPhrases || [],
+                    avoidWords: voice.bannedPhrases || [],
+                },
+                brandPersonality: archetype.primaryArchetype || null,
+            },
+            voiceSpectrums: voice.voiceSpectrums || {
+                formal_casual: 5,
+                serious_playful: 5,
+                respectful_irreverent: 5,
+                enthusiastic_matter_of_fact: 5,
+            },
+            archetype: {
+                primary: archetype.primaryArchetype,
+                primaryScore: archetype.primaryScore,
+                secondary: archetype.secondaryArchetype,
+                secondaryScore: archetype.secondaryScore,
+            },
+            personalityTraits: prism.personalityTraits || [],
+            physique: prism.physique || {},
+            reflectionProfile: prism.reflectionProfile || {},
+            completionScore: brandData.completionScore || 0,
+            entityHealthScore: brandData.entityHealthScore || 0,
+        };
+    }
+
+    // Legacy format - return as-is with defaults
+    return {
+        identity: brandData.identity || {},
+        voiceSpectrums: null,
+        archetype: null,
+        personalityTraits: [],
+        physique: {},
+        reflectionProfile: {},
+        completionScore: brandData.profileStrength || 0,
+        entityHealthScore: 0,
+    };
+}
+
 const BrandStoryCanvas: React.FC<BrandStoryCanvasProps> = ({ brandData, onUpdate }) => {
     const { t } = useTerminology();
     const [activeSection, setActiveSection] = useState<string | null>(null);
 
+    // Normalize data to handle both legacy and new formats
+    const normalizedData = useMemo(() => normalizeBrandData(brandData), [brandData]);
+
     // Debug: Log the received brandData
     console.log('[BrandStoryCanvas] Rendering with brandData:', {
-        hasIdentity: !!brandData?.identity,
-        mission: brandData?.identity?.mission?.substring(0, 50) || 'EMPTY',
-        vision: brandData?.identity?.vision?.substring(0, 50) || 'EMPTY',
-        valuesCount: brandData?.identity?.values?.length || 0,
+        isNewFormat: !!brandData?.brandIdentityPrism,
+        hasIdentity: !!normalizedData?.identity,
+        mission: normalizedData?.identity?.mission?.substring(0, 50) || 'EMPTY',
+        vision: normalizedData?.identity?.vision?.substring(0, 50) || 'EMPTY',
+        valuesCount: normalizedData?.identity?.values?.length || 0,
     });
 
-    // Mock AI alignment scores
-    const alignmentScores = {
-        essence: 92,
-        voice: 85,
-        values: 78
-    };
+    // Calculate AI alignment scores based on data completeness
+    const alignmentScores = useMemo(() => {
+        if (!normalizedData) return { essence: 0, voice: 0, values: 0 };
+
+        const essenceScore = (normalizedData.identity?.vision ? 50 : 0) + (normalizedData.identity?.mission ? 50 : 0);
+        const voiceScore = normalizedData.voiceSpectrums ? 85 : (normalizedData.identity?.brandVoice?.tone?.length ? 60 : 0);
+        const valuesScore = normalizedData.identity?.values?.length ? Math.min(normalizedData.identity.values.length * 25, 100) : 0;
+
+        return {
+            essence: essenceScore || 0,
+            voice: voiceScore || 0,
+            values: valuesScore || 0,
+        };
+    }, [normalizedData]);
 
     return (
         <div className="space-y-12">
@@ -55,7 +125,7 @@ const BrandStoryCanvas: React.FC<BrandStoryCanvasProps> = ({ brandData, onUpdate
 
                         <h3 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: 'rgb(var(--foreground-muted))' }}>Why We Exist (Vision)</h3>
                         <blockquote className="text-xl font-serif italic leading-relaxed" style={{ color: 'rgb(var(--foreground))' }}>
-                            &quot;{brandData?.identity?.vision || "Vision statement not yet extracted. Run website analysis to populate."}&quot;
+                            &quot;{normalizedData?.identity?.vision || "Vision statement not yet extracted. Run website analysis to populate."}&quot;
                         </blockquote>
 
                         <div className="mt-6 pt-6 flex items-center gap-2 text-sm" style={{ borderTop: '1px solid rgb(var(--border))', color: 'rgb(var(--foreground-muted))' }}>
@@ -74,7 +144,7 @@ const BrandStoryCanvas: React.FC<BrandStoryCanvasProps> = ({ brandData, onUpdate
 
                         <h3 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: 'rgb(var(--foreground-muted))' }}>What We Do (Mission)</h3>
                         <p className="text-lg leading-relaxed font-medium" style={{ color: 'rgb(var(--foreground))' }}>
-                            {brandData?.identity?.mission || "Mission statement not yet extracted. Run website analysis to populate."}
+                            {normalizedData?.identity?.mission || "Mission statement not yet extracted. Run website analysis to populate."}
                         </p>
 
                         <div className="mt-6 pt-6" style={{ borderTop: '1px solid rgb(var(--border))' }}>
@@ -108,32 +178,54 @@ const BrandStoryCanvas: React.FC<BrandStoryCanvasProps> = ({ brandData, onUpdate
                         <VoiceSlider
                             leftLabel="Playful"
                             rightLabel="Serious"
-                            value={30}
-                            aiValue={45}
+                            value={(normalizedData?.voiceSpectrums?.serious_playful || 5) * 10}
+                            aiValue={(normalizedData?.voiceSpectrums?.serious_playful || 5) * 10}
                         />
                         <VoiceSlider
                             leftLabel="Casual"
                             rightLabel="Formal"
-                            value={60}
-                            aiValue={80}
+                            value={(normalizedData?.voiceSpectrums?.formal_casual || 5) * 10}
+                            aiValue={(normalizedData?.voiceSpectrums?.formal_casual || 5) * 10}
                         />
                         <VoiceSlider
-                            leftLabel="Innovative"
-                            rightLabel="Traditional"
-                            value={20}
-                            aiValue={20}
+                            leftLabel="Irreverent"
+                            rightLabel="Respectful"
+                            value={(normalizedData?.voiceSpectrums?.respectful_irreverent || 5) * 10}
+                            aiValue={(normalizedData?.voiceSpectrums?.respectful_irreverent || 5) * 10}
                         />
                     </div>
 
                     <div className="mt-8 p-4 rounded-lg flex gap-4" style={{ backgroundColor: 'rgb(var(--background-secondary))', border: '1px solid rgb(var(--border))' }}>
                         <div className="w-1/2">
-                            <h4 className="text-xs font-bold uppercase mb-2" style={{ color: 'rgb(var(--foreground-muted))' }}>How You Want to Sound</h4>
-                            <p className="text-sm italic" style={{ color: 'rgb(var(--foreground))' }}>&quot;Friendly, approachable, yet authoritative on sustainability.&quot;</p>
+                            <h4 className="text-xs font-bold uppercase mb-2" style={{ color: 'rgb(var(--foreground-muted))' }}>Brand Tone & Keywords</h4>
+                            <p className="text-sm italic" style={{ color: 'rgb(var(--foreground))' }}>
+                                {normalizedData?.identity?.brandVoice?.tone?.length
+                                    ? `"${normalizedData.identity.brandVoice.tone.slice(0, 3).join(', ')}"`
+                                    : '"Run analysis to extract voice tone."'}
+                            </p>
+                            {(normalizedData?.identity?.brandVoice?.keywords?.length ?? 0) > 0 && normalizedData && (
+                                <div className="mt-2 flex flex-wrap gap-1">
+                                    {normalizedData.identity.brandVoice.keywords.slice(0, 3).map((keyword: string, i: number) => (
+                                        <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-brand-primary/10 text-brand-primary">
+                                            {keyword}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                         <div className="w-px" style={{ backgroundColor: 'rgb(var(--border))' }} />
                         <div className="w-1/2">
-                            <h4 className="text-xs font-bold text-brand-primary uppercase mb-2">How AI Describes You</h4>
-                            <p className="text-sm italic" style={{ color: 'rgb(var(--foreground-secondary))' }}>&quot;Professional and informative, focusing heavily on technical eco-specs.&quot;</p>
+                            <h4 className="text-xs font-bold text-brand-primary uppercase mb-2">Brand Archetype</h4>
+                            <p className="text-sm" style={{ color: 'rgb(var(--foreground-secondary))' }}>
+                                {normalizedData?.archetype?.primary
+                                    ? `Primary: ${normalizedData.archetype.primary.charAt(0).toUpperCase() + normalizedData.archetype.primary.slice(1)} (${normalizedData.archetype.primaryScore || 0}%)`
+                                    : 'Run analysis to determine archetype.'}
+                            </p>
+                            {normalizedData?.archetype?.secondary && (
+                                <p className="text-xs mt-1" style={{ color: 'rgb(var(--foreground-muted))' }}>
+                                    Secondary: {normalizedData.archetype.secondary.charAt(0).toUpperCase() + normalizedData.archetype.secondary.slice(1)} ({normalizedData.archetype.secondaryScore || 0}%)
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -151,7 +243,7 @@ const BrandStoryCanvas: React.FC<BrandStoryCanvasProps> = ({ brandData, onUpdate
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {(brandData?.identity?.values && brandData.identity.values.length > 0 ? brandData.identity.values : ['Value 1 - Run analysis', 'Value 2 - Run analysis', 'Value 3 - Run analysis']).map((value: string, i: number) => (
+                    {(normalizedData?.identity?.values && normalizedData.identity.values.length > 0 ? normalizedData.identity.values : ['Value 1 - Run analysis', 'Value 2 - Run analysis', 'Value 3 - Run analysis']).map((value: string, i: number) => (
                         <motion.div
                             key={i}
                             className="rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group"
