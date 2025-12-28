@@ -193,7 +193,7 @@ export default function DocumentUpload({ brandId, onComplete }: DocumentUploadPr
         className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
           isDragging
             ? 'border-primary-500 bg-primary-50'
-            : 'border-gray-300 hover:border-gray-400'
+            : 'border-border-secondary hover:border-border'
         }`}
       >
         <input
@@ -206,11 +206,11 @@ export default function DocumentUpload({ brandId, onComplete }: DocumentUploadPr
         />
 
         <div className="flex flex-col items-center">
-          <Upload className={`h-12 w-12 mb-4 ${isDragging ? 'text-primary-600' : 'text-gray-400'}`} />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <Upload className={`h-12 w-12 mb-4 ${isDragging ? 'text-primary-600' : 'text-foreground-muted'}`} />
+          <h3 className="text-lg font-medium text-foreground mb-2">
             Drop your documents here
           </h3>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-sm text-foreground-secondary mb-4">
             or{' '}
             <label
               htmlFor="file-upload"
@@ -219,7 +219,7 @@ export default function DocumentUpload({ brandId, onComplete }: DocumentUploadPr
               browse files
             </label>
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-foreground-muted">
             Supported formats: PDF, DOCX, TXT, CSV • Max file size: 10MB
           </p>
         </div>
@@ -228,19 +228,19 @@ export default function DocumentUpload({ brandId, onComplete }: DocumentUploadPr
       {/* Uploaded Files List */}
       {uploadedFiles.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-gray-900">Uploaded Files</h4>
+          <h4 className="text-sm font-medium text-foreground">Uploaded Files</h4>
           {uploadedFiles.map((uploadedFile, index) => (
             <div
               key={index}
-              className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200"
+              className="flex items-center justify-between p-4 bg-background-secondary rounded-lg border border-border"
             >
               <div className="flex items-center space-x-3 flex-1">
-                <FileText className="h-5 w-5 text-gray-400" />
+                <FileText className="h-5 w-5 text-foreground-muted" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+                  <p className="text-sm font-medium text-foreground truncate">
                     {uploadedFile.file.name}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-foreground-muted">
                     {(uploadedFile.file.size / 1024).toFixed(2)} KB
                   </p>
                 </div>
@@ -250,7 +250,7 @@ export default function DocumentUpload({ brandId, onComplete }: DocumentUploadPr
                 {uploadedFile.status === 'uploading' && (
                   <div className="flex items-center space-x-2">
                     <Loader2 className="h-5 w-5 text-primary-600 animate-spin" />
-                    <span className="text-sm text-gray-600">{uploadedFile.progress}%</span>
+                    <span className="text-sm text-foreground-secondary">{uploadedFile.progress}%</span>
                   </div>
                 )}
                 {uploadedFile.status === 'processing' && (

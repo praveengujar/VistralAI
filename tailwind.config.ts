@@ -10,6 +10,80 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // ==========================================
+        // SEMANTIC TOKENS - Theme-aware colors
+        // These reference CSS variables from globals.css
+        // ==========================================
+
+        // Backgrounds
+        background: {
+          DEFAULT: 'rgb(var(--background) / <alpha-value>)',
+          secondary: 'rgb(var(--background-secondary) / <alpha-value>)',
+          tertiary: 'rgb(var(--background-tertiary) / <alpha-value>)',
+          elevated: 'rgb(var(--background-elevated) / <alpha-value>)',
+          inverse: 'rgb(var(--background-inverse) / <alpha-value>)',
+        },
+
+        // Foregrounds/Text
+        foreground: {
+          DEFAULT: 'rgb(var(--foreground) / <alpha-value>)',
+          secondary: 'rgb(var(--foreground-secondary) / <alpha-value>)',
+          tertiary: 'rgb(var(--foreground-tertiary) / <alpha-value>)',
+          muted: 'rgb(var(--foreground-muted) / <alpha-value>)',
+          inverse: 'rgb(var(--foreground-inverse) / <alpha-value>)',
+        },
+
+        // Surfaces (cards, panels)
+        surface: {
+          DEFAULT: 'rgb(var(--surface) / <alpha-value>)',
+          hover: 'rgb(var(--surface-hover) / <alpha-value>)',
+          active: 'rgb(var(--surface-active) / <alpha-value>)',
+          disabled: 'rgb(var(--surface-disabled) / <alpha-value>)',
+        },
+
+        // Borders
+        border: {
+          DEFAULT: 'rgb(var(--border) / <alpha-value>)',
+          secondary: 'rgb(var(--border-secondary) / <alpha-value>)',
+          focus: 'rgb(var(--border-focus) / <alpha-value>)',
+        },
+
+        // Inputs
+        input: {
+          DEFAULT: 'rgb(var(--input) / <alpha-value>)',
+          border: 'rgb(var(--input-border) / <alpha-value>)',
+          focus: 'rgb(var(--input-focus) / <alpha-value>)',
+          placeholder: 'rgb(var(--input-placeholder) / <alpha-value>)',
+        },
+
+        // Sidebar
+        sidebar: {
+          DEFAULT: 'rgb(var(--sidebar) / <alpha-value>)',
+          foreground: 'rgb(var(--sidebar-foreground) / <alpha-value>)',
+          border: 'rgb(var(--sidebar-border) / <alpha-value>)',
+          hover: 'rgb(var(--sidebar-hover) / <alpha-value>)',
+          active: 'rgb(var(--sidebar-active) / <alpha-value>)',
+        },
+
+        // Ring/Focus
+        ring: 'rgb(var(--ring) / <alpha-value>)',
+
+        // Chart colors (theme-aware)
+        chart: {
+          1: 'rgb(var(--chart-1) / <alpha-value>)',
+          2: 'rgb(var(--chart-2) / <alpha-value>)',
+          3: 'rgb(var(--chart-3) / <alpha-value>)',
+          4: 'rgb(var(--chart-4) / <alpha-value>)',
+          5: 'rgb(var(--chart-5) / <alpha-value>)',
+          6: 'rgb(var(--chart-6) / <alpha-value>)',
+          7: 'rgb(var(--chart-7) / <alpha-value>)',
+          8: 'rgb(var(--chart-8) / <alpha-value>)',
+        },
+
+        // ==========================================
+        // STATIC COLOR PALETTES
+        // ==========================================
+
         // Modern primary palette - Deep indigo with vibrant accents
         primary: {
           50: '#eef2ff',

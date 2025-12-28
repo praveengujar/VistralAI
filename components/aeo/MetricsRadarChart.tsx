@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from 'recharts';
+import { useChartTheme } from '@/lib/hooks/useChartTheme';
 
 interface MetricsData {
   faithfulness: number;
@@ -85,6 +86,7 @@ export function MetricsRadarChart({
   height = 300,
 }: MetricsRadarChartProps) {
   const data = formatMetricsForChart(currentMetrics, previousMetrics, benchmarkMetrics);
+  const chartTheme = useChartTheme();
 
   return (
     <div className="w-full">
@@ -95,16 +97,16 @@ export function MetricsRadarChart({
       )}
       <ResponsiveContainer width="100%" height={height}>
         <RadarChart data={data} margin={{ top: 20, right: 50, bottom: 20, left: 50 }}>
-          <PolarGrid stroke="#e5e7eb" />
+          <PolarGrid stroke={chartTheme.gridColor} />
           <PolarAngleAxis
             dataKey="metric"
-            tick={{ fill: '#6b7280', fontSize: 11 }}
+            tick={{ fill: chartTheme.axisLabelColor, fontSize: 11 }}
             tickLine={false}
           />
           <PolarRadiusAxis
             angle={90}
             domain={[0, 100]}
-            tick={{ fill: '#9ca3af', fontSize: 10 }}
+            tick={{ fill: chartTheme.axisColor, fontSize: 10 }}
             tickCount={5}
           />
 
@@ -113,8 +115,8 @@ export function MetricsRadarChart({
             <Radar
               name="Industry Benchmark"
               dataKey="benchmark"
-              stroke="#94a3b8"
-              fill="#94a3b8"
+              stroke={chartTheme.neutralColor}
+              fill={chartTheme.neutralColor}
               fillOpacity={0.1}
               strokeDasharray="4 4"
             />
@@ -125,8 +127,8 @@ export function MetricsRadarChart({
             <Radar
               name="Previous Scan"
               dataKey="previous"
-              stroke="#a78bfa"
-              fill="#a78bfa"
+              stroke={chartTheme.colors[1]}
+              fill={chartTheme.colors[1]}
               fillOpacity={0.2}
               strokeWidth={1}
             />
@@ -136,8 +138,8 @@ export function MetricsRadarChart({
           <Radar
             name="Current"
             dataKey="current"
-            stroke="#8b5cf6"
-            fill="#8b5cf6"
+            stroke={chartTheme.colors[0]}
+            fill={chartTheme.colors[0]}
             fillOpacity={0.4}
             strokeWidth={2}
           />

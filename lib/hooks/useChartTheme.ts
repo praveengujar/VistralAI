@@ -58,6 +58,70 @@ export function useChartTheme(): ChartTheme {
   const { resolvedTheme } = useTheme();
 
   return useMemo(() => {
+    // Dim mode (Twitter-style soft dark)
+    if (resolvedTheme === 'dim') {
+      return {
+        // Background
+        backgroundColor: '#15202B',
+
+        // Grid
+        gridColor: '#38444d',
+        gridStrokeWidth: 1,
+
+        // Axis
+        axisColor: '#657786',
+        axisLabelColor: '#8899a6',
+        axisFontSize: 12,
+
+        // Tooltip
+        tooltipBackgroundColor: '#1e2a38',
+        tooltipBorderColor: '#38444d',
+        tooltipTextColor: '#f7f9f9',
+        tooltipShadow: '0 10px 40px rgba(0, 0, 0, 0.4)',
+
+        // Legend
+        legendTextColor: '#d9e4e8',
+
+        // Data colors (brightened for dim mode)
+        colors: [
+          '#818cf8', // Indigo
+          '#a78bfa', // Purple
+          '#f472b6', // Pink
+          '#fb923c', // Orange
+          '#fcd34d', // Amber
+          '#34d399', // Emerald
+          '#38bdf8', // Sky
+          '#facc15', // Yellow
+        ],
+
+        // Semantic
+        positiveColor: '#34d399',
+        negativeColor: '#f87171',
+        neutralColor: '#8899a6',
+
+        // Text
+        titleColor: '#f7f9f9',
+        subtitleColor: '#8899a6',
+
+        // Quadrant colors for AEO
+        quadrantColors: {
+          dominant: '#34d399',
+          vulnerable: '#fbbf24',
+          niche: '#38bdf8',
+          invisible: '#f87171',
+        },
+
+        // Platform colors
+        platformColors: {
+          chatgpt: '#10b981',
+          claude: '#fb923c',
+          gemini: '#60a5fa',
+          perplexity: '#a78bfa',
+        },
+      };
+    }
+
+    // Dark mode (lights out / AMOLED)
     if (resolvedTheme === 'dark') {
       return {
         // Background

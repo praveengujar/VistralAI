@@ -87,7 +87,7 @@ const AIPlatformGalaxy: React.FC<AIPlatformGalaxyProps> = ({ brandName }) => {
                                         {platform.name} Presence
                                     </div>
                                 </div>
-                                <span className="text-xs font-medium text-gray-400">{platform.name}</span>
+                                <span className="text-xs font-medium text-white/70">{platform.name}</span>
                             </div>
                         </motion.div>
                     </React.Fragment>
@@ -97,7 +97,7 @@ const AIPlatformGalaxy: React.FC<AIPlatformGalaxyProps> = ({ brandName }) => {
             {/* Legend/Controls */}
             <div className="absolute bottom-8 left-8 z-20">
                 <h3 className="text-lg font-bold mb-2">AI Platform Galaxy</h3>
-                <p className="text-sm text-gray-400 max-w-xs">
+                <p className="text-sm text-white/60 max-w-xs">
                     Visualizing your brand&apos;s gravitational pull across the AI universe. Closer orbits indicate stronger alignment and presence.
                 </p>
             </div>

@@ -19,8 +19,8 @@ interface CorrectionFunnelProps {
 const STAGE_CONFIG: Record<CorrectionWorkflowStatus, { label: string; color: string; hoverColor: string; description: string }> = {
   suggested: {
     label: 'Suggested',
-    color: 'bg-gray-400',
-    hoverColor: 'hover:bg-gray-500',
+    color: 'bg-foreground-muted',
+    hoverColor: 'hover:bg-foreground-secondary',
     description: 'Awaiting review',
   },
   approved: {
@@ -64,10 +64,10 @@ export function CorrectionFunnel({ data, onStageClick }: CorrectionFunnelProps) 
 
   if (total === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+      <div className="flex flex-col items-center justify-center py-8 text-foreground-muted">
         <span className="text-2xl mb-2">🔧</span>
         <p className="text-sm">No corrections in progress</p>
-        <p className="text-xs text-gray-400">Create corrections from insights</p>
+        <p className="text-xs text-foreground-muted">Create corrections from insights</p>
       </div>
     );
   }
@@ -102,15 +102,15 @@ export function CorrectionFunnel({ data, onStageClick }: CorrectionFunnelProps) 
 
               {/* Label */}
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">{config.label}</p>
-                <p className="text-xs text-gray-500">{config.description}</p>
+                <p className="text-sm font-medium text-foreground">{config.label}</p>
+                <p className="text-xs text-foreground-muted">{config.description}</p>
               </div>
             </div>
 
             {/* Connector line */}
             {index < STAGE_ORDER.length - 1 && (
               <div
-                className="absolute left-1/2 -translate-x-1/2 w-0.5 h-3 bg-gray-200"
+                className="absolute left-1/2 -translate-x-1/2 w-0.5 h-3 bg-border-secondary"
                 style={{ top: '100%' }}
               />
             )}
@@ -120,23 +120,23 @@ export function CorrectionFunnel({ data, onStageClick }: CorrectionFunnelProps) 
 
       {/* Dismissed count (if any) */}
       {data.dismissed && data.dismissed > 0 && (
-        <div className="pt-2 border-t border-gray-100">
+        <div className="pt-2 border-t border-border">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Dismissed</span>
-            <span className="text-gray-600">{data.dismissed}</span>
+            <span className="text-foreground-muted">Dismissed</span>
+            <span className="text-foreground-secondary">{data.dismissed}</span>
           </div>
         </div>
       )}
 
       {/* Summary stats */}
-      <div className="pt-4 border-t border-gray-100">
+      <div className="pt-4 border-t border-border">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-500">Total Corrections</span>
-          <span className="font-semibold text-gray-900">{total}</span>
+          <span className="text-foreground-muted">Total Corrections</span>
+          <span className="font-semibold text-foreground">{total}</span>
         </div>
         {total > 0 && (
           <div className="flex items-center justify-between text-sm mt-1">
-            <span className="text-gray-500">Completion Rate</span>
+            <span className="text-foreground-muted">Completion Rate</span>
             <span className="font-semibold text-success-600">
               {((data.verified / total) * 100).toFixed(0)}%
             </span>

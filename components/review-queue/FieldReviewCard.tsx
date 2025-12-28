@@ -64,13 +64,13 @@ export default function FieldReviewCard({
       : String(field.originalValue);
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 mb-4">
+    <div className="rounded-lg border border-border bg-surface p-4 mb-4">
       {/* Header with Field Name and Confidence */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-gray-900">{field.field}</h3>
-            <span className="text-xs font-medium px-2 py-1 bg-gray-100 text-gray-700 rounded">
+            <h3 className="font-semibold text-foreground">{field.field}</h3>
+            <span className="text-xs font-medium px-2 py-1 bg-background-secondary text-foreground-secondary rounded">
               {field.dataType}
             </span>
           </div>
@@ -100,9 +100,9 @@ export default function FieldReviewCard({
 
       {/* Original Value Display */}
       {!isEditing && (
-        <div className="mb-4 p-3 bg-gray-50 rounded border border-gray-200">
-          <p className="text-xs text-gray-600 font-medium mb-1">AI Extracted Value:</p>
-          <p className="text-sm text-gray-900 break-words">{displayValue}</p>
+        <div className="mb-4 p-3 bg-background-secondary rounded border border-border">
+          <p className="text-xs text-foreground-secondary font-medium mb-1">AI Extracted Value:</p>
+          <p className="text-sm text-foreground break-words">{displayValue}</p>
         </div>
       )}
 
@@ -110,26 +110,26 @@ export default function FieldReviewCard({
       {isEditing && (
         <div className="mb-4 space-y-3">
           <div>
-            <label className="text-xs text-gray-600 font-medium mb-1 block">
+            <label className="text-xs text-foreground-secondary font-medium mb-1 block">
               Edit Value:
             </label>
             <textarea
               value={String(editValue)}
               onChange={(e) => setEditValue(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 border border-border-secondary rounded text-sm font-mono bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500"
               rows={3}
             />
           </div>
 
           <div>
-            <label className="text-xs text-gray-600 font-medium mb-1 block">
+            <label className="text-xs text-foreground-secondary font-medium mb-1 block">
               Feedback (optional):
             </label>
             <textarea
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               placeholder="Why did you make this change?"
-              className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 border border-border-secondary rounded text-sm bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500"
               rows={2}
             />
           </div>
@@ -174,7 +174,7 @@ export default function FieldReviewCard({
           <button
             onClick={handleSaveEdit}
             disabled={isLoading}
-            className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
+            className="flex-1 px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
           >
             Save Changes
           </button>
@@ -182,7 +182,7 @@ export default function FieldReviewCard({
           <button
             onClick={handleCancel}
             disabled={isLoading}
-            className="flex-1 px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
+            className="flex-1 px-3 py-2 bg-surface-hover hover:bg-surface-active text-foreground-secondary rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
           >
             Cancel
           </button>

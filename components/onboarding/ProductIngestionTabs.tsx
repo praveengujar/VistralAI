@@ -99,13 +99,13 @@ export default function ProductIngestionTabs({
   return (
     <div className="space-y-6">
       {/* Tabs */}
-      <div className="flex border-b border-gray-200">
+      <div className="flex border-b border-border">
         <button
           onClick={() => setActiveTab('website')}
           className={`px-6 py-3 font-medium text-sm border-b-2 transition ${
             activeTab === 'website'
               ? 'border-primary-600 text-primary-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900'
+              : 'border-transparent text-foreground-muted hover:text-foreground'
           }`}
         >
           Extract from Website
@@ -115,7 +115,7 @@ export default function ProductIngestionTabs({
           className={`px-6 py-3 font-medium text-sm border-b-2 transition ${
             activeTab === 'spreadsheet'
               ? 'border-primary-600 text-primary-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900'
+              : 'border-transparent text-foreground-muted hover:text-foreground'
           }`}
         >
           Upload CSV/Excel
@@ -125,7 +125,7 @@ export default function ProductIngestionTabs({
           className={`px-6 py-3 font-medium text-sm border-b-2 transition ${
             activeTab === 'shopify'
               ? 'border-primary-600 text-primary-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900'
+              : 'border-transparent text-foreground-muted hover:text-foreground'
           }`}
         >
           Shopify Integration
@@ -162,14 +162,14 @@ export default function ProductIngestionTabs({
         {/* Spreadsheet Upload Tab */}
         {activeTab === 'spreadsheet' && (
           <div className="space-y-4">
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
+            <div className="border-2 border-dashed border-border-secondary rounded-lg p-8">
               <label className="cursor-pointer block">
                 <div className="flex flex-col items-center justify-center">
-                  <Upload className="w-12 h-12 text-gray-400 mb-2" />
-                  <p className="text-lg font-medium text-gray-900">
+                  <Upload className="w-12 h-12 text-foreground-muted mb-2" />
+                  <p className="text-lg font-medium text-foreground">
                     Drop your file here
                   </p>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-foreground-secondary mt-1">
                     or click to browse (CSV, XLSX, XLS)
                   </p>
                 </div>
@@ -211,7 +211,7 @@ export default function ProductIngestionTabs({
               </div>
             )}
 
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-foreground-secondary">
               <strong>CSV Format:</strong> Include columns like name, category, description,
               price, features, benefits
             </p>
@@ -229,7 +229,7 @@ export default function ProductIngestionTabs({
             </div>
             <button
               disabled={true}
-              className="w-full px-4 py-3 bg-gray-400 text-white rounded-lg disabled:cursor-not-allowed font-medium"
+              className="w-full px-4 py-3 bg-background-tertiary text-foreground-muted rounded-lg disabled:cursor-not-allowed font-medium"
             >
               Connect Shopify (Coming Soon)
             </button>
@@ -238,11 +238,11 @@ export default function ProductIngestionTabs({
       </div>
 
       {/* Help Text */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-        <p className="text-sm font-medium text-gray-900 mb-2">
+      <div className="bg-background-secondary border border-border rounded-lg p-4">
+        <p className="text-sm font-medium text-foreground mb-2">
           All steps are optional
         </p>
-        <p className="text-sm text-gray-700">
+        <p className="text-sm text-foreground-secondary">
           You can skip this step and add products manually later from your dashboard.
         </p>
       </div>

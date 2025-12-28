@@ -14,6 +14,7 @@ import {
 } from 'recharts';
 import { format } from 'date-fns';
 import { QuadrantPosition } from '@/lib/services/agents/types';
+import { useChartTheme } from '@/lib/hooks/useChartTheme';
 
 interface TrendDataPoint {
   date: Date;
@@ -30,13 +31,6 @@ interface ScoreTrendChartProps {
   onPointClick?: (scanId: string) => void;
 }
 
-const QUADRANT_COLORS = {
-  dominant: '#10b981',
-  niche: '#06b6d4',
-  vulnerable: '#f59e0b',
-  invisible: '#ef4444',
-};
-
 export function ScoreTrendChart({
   data,
   benchmark,
@@ -44,13 +38,17 @@ export function ScoreTrendChart({
   height = 200,
   onPointClick,
 }: ScoreTrendChartProps) {
+  const chartTheme = useChartTheme();
+
+  const QUADRANT_COLORS = chartTheme.quadrantColors;
+
   const chartData = data.map((point) => ({
     date: format(point.date, 'MMM d'),
     fullDate: format(point.date, 'PPp'),
     score: point.score,
     quadrant: point.quadrant,
     scanId: point.scanId,
-    color: point.quadrant ? QUADRANT_COLORS[point.quadrant] : '#8b5cf6',
+    color: point.quadrant ? QUADRANT_COLORS[point.quadrant] : chartTheme.colors[0],
   }));
 
   const handleClick = (data: { activePayload?: Array<{ payload: { scanId?: string } }> }) => {
@@ -69,23 +67,23 @@ export function ScoreTrendChart({
         >
           <defs>
             <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+              <stop offset="5%" stopColor={chartTheme.colors[0]} stopOpacity={0.3} />
+              <stop offset="95%" stopColor={chartTheme.colors[0]} stopOpacity={0} />
             </linearGradient>
           </defs>
 
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.gridColor} vertical={false} />
 
           <XAxis
             dataKey="date"
-            tick={{ fill: '#6b7280', fontSize: 11 }}
-            axisLine={{ stroke: '#e5e7eb' }}
+            tick={{ fill: chartTheme.axisLabelColor, fontSize: 11 }}
+            axisLine={{ stroke: chartTheme.gridColor }}
             tickLine={false}
           />
           <YAxis
             domain={[0, 100]}
-            tick={{ fill: '#9ca3af', fontSize: 11 }}
-            axisLine={{ stroke: '#e5e7eb' }}
+            tick={{ fill: chartTheme.axisColor, fontSize: 11 }}
+            axisLine={{ stroke: chartTheme.gridColor }}
             tickLine={false}
             tickFormatter={(value) => `${value}`}
           />
@@ -95,13 +93,13 @@ export function ScoreTrendChart({
             <>
               <ReferenceLine
                 y={70}
-                stroke="#10b981"
+                stroke={chartTheme.positiveColor}
                 strokeDasharray="4 4"
                 strokeOpacity={0.5}
               />
               <ReferenceLine
                 y={50}
-                stroke="#f59e0b"
+                stroke={chartTheme.quadrantColors.vulnerable}
                 strokeDasharray="4 4"
                 strokeOpacity={0.5}
               />
@@ -112,11 +110,11 @@ export function ScoreTrendChart({
           {benchmark && (
             <ReferenceLine
               y={benchmark}
-              stroke="#94a3b8"
+              stroke={chartTheme.neutralColor}
               strokeDasharray="8 4"
               label={{
                 value: `Benchmark`,
-                fill: '#94a3b8',
+                fill: chartTheme.neutralColor,
                 fontSize: 10,
                 position: 'right',
               }}
@@ -135,18 +133,18 @@ export function ScoreTrendChart({
           <Line
             type="monotone"
             dataKey="score"
-            stroke="#8b5cf6"
+            stroke={chartTheme.colors[0]}
             strokeWidth={2}
             dot={{
-              fill: '#8b5cf6',
+              fill: chartTheme.colors[0],
               strokeWidth: 2,
               r: 4,
-              stroke: '#fff',
+              stroke: chartTheme.backgroundColor,
             }}
             activeDot={{
               r: 6,
-              fill: '#8b5cf6',
-              stroke: '#fff',
+              fill: chartTheme.colors[0],
+              stroke: chartTheme.backgroundColor,
               strokeWidth: 2,
               cursor: 'pointer',
             }}

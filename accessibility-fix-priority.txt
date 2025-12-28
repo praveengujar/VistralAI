@@ -1,0 +1,49 @@
+
+================================================================================
+VISTRALAI ACCESSIBILITY FIX PRIORITY ORDER
+================================================================================
+
+Date: 2025-12-28T19:39:14.522Z
+Total Issues: 187
+
+1. CRITICAL: Text Visibility Issues (72 issues)
+   - Hardcoded white text (text-white) on potentially light backgrounds
+   - Hardcoded dark text (text-gray-900, text-black) invisible in dark mode
+
+   IMMEDIATE FIX:
+   - Replace text-gray-900 with style={{ color: 'rgb(var(--foreground))' }}
+   - Ensure text-white is only used on colored/primary backgrounds
+
+2. HIGH: Missing Dark Mode Support (74 issues)
+   - White backgrounds (bg-white) without dark variants
+   - Light gray backgrounds (bg-gray-50/100/200) without dark variants
+   - Chart colors with hardcoded hex values
+
+   FIX APPROACH:
+   - Replace bg-white with style={{ backgroundColor: 'rgb(var(--surface))' }}
+   - Replace bg-gray-100 with style={{ backgroundColor: 'rgb(var(--background-secondary))' }}
+   - Create useChartTheme() hook for chart colors
+
+3. MEDIUM: Contrast & Border Issues (41 issues)
+   - Border colors without dark variants
+   - Hover states without dark variants
+
+   FIX APPROACH:
+   - Replace border-gray-200 with style={{ borderColor: 'rgb(var(--border))' }}
+   - Add dark: variants to hover states
+
+================================================================================
+TOP 10 FILES TO FIX FIRST:
+================================================================================
+1. components/brand-360/ProductCatalogConnector.tsx (33 issues)
+2. components/onboarding/ProductIngestionTabs.tsx (17 issues)
+3. components/aeo/CorrectionFunnel.tsx (13 issues)
+4. components/onboarding/NewOnboardingWizard.tsx (12 issues)
+5. components/brand-360/DocumentUpload.tsx (11 issues)
+6. components/reporting/BrandStoryReport.tsx (10 issues)
+7. components/aeo/InsightsPriorityMatrix.tsx (8 issues)
+8. components/dashboard/AIPlatformGalaxy.tsx (7 issues)
+9. Diagrams/09-docker-services.jsx (6 issues)
+10. components/dashboard/BrandGrowthOpportunities.tsx (5 issues)
+
+================================================================================

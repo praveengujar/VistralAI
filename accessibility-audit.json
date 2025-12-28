@@ -1,0 +1,1699 @@
+{
+  "totalFiles": 85,
+  "totalIssues": 187,
+  "criticalIssues": 72,
+  "highIssues": 74,
+  "issues": [
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/auth/error/page.tsx",
+      "line": 30,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/auth/login/page.tsx",
+      "line": 26,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/auth/register/page.tsx",
+      "line": 26,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/aeo/scan/new/page.tsx",
+      "line": 326,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/brand-profile/audience/page.tsx",
+      "line": 68,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/brand-profile/audience/page.tsx",
+      "line": 112,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/brand-profile/audience/page.tsx",
+      "line": 231,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/brand-profile/page.tsx",
+      "line": 249,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/brand-profile/positioning/page.tsx",
+      "line": 69,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/brand-profile/positioning/page.tsx",
+      "line": 111,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/brand-profile/positioning/page.tsx",
+      "line": 131,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/page.tsx",
+      "line": 119,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/page.tsx",
+      "line": 129,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/settings/organization/members/page.tsx",
+      "line": 239,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/settings/organization/members/page.tsx",
+      "line": 440,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/settings/profile/page.tsx",
+      "line": 160,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/settings/security/page.tsx",
+      "line": 538,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/CorrectionFunnel.tsx",
+      "line": 100,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/CorrectionFunnel.tsx",
+      "line": 105,
+      "severity": "critical",
+      "category": "hardcoded-black",
+      "issue": "Hardcoded dark text - invisible in dark mode",
+      "code": "text-gray-900",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground))' }} or text-foreground"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/CorrectionFunnel.tsx",
+      "line": 135,
+      "severity": "critical",
+      "category": "hardcoded-black",
+      "issue": "Hardcoded dark text - invisible in dark mode",
+      "code": "text-gray-900",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground))' }} or text-foreground"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/InsightsPriorityMatrix.tsx",
+      "line": 97,
+      "severity": "critical",
+      "category": "hardcoded-black",
+      "issue": "Hardcoded dark text - invisible in dark mode",
+      "code": "text-gray-900",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground))' }} or text-foreground"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/PerceptionScoreCard.tsx",
+      "line": 88,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/audience/PersonaCard.tsx",
+      "line": 45,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/BrandOfferingsShowcase.tsx",
+      "line": 37,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/BrandStoryCanvas.tsx",
+      "line": 253,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/DocumentUpload.tsx",
+      "line": 210,
+      "severity": "critical",
+      "category": "hardcoded-black",
+      "issue": "Hardcoded dark text - invisible in dark mode",
+      "code": "text-gray-900",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground))' }} or text-foreground"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/DocumentUpload.tsx",
+      "line": 231,
+      "severity": "critical",
+      "category": "hardcoded-black",
+      "issue": "Hardcoded dark text - invisible in dark mode",
+      "code": "text-gray-900",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground))' }} or text-foreground"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/DocumentUpload.tsx",
+      "line": 240,
+      "severity": "critical",
+      "category": "hardcoded-black",
+      "issue": "Hardcoded dark text - invisible in dark mode",
+      "code": "text-gray-900",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground))' }} or text-foreground"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 210,
+      "severity": "critical",
+      "category": "hardcoded-black",
+      "issue": "Hardcoded dark text - invisible in dark mode",
+      "code": "text-gray-900",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground))' }} or text-foreground"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 257,
+      "severity": "critical",
+      "category": "hardcoded-black",
+      "issue": "Hardcoded dark text - invisible in dark mode",
+      "code": "text-gray-900",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground))' }} or text-foreground"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 276,
+      "severity": "critical",
+      "category": "hardcoded-black",
+      "issue": "Hardcoded dark text - invisible in dark mode",
+      "code": "text-gray-900",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground))' }} or text-foreground"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 347,
+      "severity": "critical",
+      "category": "hardcoded-black",
+      "issue": "Hardcoded dark text - invisible in dark mode",
+      "code": "text-gray-900",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground))' }} or text-foreground"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 359,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProfileStrengthMeter.tsx",
+      "line": 75,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/WebsiteAnalyzer.tsx",
+      "line": 455,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/WebsiteAnalyzer.tsx",
+      "line": 486,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/WebsiteAnalyzer.tsx",
+      "line": 790,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/dashboard/AIPlatformGalaxy.tsx",
+      "line": 28,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/dashboard/AIPlatformGalaxy.tsx",
+      "line": 86,
+      "severity": "critical",
+      "category": "hardcoded-black",
+      "issue": "Hardcoded dark text - invisible in dark mode",
+      "code": "text-gray-900",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground))' }} or text-foreground"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/dashboard/BrandGrowthOpportunities.tsx",
+      "line": 46,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/dashboard/MarketLandscape.tsx",
+      "line": 84,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/dashboard/MarketLandscape.tsx",
+      "line": 264,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/layout/DashboardLayout.tsx",
+      "line": 74,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/layout/DashboardLayout.tsx",
+      "line": 194,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/layout/DashboardLayout.tsx",
+      "line": 246,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/layout/DashboardLayout.tsx",
+      "line": 292,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/layout/DashboardLayout.tsx",
+      "line": 382,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/NewOnboardingWizard.tsx",
+      "line": 275,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/NewOnboardingWizard.tsx",
+      "line": 291,
+      "severity": "critical",
+      "category": "hardcoded-black",
+      "issue": "Hardcoded dark text - invisible in dark mode",
+      "code": "text-gray-900",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground))' }} or text-foreground"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/NewOnboardingWizard.tsx",
+      "line": 304,
+      "severity": "critical",
+      "category": "hardcoded-black",
+      "issue": "Hardcoded dark text - invisible in dark mode",
+      "code": "text-gray-900",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground))' }} or text-foreground"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/NewOnboardingWizard.tsx",
+      "line": 399,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/NewOnboardingWizard.tsx",
+      "line": 408,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/OnboardingWizard.tsx",
+      "line": 129,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/OnboardingWizard.tsx",
+      "line": 162,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/OnboardingWizard.tsx",
+      "line": 163,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/ProductIngestionTabs.tsx",
+      "line": 108,
+      "severity": "critical",
+      "category": "hardcoded-black",
+      "issue": "Hardcoded dark text - invisible in dark mode",
+      "code": "text-gray-900",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground))' }} or text-foreground"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/ProductIngestionTabs.tsx",
+      "line": 118,
+      "severity": "critical",
+      "category": "hardcoded-black",
+      "issue": "Hardcoded dark text - invisible in dark mode",
+      "code": "text-gray-900",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground))' }} or text-foreground"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/ProductIngestionTabs.tsx",
+      "line": 128,
+      "severity": "critical",
+      "category": "hardcoded-black",
+      "issue": "Hardcoded dark text - invisible in dark mode",
+      "code": "text-gray-900",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground))' }} or text-foreground"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/ProductIngestionTabs.tsx",
+      "line": 148,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/ProductIngestionTabs.tsx",
+      "line": 169,
+      "severity": "critical",
+      "category": "hardcoded-black",
+      "issue": "Hardcoded dark text - invisible in dark mode",
+      "code": "text-gray-900",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground))' }} or text-foreground"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/ProductIngestionTabs.tsx",
+      "line": 232,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/ProductIngestionTabs.tsx",
+      "line": 242,
+      "severity": "critical",
+      "category": "hardcoded-black",
+      "issue": "Hardcoded dark text - invisible in dark mode",
+      "code": "text-gray-900",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground))' }} or text-foreground"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/ProfileReviewCards.tsx",
+      "line": 151,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/UrlAnalyzer.tsx",
+      "line": 74,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/positioning/PositioningStatement.tsx",
+      "line": 99,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/reporting/BrandStoryReport.tsx",
+      "line": 42,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/reporting/BrandStoryReport.tsx",
+      "line": 77,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/reporting/BrandStoryReport.tsx",
+      "line": 138,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/review-queue/FieldReviewCard.tsx",
+      "line": 177,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/review-queue/ReviewModal.tsx",
+      "line": 197,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/review-queue/ReviewQueueBanner.tsx",
+      "line": 69,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/ui/OpportunityCard.tsx",
+      "line": 57,
+      "severity": "critical",
+      "category": "hardcoded-white",
+      "issue": "Hardcoded white text - may be invisible on light backgrounds",
+      "code": "text-white",
+      "suggestion": "Use text-foreground or ensure it's on a colored background"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/Diagrams/09-docker-services.jsx",
+      "line": 64,
+      "severity": "high",
+      "category": "chart-hardcoded",
+      "issue": "Hardcoded stroke color in chart - does not respect theme",
+      "code": "stroke=\"#475569\"",
+      "suggestion": "Use CSS variable or theme-aware color hook"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/Diagrams/09-docker-services.jsx",
+      "line": 65,
+      "severity": "high",
+      "category": "chart-hardcoded",
+      "issue": "Hardcoded stroke color in chart - does not respect theme",
+      "code": "stroke=\"#475569\"",
+      "suggestion": "Use CSS variable or theme-aware color hook"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/Diagrams/09-docker-services.jsx",
+      "line": 66,
+      "severity": "high",
+      "category": "chart-hardcoded",
+      "issue": "Hardcoded stroke color in chart - does not respect theme",
+      "code": "stroke=\"#22C55E\"",
+      "suggestion": "Use CSS variable or theme-aware color hook"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/Diagrams/09-docker-services.jsx",
+      "line": 67,
+      "severity": "high",
+      "category": "chart-hardcoded",
+      "issue": "Hardcoded stroke color in chart - does not respect theme",
+      "code": "stroke=\"#DC2626\"",
+      "suggestion": "Use CSS variable or theme-aware color hook"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/Diagrams/09-docker-services.jsx",
+      "line": 68,
+      "severity": "high",
+      "category": "chart-hardcoded",
+      "issue": "Hardcoded stroke color in chart - does not respect theme",
+      "code": "stroke=\"#6B7280\"",
+      "suggestion": "Use CSS variable or theme-aware color hook"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/Diagrams/09-docker-services.jsx",
+      "line": 69,
+      "severity": "high",
+      "category": "chart-hardcoded",
+      "issue": "Hardcoded stroke color in chart - does not respect theme",
+      "code": "stroke=\"#F59E0B\"",
+      "suggestion": "Use CSS variable or theme-aware color hook"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/Diagrams/10-quadrant-chart.jsx",
+      "line": 90,
+      "severity": "high",
+      "category": "chart-hardcoded",
+      "issue": "Hardcoded stroke color in chart - does not respect theme",
+      "code": "stroke=\"#475569\"",
+      "suggestion": "Use CSS variable or theme-aware color hook"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/Diagrams/10-quadrant-chart.jsx",
+      "line": 91,
+      "severity": "high",
+      "category": "chart-hardcoded",
+      "issue": "Hardcoded stroke color in chart - does not respect theme",
+      "code": "stroke=\"#475569\"",
+      "suggestion": "Use CSS variable or theme-aware color hook"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/Diagrams/10-quadrant-chart.jsx",
+      "line": 96,
+      "severity": "high",
+      "category": "chart-hardcoded",
+      "issue": "Hardcoded stroke color in chart - does not respect theme",
+      "code": "stroke=\"#334155\"",
+      "suggestion": "Use CSS variable or theme-aware color hook"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/Diagrams/10-quadrant-chart.jsx",
+      "line": 97,
+      "severity": "high",
+      "category": "chart-hardcoded",
+      "issue": "Hardcoded stroke color in chart - does not respect theme",
+      "code": "stroke=\"#334155\"",
+      "suggestion": "Use CSS variable or theme-aware color hook"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/Diagrams/10-quadrant-chart.jsx",
+      "line": 102,
+      "severity": "high",
+      "category": "chart-hardcoded",
+      "issue": "Hardcoded stroke color in chart - does not respect theme",
+      "code": "stroke=\"#475569\"",
+      "suggestion": "Use CSS variable or theme-aware color hook"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/auth/login/page.tsx",
+      "line": 34,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/auth/register/page.tsx",
+      "line": 34,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/page.tsx",
+      "line": 129,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/page.tsx",
+      "line": 129,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/settings/organization/members/page.tsx",
+      "line": 285,
+      "severity": "high",
+      "category": "missing-dark-bg",
+      "issue": "Light gray background without dark mode variant",
+      "code": "bg-gray-100",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--background-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/settings/security/page.tsx",
+      "line": 360,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/CorrectionFunnel.tsx",
+      "line": 67,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-500",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/CorrectionFunnel.tsx",
+      "line": 70,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-400",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/CorrectionFunnel.tsx",
+      "line": 106,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-500",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/CorrectionFunnel.tsx",
+      "line": 113,
+      "severity": "high",
+      "category": "missing-dark-bg",
+      "issue": "Light gray background without dark mode variant",
+      "code": "bg-gray-200",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--background-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/CorrectionFunnel.tsx",
+      "line": 125,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-500",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/CorrectionFunnel.tsx",
+      "line": 134,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-500",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/CorrectionFunnel.tsx",
+      "line": 139,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-500",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/InsightsPriorityMatrix.tsx",
+      "line": 24,
+      "severity": "high",
+      "category": "missing-dark-bg",
+      "issue": "Light gray background without dark mode variant",
+      "code": "bg-gray-100",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--background-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/InsightsPriorityMatrix.tsx",
+      "line": 67,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-500",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/InsightsPriorityMatrix.tsx",
+      "line": 70,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-400",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/InsightsPriorityMatrix.tsx",
+      "line": 115,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-400",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/PlatformComparisonChart.tsx",
+      "line": 73,
+      "severity": "high",
+      "category": "chart-hardcoded",
+      "issue": "Hardcoded stroke color in chart - does not respect theme",
+      "code": "stroke=\"#e5e7eb\"",
+      "suggestion": "Use CSS variable or theme-aware color hook"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/PlatformComparisonChart.tsx",
+      "line": 91,
+      "severity": "high",
+      "category": "chart-hardcoded",
+      "issue": "Hardcoded stroke color in chart - does not respect theme",
+      "code": "stroke=\"#94a3b8\"",
+      "suggestion": "Use CSS variable or theme-aware color hook"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/PlatformComparisonChart.tsx",
+      "line": 150,
+      "severity": "high",
+      "category": "chart-hardcoded",
+      "issue": "Hardcoded fill color in chart - does not respect theme",
+      "code": "fill=\"#e5e7eb\"",
+      "suggestion": "Use CSS variable or theme-aware color hook"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/QuadrantChart.tsx",
+      "line": 139,
+      "severity": "high",
+      "category": "chart-hardcoded",
+      "issue": "Hardcoded stroke color in chart - does not respect theme",
+      "code": "stroke=\"#6366f1\"",
+      "suggestion": "Use CSS variable or theme-aware color hook"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/QuadrantChart.tsx",
+      "line": 151,
+      "severity": "high",
+      "category": "chart-hardcoded",
+      "issue": "Hardcoded fill color in chart - does not respect theme",
+      "code": "fill=\"#94a3b8\"",
+      "suggestion": "Use CSS variable or theme-aware color hook"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/audience/PersonaCard.tsx",
+      "line": 21,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-400",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/BrandOfferingsShowcase.tsx",
+      "line": 38,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/DocumentUpload.tsx",
+      "line": 209,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-400",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/DocumentUpload.tsx",
+      "line": 222,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-500",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/DocumentUpload.tsx",
+      "line": 238,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-400",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/DocumentUpload.tsx",
+      "line": 243,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-500",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 172,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-500",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 183,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-500",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 209,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-400",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 222,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-500",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 253,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 261,
+      "severity": "high",
+      "category": "missing-dark-bg",
+      "issue": "Light gray background without dark mode variant",
+      "code": "bg-gray-200",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--background-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 272,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 340,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 366,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-500",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 366,
+      "severity": "high",
+      "category": "missing-dark-bg",
+      "issue": "Light gray background without dark mode variant",
+      "code": "bg-gray-100",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--background-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 372,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/dashboard/AIPlatformGalaxy.tsx",
+      "line": 34,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/dashboard/AIPlatformGalaxy.tsx",
+      "line": 48,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/dashboard/AIPlatformGalaxy.tsx",
+      "line": 86,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/dashboard/AIPlatformGalaxy.tsx",
+      "line": 90,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-400",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/dashboard/AIPlatformGalaxy.tsx",
+      "line": 100,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-400",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/dashboard/BrandGrowthOpportunities.tsx",
+      "line": 29,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-500",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/dashboard/BrandGrowthOpportunities.tsx",
+      "line": 47,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/dashboard/BrandGrowthOpportunities.tsx",
+      "line": 54,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/dashboard/BrandGrowthOpportunities.tsx",
+      "line": 58,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/dashboard/BrandHealthIndicator.tsx",
+      "line": 117,
+      "severity": "high",
+      "category": "chart-hardcoded",
+      "issue": "Hardcoded stroke color in chart - does not respect theme",
+      "code": "stroke=\"#1a365d\"",
+      "suggestion": "Use CSS variable or theme-aware color hook"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/dashboard/BrandMoments.tsx",
+      "line": 29,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-500",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/NewOnboardingWizard.tsx",
+      "line": 271,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-400",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/NewOnboardingWizard.tsx",
+      "line": 292,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-400",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/NewOnboardingWizard.tsx",
+      "line": 303,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/OnboardingWizard.tsx",
+      "line": 292,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/OnboardingWizard.tsx",
+      "line": 347,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/ProductIngestionTabs.tsx",
+      "line": 168,
+      "severity": "high",
+      "category": "poor-contrast",
+      "issue": "Gray text may have poor contrast without dark mode variant",
+      "code": "text-gray-400",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-muted))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/reporting/BrandStoryReport.tsx",
+      "line": 43,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/reporting/BrandStoryReport.tsx",
+      "line": 51,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/reporting/BrandStoryReport.tsx",
+      "line": 51,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/reporting/BrandStoryReport.tsx",
+      "line": 62,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/reporting/BrandStoryReport.tsx",
+      "line": 62,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/reporting/BrandStoryReport.tsx",
+      "line": 69,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/reporting/BrandStoryReport.tsx",
+      "line": 69,
+      "severity": "high",
+      "category": "hardcoded-white-bg",
+      "issue": "Hardcoded white background - no dark mode support",
+      "code": "bg-white",
+      "suggestion": "Use style={{ backgroundColor: 'rgb(var(--surface))' }} or bg-surface"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/app/dashboard/settings/organization/members/page.tsx",
+      "line": 285,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-700",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/CorrectionFunnel.tsx",
+      "line": 123,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-100",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/CorrectionFunnel.tsx",
+      "line": 126,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-600",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/CorrectionFunnel.tsx",
+      "line": 132,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-100",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/InsightsPriorityMatrix.tsx",
+      "line": 24,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-600",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/InsightsPriorityMatrix.tsx",
+      "line": 84,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-100",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/aeo/InsightsPriorityMatrix.tsx",
+      "line": 84,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-200",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/DocumentUpload.tsx",
+      "line": 196,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-300",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/DocumentUpload.tsx",
+      "line": 213,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-600",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/DocumentUpload.tsx",
+      "line": 235,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-200",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/DocumentUpload.tsx",
+      "line": 253,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-600",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 165,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-200",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 172,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-700",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 172,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-300",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 183,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-700",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 183,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-300",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 200,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-300",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 213,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-600",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 253,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-200",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 258,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-600",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 267,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-600",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 272,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-200",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 277,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-600",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 329,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-600",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 340,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-200",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 348,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-600",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 372,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-700",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/brand-360/ProductCatalogConnector.tsx",
+      "line": 372,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-300",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/NewOnboardingWizard.tsx",
+      "line": 271,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-300",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/NewOnboardingWizard.tsx",
+      "line": 307,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-600",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/NewOnboardingWizard.tsx",
+      "line": 390,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-700",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/NewOnboardingWizard.tsx",
+      "line": 390,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-300",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/ProductIngestionTabs.tsx",
+      "line": 102,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-200",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/ProductIngestionTabs.tsx",
+      "line": 108,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-600",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/ProductIngestionTabs.tsx",
+      "line": 118,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-600",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/ProductIngestionTabs.tsx",
+      "line": 128,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-600",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/ProductIngestionTabs.tsx",
+      "line": 165,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-300",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/ProductIngestionTabs.tsx",
+      "line": 172,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-600",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/ProductIngestionTabs.tsx",
+      "line": 214,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-600",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/ProductIngestionTabs.tsx",
+      "line": 241,
+      "severity": "medium",
+      "category": "missing-dark-border",
+      "issue": "Border color without dark mode variant",
+      "code": "border-gray-200",
+      "suggestion": "Use style={{ borderColor: 'rgb(var(--border))' }} or border-border"
+    },
+    {
+      "file": "/Users/pgujar/Documents/Projects/VistralAI/components/onboarding/ProductIngestionTabs.tsx",
+      "line": 245,
+      "severity": "medium",
+      "category": "missing-dark",
+      "issue": "Text color without dark mode variant",
+      "code": "text-gray-700",
+      "suggestion": "Use style={{ color: 'rgb(var(--foreground-secondary))' }}"
+    }
+  ],
+  "summary": {
+    "hardcodedColors": 115,
+    "missingDarkMode": 46,
+    "poorContrast": 26,
+    "hardcodedWhite": 80,
+    "hardcodedBlack": 18,
+    "chartColors": 17
+  }
+}
