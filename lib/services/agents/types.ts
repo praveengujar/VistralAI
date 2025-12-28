@@ -373,8 +373,11 @@ export interface GeneratedPromptData {
   targetCompetitor?: string;
   targetClaim?: string;
   targetProduct?: string;
+  targetReviewWebsite?: string;
+  reviewSiteCitationStyle?: 'inline' | 'footnote' | 'list';
   expectedThemes: string[];
   expectedTone?: string;
+  expectedVocabulary?: string; // 'technical' | 'professional' | 'casual'
   expectedEntities: string[];
   expectedCitations: boolean;
   adversarialTwist?: string;
@@ -390,6 +393,10 @@ export interface PromptGeneratorOptions {
   personaFilter?: string[];
   competitorFilter?: string[];
   productFilter?: string[];
+  // Review website options
+  includeReviewWebsites?: boolean;
+  reviewWebsiteIds?: string[];
+  preferredCitationStyle?: 'inline' | 'footnote' | 'list';
 }
 
 export interface PromptGeneratorResult {
@@ -399,6 +406,7 @@ export interface PromptGeneratorResult {
   personasCovered: string[];
   competitorsCovered: string[];
   productsCovered: string[];
+  reviewWebsitesCovered?: string[];
 }
 
 // ============================================

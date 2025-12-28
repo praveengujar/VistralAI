@@ -348,11 +348,10 @@ export class PerceptionScanOrchestrator {
 
   /**
    * Load Brand360 profile with all relations
-   * Note: brand360Id is actually the organizationId (BrandProfile.id)
    */
   private async loadBrand360(brand360Id: string) {
-    return prisma.brand360Profile.findFirst({
-      where: { organizationId: brand360Id },
+    return prisma.brand360Profile.findUnique({
+      where: { id: brand360Id },
       include: {
         entityHome: true,
         organizationSchema: true,

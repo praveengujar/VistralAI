@@ -1203,18 +1203,16 @@ export const updateCustomerPersona = async (
     demographics: object;
     psychographics: object;
     jobsToBeDone: string[];
-    painPoints: string[];
     motivations: string[];
     preferredChannels: string[];
     decisionCriteria: string[];
-    objections: string[];
     searchBehavior: object;
     isPrimary: boolean;
   }>
 ) => {
   return prisma.customerPersona.update({
     where: { id: personaId },
-    data,
+    data: data as any,
   });
 };
 

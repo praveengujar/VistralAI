@@ -12,9 +12,10 @@
 4. [Core Resources](#core-resources)
 5. [Brand 360° API](#brand-360-api)
 6. [AEO (Perception) API](#aeo-perception-api)
-7. [Onboarding API](#onboarding-api)
-8. [Queue Management API](#queue-management-api)
-9. [Admin API](#admin-api)
+7. [Review Sites API](#review-sites-api)
+8. [Onboarding API](#onboarding-api)
+9. [Queue Management API](#queue-management-api)
+10. [Admin API](#admin-api)
 
 ---
 
@@ -1035,6 +1036,210 @@ POST /aeo/magic-import
 
 ---
 
+## Review Sites API
+
+Industry-specific review website integration for AI prompt generation. Maps brands to relevant review platforms (G2, Trustpilot, CNET, etc.) based on industry categories.
+
+### Categories
+
+#### List All Categories
+```
+GET /api/review-sites/categories
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "categories": [
+      {
+        "id": "cat_123",
+        "name": "B2B Software",
+        "slug": "b2b-software",
+        "description": "Business software, SaaS, and enterprise solutions",
+        "industryKeywords": ["saas", "software", "enterprise", "b2b", "cloud"],
+        "websites": [
+          {
+            "id": "web_123",
+            "name": "G2",
+            "slug": "g2",
+            "domain": "g2.com",
+            "reviewType": "user",
+            "audienceType": "b2b",
+            "priority": 10
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Websites
+
+#### List Websites by Category
+```
+GET /api/review-sites/websites?categoryId=cat_123
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "websites": [
+      {
+        "id": "web_123",
+        "name": "G2",
+        "slug": "g2",
+        "domain": "g2.com",
+        "reviewType": "user",
+        "audienceType": "b2b",
+        "citationFormat": "According to G2 reviews, {brandName}",
+        "priority": 10,
+        "isActive": true
+      }
+    ]
+  }
+}
+```
+
+### Brand Mappings
+
+#### Get Brand Category Mappings
+```
+GET /api/review-sites/brand-mapping?brand360Id=brand360_123
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "mappings": [
+      {
+        "id": "map_123",
+        "brand360Id": "brand360_123",
+        "categoryId": "cat_123",
+        "isPrimary": true,
+        "confidence": 0.92,
+        "source": "auto",
+        "category": {
+          "id": "cat_123",
+          "name": "Consumer Electronics",
+          "websites": [...]
+        }
+      }
+    ]
+  }
+}
+```
+
+#### Create Brand Category Mapping
+```
+POST /api/review-sites/brand-mapping
+```
+
+**Request**:
+```json
+{
+  "brand360Id": "brand360_123",
+  "categoryId": "cat_123",
+  "isPrimary": true
+}
+```
+
+**Response** (201):
+```json
+{
+  "success": true,
+  "data": {
+    "id": "map_123",
+    "brand360Id": "brand360_123",
+    "categoryId": "cat_123",
+    "isPrimary": true,
+    "source": "manual",
+    "createdAt": "2024-12-28T10:00:00Z"
+  }
+}
+```
+
+#### Delete Brand Category Mapping
+```
+DELETE /api/review-sites/brand-mapping?brand360Id=brand360_123&categoryId=cat_123
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": { "deleted": true }
+}
+```
+
+### Auto-Detect
+
+#### Auto-Detect Categories for Brand
+```
+POST /api/review-sites/auto-detect
+```
+
+Automatically detects relevant industry categories based on brand data (products, descriptions, industry verticals).
+
+**Request**:
+```json
+{
+  "brand360Id": "brand360_123",
+  "applyMappings": true,
+  "minConfidence": 0.3,
+  "maxCategories": 3
+}
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "detected": [
+      {
+        "categoryId": "cat_123",
+        "categoryName": "Consumer Electronics",
+        "categorySlug": "consumer-electronics",
+        "confidence": 0.95,
+        "matchedKeywords": ["iphone", "macbook", "smartphone"]
+      }
+    ],
+    "mappingsApplied": true,
+    "mappings": [...],
+    "totalDetected": 1
+  }
+}
+```
+
+### Available Categories
+
+| Category | Review Sites |
+|----------|--------------|
+| B2B Software | G2, Capterra, TrustRadius |
+| Consumer Electronics | CNET, TechRadar, Wirecutter |
+| E-commerce & Retail | Trustpilot, Consumer Reports, Yelp |
+| Financial Services | NerdWallet, Bankrate, Forbes Advisor |
+| Healthcare | Healthgrades, WebMD, Vitals |
+| Travel & Hospitality | TripAdvisor, Booking.com, Expedia |
+| Restaurants & Food | Yelp, DoorDash, Zomato |
+| Automotive | Edmunds, Kelley Blue Book, J.D. Power |
+| Home Services | Angi, HomeAdvisor, Thumbtack |
+| Real Estate | Zillow, Realtor.com, Redfin |
+| Legal Services | Avvo, Martindale-Hubbell, Lawyers.com |
+| Education | Niche, Course Report, SwitchUp |
+| Marketing & Agencies | Clutch, DesignRush, UpCity |
+| HR & Recruiting | Glassdoor, Indeed, Comparably |
+| Cybersecurity | Gartner, PeerSpot, G2 Security |
+
+---
+
 ## Onboarding API
 
 ### Start Website Analysis
@@ -1429,4 +1634,4 @@ Future versions will be available as `/api/v2`, `/api/v3`, etc. with backward co
 
 **Last Updated**: December 2024
 **Status**: Production Ready
-**Version**: 1.1
+**Version**: 1.2

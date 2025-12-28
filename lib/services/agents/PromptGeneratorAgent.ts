@@ -24,12 +24,18 @@ import {
   COMPETITOR_PRIORITY_MULTIPLIERS,
   HALLUCINATION_TRAP_FEATURES,
   HALLUCINATION_TRAP_AWARDS,
+  REVIEW_WEBSITE_TEMPLATES,
 } from './promptTemplates';
+import {
+  reviewWebsiteService,
+  ReviewWebsiteWithCategory,
+} from '@/lib/services/ReviewWebsiteService';
 
 // Types for Brand360 data with relations
 interface Brand360WithRelations {
   id: string;
   organizationId: string;
+  industry?: string;
   brandIdentityPrism?: {
     personalityTraits?: string[];
     cultureValues?: string[];
@@ -41,6 +47,7 @@ interface Brand360WithRelations {
   brandVoiceProfile?: {
     primaryTone?: string;
     vocabularyLevel?: string;
+    formalCasualScore?: number; // 1-10 scale
   } | null;
   competitorGraph?: {
     competitors: Array<{
@@ -52,6 +59,7 @@ interface Brand360WithRelations {
   customerPersonas: Array<{
     name: string;
     type: string;
+    description?: string | null;
     painPoints?: string[];
     goals?: string[];
     commonQuestions?: string[];
@@ -114,6 +122,7 @@ export class PromptGeneratorAgent {
       const personasCovered: string[] = [];
       const competitorsCovered: string[] = [];
       const productsCovered: string[] = [];
+      const reviewWebsitesCovered: string[] = [];
 
       // Generate prompts for each category
       for (const category of categories) {
@@ -156,6 +165,23 @@ export class PromptGeneratorAgent {
         });
       }
 
+      // Generate review website prompts if enabled
+      if (options.includeReviewWebsites) {
+        const reviewWebsitePrompts = await this.generateReviewWebsitePrompts(
+          brand360,
+          brandName,
+          options
+        );
+        allPrompts.push(...reviewWebsitePrompts);
+
+        // Track review websites covered
+        reviewWebsitePrompts.forEach((p) => {
+          if (p.targetReviewWebsite && !reviewWebsitesCovered.includes(p.targetReviewWebsite)) {
+            reviewWebsitesCovered.push(p.targetReviewWebsite);
+          }
+        });
+      }
+
       const duration = Date.now() - startTime;
 
       return {
@@ -167,6 +193,7 @@ export class PromptGeneratorAgent {
           personasCovered,
           competitorsCovered,
           productsCovered,
+          reviewWebsitesCovered,
         },
         confidence: 0.95,
         source: 'prompt_generator_agent',
@@ -194,10 +221,22 @@ export class PromptGeneratorAgent {
     const prompts: GeneratedPromptData[] = [];
     const templates = PROMPT_TEMPLATES.navigational.templates;
     const categoryLabel = CATEGORY_LABELS.navigational;
+    const industry = brand360.industry || 'technology';
 
-    // Brand-level queries
-    for (const template of templates.filter((t) => !t.id.includes('product'))) {
+    // Brand-level queries (excluding product and industry templates)
+    for (const template of templates.filter(
+      (t) => !t.id.includes('product') && !t.id.includes('industry')
+    )) {
       const rendered = this.renderTemplate(template.template, { brandName });
+      prompts.push(this.createPromptData('navigational', categoryLabel, template, rendered, brandName));
+    }
+
+    // Industry-specific queries
+    for (const template of templates.filter((t) => t.id.includes('industry'))) {
+      const rendered = this.renderTemplate(template.template, {
+        brandName,
+        industry,
+      });
       prompts.push(this.createPromptData('navigational', categoryLabel, template, rendered, brandName));
     }
 
@@ -246,9 +285,9 @@ export class PromptGeneratorAgent {
       const priorityMultiplier =
         PERSONA_PRIORITY_MULTIPLIERS[persona.type] || 1.0;
 
-      // Pain point queries
+      // Pain point queries - increased from 2 to 3
       const painPoints = persona.painPoints || [];
-      for (const painPoint of painPoints.slice(0, 2)) {
+      for (const painPoint of painPoints.slice(0, 3)) {
         for (const template of templates.filter((t) => t.id.includes('pain'))) {
           const rendered = this.renderTemplate(template.template, {
             brandName,
@@ -268,9 +307,9 @@ export class PromptGeneratorAgent {
         }
       }
 
-      // Goal queries
+      // Goal queries - increased from 2 to 3
       const goals = persona.goals || [];
-      for (const goal of goals.slice(0, 2)) {
+      for (const goal of goals.slice(0, 3)) {
         for (const template of templates.filter((t) => t.id.includes('goal'))) {
           const rendered = this.renderTemplate(template.template, {
             brandName,
@@ -290,9 +329,9 @@ export class PromptGeneratorAgent {
         }
       }
 
-      // Common questions
+      // Common questions - increased from 1 to 2
       const questions = persona.commonQuestions || [];
-      for (const question of questions.slice(0, 1)) {
+      for (const question of questions.slice(0, 2)) {
         const template = templates.find((t) => t.id === 'func_question_1');
         if (template) {
           const promptData = this.createPromptData(
@@ -307,15 +346,35 @@ export class PromptGeneratorAgent {
           prompts.push(promptData);
         }
       }
+
+      // Decision journey queries for personas
+      const personaDescription = persona.description || persona.name;
+      for (const template of templates.filter((t) => t.id.includes('journey'))) {
+        const rendered = this.renderTemplate(template.template, {
+          brandName,
+          personaDescription,
+          productName: primaryProduct?.name || brandName,
+        });
+        const promptData = this.createPromptData(
+          'functional',
+          categoryLabel,
+          template,
+          rendered,
+          brandName
+        );
+        promptData.targetPersona = persona.name;
+        promptData.priority = Math.round(template.priority * priorityMultiplier);
+        prompts.push(promptData);
+      }
     }
 
-    // Use case queries
+    // Use case queries - increased from 3 to 4
     const useCases: string[] = [];
     brand360.products.forEach((p) => {
       if (p.useCases) useCases.push(...p.useCases);
     });
 
-    for (const useCase of [...new Set(useCases)].slice(0, 3)) {
+    for (const useCase of [...new Set(useCases)].slice(0, 4)) {
       for (const template of templates.filter((t) => t.id.includes('usecase'))) {
         const rendered = this.renderTemplate(template.template, {
           brandName,
@@ -325,6 +384,52 @@ export class PromptGeneratorAgent {
         prompts.push(
           this.createPromptData('functional', categoryLabel, template, rendered, brandName)
         );
+      }
+    }
+
+    // Feature-specific queries (NEW)
+    for (const product of brand360.products.slice(0, 2)) {
+      const features = product.features || [];
+      for (const feature of features.slice(0, 2)) {
+        for (const template of templates.filter((t) => t.id.includes('feature'))) {
+          const rendered = this.renderTemplate(template.template, {
+            brandName,
+            productName: product.name,
+            feature,
+          });
+          const promptData = this.createPromptData(
+            'functional',
+            categoryLabel,
+            template,
+            rendered,
+            brandName
+          );
+          promptData.targetProduct = product.name;
+          prompts.push(promptData);
+        }
+      }
+    }
+
+    // Benefit-specific queries (NEW)
+    for (const product of brand360.products.slice(0, 2)) {
+      const benefits = product.benefits || [];
+      for (const benefit of benefits.slice(0, 2)) {
+        for (const template of templates.filter((t) => t.id.includes('benefit'))) {
+          const rendered = this.renderTemplate(template.template, {
+            brandName,
+            productName: product.name,
+            benefit,
+          });
+          const promptData = this.createPromptData(
+            'functional',
+            categoryLabel,
+            template,
+            rendered,
+            brandName
+          );
+          promptData.targetProduct = product.name;
+          prompts.push(promptData);
+        }
       }
     }
 
@@ -451,13 +556,22 @@ export class PromptGeneratorAgent {
     const templates = PROMPT_TEMPLATES.voice.templates;
     const categoryLabel = CATEGORY_LABELS.voice;
 
-    const archetype = brand360.brandArchetype?.primaryArchetype || 'innovative';
+    const primaryArchetype = brand360.brandArchetype?.primaryArchetype || 'innovative';
+    const secondaryArchetype = brand360.brandArchetype?.secondaryArchetype || 'expert';
     const expectedTone = brand360.brandVoiceProfile?.primaryTone;
+    const vocabularyLevel = brand360.brandVoiceProfile?.vocabularyLevel || 'professional';
 
     for (const template of templates) {
+      // Skip archetype comparison template if no secondary archetype
+      if (template.id === 'voice_arch_3' && !brand360.brandArchetype?.secondaryArchetype) {
+        continue;
+      }
+
       const rendered = this.renderTemplate(template.template, {
         brandName,
-        archetype,
+        archetype: primaryArchetype, // backwards compatibility
+        primaryArchetype,
+        secondaryArchetype,
       });
       const promptData = this.createPromptData(
         'voice',
@@ -468,6 +582,10 @@ export class PromptGeneratorAgent {
       );
       if (expectedTone) {
         promptData.expectedTone = expectedTone;
+      }
+      // Add vocabulary level for voice matching evaluation
+      if (template.id.includes('vocab')) {
+        promptData.expectedVocabulary = vocabularyLevel;
       }
       prompts.push(promptData);
     }
@@ -489,21 +607,37 @@ export class PromptGeneratorAgent {
     const competitors = brand360.competitorGraph?.competitors || [];
     const topCompetitor = competitors[0]?.name || 'competitors';
     const misconceptions = brand360.riskFactors?.commonMisconceptions || [];
+    const negativeKeywords = brand360.riskFactors?.negativeKeywords || [];
     const objections: string[] = [];
     brand360.customerPersonas.forEach((p) => {
       if (p.objections) objections.push(...p.objections);
     });
 
-    // Negative sentiment probes
-    for (const template of templates.filter((t) => t.id.includes('neg'))) {
+    // Negative sentiment probes (basic neg_ templates only, not neg_keyword)
+    for (const template of templates.filter(
+      (t) => t.id.startsWith('adv_neg_') && !t.id.includes('keyword')
+    )) {
       const rendered = this.renderTemplate(template.template, { brandName });
       prompts.push(
         this.createPromptData('adversarial', categoryLabel, template, rendered, brandName)
       );
     }
 
-    // Objection handling
-    for (const objection of [...new Set(objections)].slice(0, 2)) {
+    // Negative keyword probes (NEW) - test if LLMs associate brand with negative terms
+    for (const keyword of negativeKeywords.slice(0, 3)) {
+      for (const template of templates.filter((t) => t.id.includes('neg_keyword'))) {
+        const rendered = this.renderTemplate(template.template, {
+          brandName,
+          negativeKeyword: keyword,
+        });
+        prompts.push(
+          this.createPromptData('adversarial', categoryLabel, template, rendered, brandName)
+        );
+      }
+    }
+
+    // Objection handling - increased from 2 to 4
+    for (const objection of [...new Set(objections)].slice(0, 4)) {
       for (const template of templates.filter((t) => t.id.includes('obj'))) {
         const rendered = this.renderTemplate(template.template, {
           brandName,
@@ -520,10 +654,9 @@ export class PromptGeneratorAgent {
       }
     }
 
-    // Misconception probes
-    for (const misconception of misconceptions.slice(0, 2)) {
-      const template = templates.find((t) => t.id === 'adv_misc_1');
-      if (template) {
+    // Misconception probes - increased from 2 to 3 and use all misc templates
+    for (const misconception of misconceptions.slice(0, 3)) {
+      for (const template of templates.filter((t) => t.id.includes('misc'))) {
         const rendered = this.renderTemplate(template.template, {
           brandName,
           misconception,
@@ -532,6 +665,14 @@ export class PromptGeneratorAgent {
           this.createPromptData('adversarial', categoryLabel, template, rendered, brandName)
         );
       }
+    }
+
+    // Trust probes (NEW)
+    for (const template of templates.filter((t) => t.id.includes('trust'))) {
+      const rendered = this.renderTemplate(template.template, { brandName });
+      prompts.push(
+        this.createPromptData('adversarial', categoryLabel, template, rendered, brandName)
+      );
     }
 
     // Competitor attack probes
@@ -583,6 +724,121 @@ export class PromptGeneratorAgent {
     }
 
     // Deduplicate
+    const seen = new Set<string>();
+    const deduplicated = prompts.filter((p) => {
+      if (seen.has(p.renderedPrompt)) return false;
+      seen.add(p.renderedPrompt);
+      return true;
+    });
+
+    return deduplicated.sort((a, b) => b.priority - a.priority);
+  }
+
+  /**
+   * Generate review website prompts (The Trust)
+   * Generates prompts that reference industry-specific review platforms
+   */
+  private async generateReviewWebsitePrompts(
+    brand360: Brand360WithRelations,
+    brandName: string,
+    options: PromptGeneratorOptions
+  ): Promise<GeneratedPromptData[]> {
+    const prompts: GeneratedPromptData[] = [];
+    const templates = REVIEW_WEBSITE_TEMPLATES;
+    const categoryLabel = 'The Trust';
+    const citationStyle = options.preferredCitationStyle || 'inline';
+
+    // Get review websites - either from options or auto-detect from brand
+    let reviewWebsites: ReviewWebsiteWithCategory[] = [];
+
+    if (options.reviewWebsiteIds && options.reviewWebsiteIds.length > 0) {
+      // Fetch specific websites by ID
+      const allWebsites = await reviewWebsiteService.getAllActiveWebsites();
+      reviewWebsites = allWebsites.filter((w) =>
+        options.reviewWebsiteIds!.includes(w.id)
+      );
+    } else {
+      // Auto-detect based on brand's category mappings
+      reviewWebsites = await reviewWebsiteService.getRelevantWebsites(brand360.id);
+
+      // If no mappings exist, try to auto-detect and get top 5 websites
+      if (reviewWebsites.length === 0) {
+        const detected = await reviewWebsiteService.autoDetectCategories(brand360.id, {
+          category: brand360.products[0]?.category,
+          industry: brand360.industry,
+          description: brand360.products[0]?.name,
+        });
+
+        if (detected.length > 0) {
+          // Get websites from top detected category
+          const topCategory = detected[0];
+          const categoryWebsites = await reviewWebsiteService.getWebsitesByCategory(
+            topCategory.categoryId
+          );
+          const allWebsites = await reviewWebsiteService.getAllActiveWebsites();
+          reviewWebsites = allWebsites.filter((w) =>
+            categoryWebsites.some((cw) => cw.id === w.id)
+          );
+        }
+      }
+    }
+
+    // Limit to top 5 review websites
+    reviewWebsites = reviewWebsites.slice(0, 5);
+
+    if (reviewWebsites.length === 0) {
+      return prompts; // No review websites to generate prompts for
+    }
+
+    const competitors = brand360.competitorGraph?.competitors || [];
+    const topCompetitor = competitors[0]?.name || '';
+    const primaryProduct = brand360.products.find((p) => p.isHero) || brand360.products[0];
+    const useCase = primaryProduct?.useCases?.[0] || 'business needs';
+
+    // Generate prompts for each review website
+    for (const website of reviewWebsites) {
+      for (const template of templates) {
+        // Skip competitor templates if no competitors
+        if (template.id.includes('comp_review') && !topCompetitor) {
+          continue;
+        }
+
+        const rendered = this.renderTemplate(template.template, {
+          brandName,
+          reviewSite: website.name,
+          competitorName: topCompetitor,
+          useCase,
+        });
+
+        const promptData: GeneratedPromptData = {
+          category: template.id.includes('nav_') ? 'navigational' :
+                    template.id.includes('func_') ? 'functional' : 'comparative',
+          categoryLabel,
+          intent: template.intent,
+          template: template.template,
+          renderedPrompt: rendered,
+          expectedThemes: template.expectedThemes,
+          expectedEntities: [brandName, website.name],
+          expectedCitations: template.expectedCitations,
+          adversarialTwist: template.adversarialTwist,
+          hallucinationTest: template.hallucinationTest || false,
+          priority: template.priority,
+          isCustom: false,
+          targetReviewWebsite: website.name,
+          reviewSiteCitationStyle: citationStyle,
+        };
+
+        // Add competitor if present
+        if (template.id.includes('comp_review') && topCompetitor) {
+          promptData.targetCompetitor = topCompetitor;
+          promptData.expectedEntities.push(topCompetitor);
+        }
+
+        prompts.push(promptData);
+      }
+    }
+
+    // Deduplicate by rendered prompt
     const seen = new Set<string>();
     const deduplicated = prompts.filter((p) => {
       if (seen.has(p.renderedPrompt)) return false;

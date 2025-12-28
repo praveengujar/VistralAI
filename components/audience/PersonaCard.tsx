@@ -164,7 +164,7 @@ export function PersonaCard({ persona, onEdit, onDelete }: PersonaCardProps) {
               <ul className="space-y-1">
                 {persona.keyMessages.map((message, i) => (
                   <li key={i} className="text-sm text-[rgb(var(--foreground-secondary))] italic">
-                    "{message}"
+                    &ldquo;{message}&rdquo;
                   </li>
                 ))}
               </ul>

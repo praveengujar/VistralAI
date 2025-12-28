@@ -10,7 +10,7 @@ npm run dev
 
 ### Key Directories
 ```
-lib/db/operations/    - Database operations (9 files)
+lib/db/operations/    - Database operations (10 files, includes review-website-ops.ts)
 lib/cache/            - Redis caching layer
 lib/realtime/         - WebSocket support
 lib/query/            - React Query hooks (hooks.ts, audienceHooks.ts)
@@ -20,6 +20,8 @@ lib/utils/            - Lazy loading utilities
 components/ui/        - State components (EmptyState, LoadingState, ErrorState, DataWrapper)
 components/audience/  - PersonaCard, PersonaForm
 components/positioning/ - PositioningStatement, ValuePropositionCards, ProofPointsList
+components/aeo/       - ReviewSiteSelector, CategoryMappingManager
+lib/services/         - ReviewWebsiteService.ts (review site integration)
 ```
 
 ---
@@ -233,6 +235,50 @@ Low Accuracy + Low Visibility = INVISIBLE (red)
 | PerceptionScanOrchestrator | `lib/services/agents/PerceptionScanOrchestrator.ts` | Coordinates scan flow |
 | CorrectionGeneratorAgent | `lib/services/agents/CorrectionGeneratorAgent.ts` | Fix suggestions |
 | MagicImportOrchestrator | `lib/services/agents/MagicImportOrchestrator.ts` | Coordinates onboarding |
+
+---
+
+## Review Website Integration
+
+Industry-specific review site references for AI prompts (G2, Trustpilot, CNET, etc.).
+
+### Database Models
+| Model | Purpose |
+|-------|---------|
+| `ReviewCategory` | Industry categories (B2B Software, Consumer Electronics, etc.) |
+| `ReviewWebsite` | Review sites with domain, priority, citation format |
+| `BrandCategoryMapping` | Links brands to relevant categories |
+| `PromptReviewSiteUsage` | Tracks which review sites used in prompts |
+
+### Service Layer
+```typescript
+import { reviewWebsiteService } from '@/lib/services/ReviewWebsiteService';
+
+// Auto-detect categories for a brand
+const detected = await reviewWebsiteService.autoDetectCategories(brand360Id, brandData);
+
+// Get relevant websites for a brand
+const websites = await reviewWebsiteService.getRelevantWebsites(brand360Id);
+
+// Map brand to category
+await reviewWebsiteService.mapBrandToCategory(brand360Id, categoryId, { isPrimary: true });
+```
+
+### API Routes
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/api/review-sites/categories` | GET | List all categories |
+| `/api/review-sites/websites` | GET | List websites by category |
+| `/api/review-sites/brand-mapping` | GET/POST/DELETE | Manage brand-category mappings |
+| `/api/review-sites/auto-detect` | POST | Auto-detect categories for brand |
+
+### Categories (15 total)
+B2B Software, Consumer Electronics, E-commerce & Retail, Financial Services, Healthcare, Travel & Hospitality, Restaurants & Food, Automotive, Home Services, Real Estate, Legal Services, Education, Marketing & Agencies, HR & Recruiting, Cybersecurity
+
+### Seeding
+```bash
+npx ts-node prisma/seed-review-sites.ts
+```
 
 ---
 
