@@ -17,7 +17,7 @@ import {
   Search,
   Zap,
 } from 'lucide-react';
-import { ReviewSiteSelector } from '@/components/aeo';
+// Review site prompts are automatically included - no selector needed
 
 type LLMPlatform = 'claude' | 'chatgpt' | 'gemini' | 'perplexity' | 'google_aio';
 type PromptCategory = 'navigational' | 'functional' | 'comparative' | 'voice' | 'adversarial';
@@ -116,8 +116,7 @@ export default function NewScanPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
-  const [includeReviewSites, setIncludeReviewSites] = useState(false);
-  const [selectedReviewWebsiteIds, setSelectedReviewWebsiteIds] = useState<string[]>([]);
+  // Review sites are always included automatically - no state needed
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -203,10 +202,7 @@ export default function NewScanPage() {
             categories: selectedCategories.length > 0 ? selectedCategories : undefined,
             maxPrompts,
             mockExternalPlatforms: true,
-            includeReviewWebsites: includeReviewSites,
-            reviewWebsiteIds: includeReviewSites && selectedReviewWebsiteIds.length > 0
-              ? selectedReviewWebsiteIds
-              : undefined,
+            includeReviewWebsites: true, // Always enabled - auto-detects relevant sites
           },
         }),
       });
@@ -385,23 +381,7 @@ export default function NewScanPage() {
               </div>
             </div>
 
-            {/* Review Sites */}
-            <div className="card p-6">
-              <h2 className="text-lg font-semibold text-secondary-900 mb-2">
-                Review Site Prompts
-              </h2>
-              <p className="text-sm text-secondary-500 mb-6">
-                Include prompts that reference industry review sites (G2, Trustpilot, etc.)
-              </p>
-
-              <ReviewSiteSelector
-                brand360Id={brand360Id || ''}
-                selectedWebsiteIds={selectedReviewWebsiteIds}
-                onSelectionChange={setSelectedReviewWebsiteIds}
-                includeReviewSites={includeReviewSites}
-                onIncludeChange={setIncludeReviewSites}
-              />
-            </div>
+            {/* Review site prompts are automatically included - no UI needed */}
 
             {/* Scan Options */}
             <div className="card p-6">

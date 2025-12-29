@@ -143,6 +143,9 @@ export class PerceptionScanOrchestrator {
         const result = await generator.generate(brand360Data, brandName, {
           categories: ['navigational', 'comparative', 'voice', 'adversarial'],
           maxPerCategory: 13, // ~50 prompts total (13 x 4 categories)
+          // Review site prompts are included by default
+          includeReviewWebsites: options.includeReviewWebsites ?? true,
+          reviewWebsiteIds: options.reviewWebsiteIds,
         });
 
         if (result.success && result.data) {

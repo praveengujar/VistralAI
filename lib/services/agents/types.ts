@@ -466,6 +466,9 @@ export interface PerceptionScanOptions {
   parallelPlatforms?: number;
   mockExternalPlatforms?: boolean;
   onProgress?: AgentProgressCallback;
+  // Review website options - enabled by default
+  includeReviewWebsites?: boolean;
+  reviewWebsiteIds?: string[];
 }
 
 export interface AggregatedScores {

@@ -33,8 +33,6 @@ interface ReviewSiteSelectorProps {
   brand360Id: string;
   selectedWebsiteIds: string[];
   onSelectionChange: (websiteIds: string[]) => void;
-  includeReviewSites: boolean;
-  onIncludeChange: (include: boolean) => void;
   className?: string;
 }
 
@@ -42,8 +40,6 @@ export default function ReviewSiteSelector({
   brand360Id,
   selectedWebsiteIds,
   onSelectionChange,
-  includeReviewSites,
-  onIncludeChange,
   className = '',
 }: ReviewSiteSelectorProps) {
   const [categories, setCategories] = useState<ReviewCategory[]>([]);
@@ -153,7 +149,6 @@ export default function ReviewSiteSelector({
         });
 
         onSelectionChange(websiteIds);
-        onIncludeChange(true);
       }
     } catch (err) {
       console.error('Error auto-detecting categories:', err);
@@ -191,22 +186,11 @@ export default function ReviewSiteSelector({
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {/* Header with toggle and auto-detect */}
+      {/* Header with title and auto-detect */}
       <div className="flex items-center justify-between">
-        <label className="flex items-center gap-3 cursor-pointer">
-          <div className="relative">
-            <input
-              type="checkbox"
-              checked={includeReviewSites}
-              onChange={(e) => onIncludeChange(e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-[rgb(var(--border))] peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-accent rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent" />
-          </div>
-          <span className="text-sm font-medium text-[rgb(var(--foreground))]">
-            Include Review Site Prompts
-          </span>
-        </label>
+        <span className="text-sm font-medium text-[rgb(var(--foreground))]">
+          Review Site Prompts
+        </span>
 
         <button
           onClick={handleAutoDetect}
@@ -222,9 +206,8 @@ export default function ReviewSiteSelector({
         </button>
       </div>
 
-      {/* Categories list */}
-      {includeReviewSites && (
-        <div className="space-y-2 max-h-80 overflow-y-auto">
+      {/* Categories list - always shown */}
+      <div className="space-y-2 max-h-80 overflow-y-auto">
           {categories.map((category) => {
             const isExpanded = expandedCategories.has(category.id);
             const selectedCount = getSelectedCount(category);
@@ -320,10 +303,9 @@ export default function ReviewSiteSelector({
             );
           })}
         </div>
-      )}
 
       {/* Selected count */}
-      {includeReviewSites && selectedWebsiteIds.length > 0 && (
+      {selectedWebsiteIds.length > 0 && (
         <div className="text-sm text-[rgb(var(--foreground-secondary))]">
           {selectedWebsiteIds.length} review site{selectedWebsiteIds.length !== 1 ? 's' : ''} selected
         </div>
