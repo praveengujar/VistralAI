@@ -17,6 +17,7 @@ import {
   Search,
   Zap,
 } from 'lucide-react';
+// Review site prompts are automatically included - no selector needed
 
 type LLMPlatform = 'claude' | 'chatgpt' | 'gemini' | 'perplexity' | 'google_aio';
 type PromptCategory = 'navigational' | 'functional' | 'comparative' | 'voice' | 'adversarial';
@@ -115,6 +116,7 @@ export default function NewScanPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  // Review sites are always included automatically - no state needed
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -137,6 +139,12 @@ export default function NewScanPage() {
               const brand360Res = await fetch(`/api/brand-360?brandId=${data.profile.id}`);
               if (brand360Res.ok) {
                 const brand360Data = await brand360Res.json();
+
+                // If we found a Brand360Profile, update the ID to use that instead of the legacy profile ID
+                if (brand360Data.data?.id) {
+                  setBrand360Id(brand360Data.data.id);
+                }
+
                 // If there's identity data, the Brand360Profile exists
                 setHasBrand360Profile(!!brand360Data.data?.identity || !!brand360Data.data?.products?.length);
               }
@@ -194,6 +202,7 @@ export default function NewScanPage() {
             categories: selectedCategories.length > 0 ? selectedCategories : undefined,
             maxPrompts,
             mockExternalPlatforms: true,
+            includeReviewWebsites: true, // Always enabled - auto-detects relevant sites
           },
         }),
       });
@@ -316,11 +325,10 @@ export default function NewScanPage() {
                     <button
                       key={platform.id}
                       onClick={() => togglePlatform(platform.id)}
-                      className={`p-4 rounded-xl border-2 transition-all text-left ${
-                        isSelected
+                      className={`p-4 rounded-xl border-2 transition-all text-left ${isSelected
                           ? 'border-primary-500 bg-primary-50'
                           : 'border-secondary-200 hover:border-secondary-300'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className={`p-2 rounded-lg ${platform.color} text-white`}>
@@ -360,11 +368,10 @@ export default function NewScanPage() {
                     <button
                       key={category.id}
                       onClick={() => toggleCategory(category.id)}
-                      className={`px-4 py-2 rounded-full border-2 transition-all ${
-                        isSelected
+                      className={`px-4 py-2 rounded-full border-2 transition-all ${isSelected
                           ? 'border-primary-500 bg-primary-100 text-primary-700'
                           : 'border-secondary-200 text-secondary-600 hover:border-secondary-300'
-                      }`}
+                        }`}
                     >
                       <span className="font-medium">{category.name}</span>
                       <span className="text-xs ml-2 opacity-75">{category.description}</span>
@@ -373,6 +380,8 @@ export default function NewScanPage() {
                 })}
               </div>
             </div>
+
+            {/* Review site prompts are automatically included - no UI needed */}
 
             {/* Scan Options */}
             <div className="card p-6">

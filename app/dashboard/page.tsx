@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import BrandPresenceHero from '@/components/dashboard/BrandPresenceHero';
 import BrandHealthIndicator from '@/components/dashboard/BrandHealthIndicator';
+import MarketLandscape from '@/components/dashboard/MarketLandscape';
+import BrandStoryVisualizer from '@/components/dashboard/BrandStoryVisualizer';
 import EmptyState from '@/components/ui/EmptyState';
 import { ROUTES } from '@/lib/constants';
 import { Eye, Target, CheckCircle, Activity, ArrowRight, Sparkles } from 'lucide-react';
@@ -19,6 +21,9 @@ export default function DashboardPage() {
   const [brandProfile, setBrandProfile] = useState<BrandProfile | null>(null);
   const [crawlingStatus, setCrawlingStatus] = useState<'idle' | 'processing' | 'completed' | 'failed'>('idle');
   const [isLoadingBrand, setIsLoadingBrand] = useState(true);
+  const [brand360Id, setBrand360Id] = useState<string | null>(null);
+  const [brand360Profile, setBrand360Profile] = useState<any>(null);
+  const [perceptionScan, setPerceptionScan] = useState<any>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -37,6 +42,20 @@ export default function DashboardPage() {
             if (data.profile) {
               setBrandProfile(data.profile);
               setCrawlingStatus(data.profile.crawlingStatus || 'idle');
+
+              // Fetch Brand360 profile to get brand360Id and competitor/identity data
+              try {
+                const brand360Res = await fetch(`/api/brand-360?brandId=${data.profile.id}`);
+                if (brand360Res.ok) {
+                  const brand360Data = await brand360Res.json();
+                  if (brand360Data.data) {
+                    setBrand360Profile(brand360Data.data);
+                    setBrand360Id(brand360Data.data.id);
+                  }
+                }
+              } catch (e) {
+                console.error('Failed to fetch Brand360 profile', e);
+              }
             }
           }
         } catch (e) {
@@ -79,6 +98,27 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, [crawlingStatus, session?.user?.id]);
 
+  // Fetch latest perception scan when brand360Id is available
+  useEffect(() => {
+    const fetchPerceptionScan = async () => {
+      if (brand360Id) {
+        try {
+          const res = await fetch(`/api/aeo/perception-scan?brand360Id=${brand360Id}`);
+          if (res.ok) {
+            const result = await res.json();
+            // API returns { success: true, data: { scans: [...], total: N } }
+            if (result.data?.scans?.[0]) {
+              setPerceptionScan(result.data.scans[0]);
+            }
+          }
+        } catch (e) {
+          console.error('Failed to fetch perception scan', e);
+        }
+      }
+    };
+    fetchPerceptionScan();
+  }, [brand360Id]);
+
   if (status === 'loading') {
     return (
       <div className="min-h-screen bg-secondary-50 flex items-center justify-center">
@@ -93,6 +133,74 @@ export default function DashboardPage() {
   const brandName = brandProfile?.brandName || 'Your Brand';
   const brandCategory = brandProfile?.category || 'Your Industry';
   const brandTagline = brandProfile?.descriptor || 'Building your brand presence in AI';
+
+  // Transform competitor data for MarketLandscape
+  const competitors = brand360Profile?.competitorGraph?.competitors?.map((c: any) => ({
+    id: c.id,
+    name: c.name,
+    presence: c.shareOfVoice || 50,
+    threatLevel: c.competitorType === 'indirect' ? 'indirect' : c.competitorType === 'aspirational' ? 'aspirational' : 'direct',
+    overlap: 70,
+    story: c.description || `Competitor in ${brandCategory}`,
+    strengths: c.strengths || [],
+    weaknesses: c.weaknesses || [],
+  })) || [];
+
+  // Transform brand identity data for BrandStoryVisualizer
+  const storyNodes = brand360Profile?.brandIdentityPrism || brand360Profile?.values?.length > 0 ? [
+    {
+      id: '1',
+      stage: 'Origin' as const,
+      title: brand360Profile?.foundingYear ? `Founded ${brand360Profile.foundingYear}` : 'Brand Origins',
+      aiConsistency: perceptionScan?.overallScore || 75,
+      keyThemes: brand360Profile?.brandIdentityPrism?.cultureValues || brand360Profile?.values || ['Innovation', 'Quality'],
+      platforms: {
+        openai: !!perceptionScan?.platformScores?.chatgpt,
+        gemini: !!perceptionScan?.platformScores?.gemini,
+        claude: !!perceptionScan?.platformScores?.claude,
+        perplexity: !!perceptionScan?.platformScores?.perplexity,
+      }
+    },
+    {
+      id: '2',
+      stage: 'Conflict' as const,
+      title: 'Market Challenge',
+      aiConsistency: perceptionScan?.overallScore || 70,
+      keyThemes: brand360Profile?.brandIdentityPrism?.physique || ['Competition', 'Differentiation'],
+      platforms: {
+        openai: !!perceptionScan?.platformScores?.chatgpt,
+        gemini: !!perceptionScan?.platformScores?.gemini,
+        claude: !!perceptionScan?.platformScores?.claude,
+        perplexity: !!perceptionScan?.platformScores?.perplexity,
+      }
+    },
+    {
+      id: '3',
+      stage: 'Resolution' as const,
+      title: 'Brand Promise',
+      aiConsistency: perceptionScan?.overallScore || 80,
+      keyThemes: brand360Profile?.brandIdentityPrism?.relationshipType ? [brand360Profile.brandIdentityPrism.relationshipType] : ['Customer Success'],
+      platforms: {
+        openai: !!perceptionScan?.platformScores?.chatgpt,
+        gemini: !!perceptionScan?.platformScores?.gemini,
+        claude: !!perceptionScan?.platformScores?.claude,
+        perplexity: !!perceptionScan?.platformScores?.perplexity,
+      }
+    },
+    {
+      id: '4',
+      stage: 'Evolution' as const,
+      title: 'Future Vision',
+      aiConsistency: perceptionScan?.overallScore || 65,
+      keyThemes: brand360Profile?.brandIdentityPrism?.selfImage || ['Growth', 'Innovation'],
+      platforms: {
+        openai: !!perceptionScan?.platformScores?.chatgpt,
+        gemini: !!perceptionScan?.platformScores?.gemini,
+        claude: !!perceptionScan?.platformScores?.claude,
+        perplexity: !!perceptionScan?.platformScores?.perplexity,
+      }
+    },
+  ] : [];
 
   // Show empty state if no brand profile exists
   if (!isLoadingBrand && !brandProfile) {
@@ -141,76 +249,91 @@ export default function DashboardPage() {
           brandName={brandName}
           brandTagline={brandTagline}
           industry={brandCategory}
-          brandPulse={0}
+          brandPulse={perceptionScan?.overallScore || 0}
           pulseTrend={0}
           platformPresence={[
-            { platform: 'chatgpt', score: 0 },
-            { platform: 'gemini', score: 0 },
-            { platform: 'claude', score: 0 },
-            { platform: 'perplexity', score: 0 },
+            { platform: 'chatgpt', score: perceptionScan?.platformScores?.chatgpt || 0 },
+            { platform: 'gemini', score: perceptionScan?.platformScores?.gemini || 0 },
+            { platform: 'claude', score: perceptionScan?.platformScores?.claude || 0 },
+            { platform: 'perplexity', score: perceptionScan?.platformScores?.perplexity || 0 },
           ]}
         />
 
-        {/* Brand Health Indicators - Show zeros until AEO scan is completed */}
+        {/* Brand Health Indicators - Show real data from perception scans */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <BrandHealthIndicator
             type="recognition"
             label="Brand Recognition"
-            value={0}
+            value={perceptionScan?.overallScore || 0}
             trend={0}
-            context={`Run a perception scan to measure how ${brandName} appears in AI responses`}
+            context={perceptionScan ? `${brandName} visibility score across AI platforms` : `Run a perception scan to measure how ${brandName} appears in AI responses`}
             icon={Eye}
           />
           <BrandHealthIndicator
             type="accuracy"
             label="Story Accuracy"
-            value={0}
+            value={perceptionScan?.overallScore || 0}
             trend={0}
-            context={`Run a perception scan to measure brand accuracy`}
+            context={perceptionScan ? `Brand narrative accuracy in AI responses` : `Run a perception scan to measure brand accuracy`}
             icon={CheckCircle}
           />
           <BrandHealthIndicator
             type="voice"
             label="Market Voice"
-            value={0}
+            value={perceptionScan?.overallScore || 0}
             trend={0}
-            context="Run a perception scan to measure share of voice"
+            context={perceptionScan ? `Share of voice in AI-powered search` : `Run a perception scan to measure share of voice`}
             icon={Target}
           />
           <BrandHealthIndicator
             type="footprint"
             label="Digital Footprint"
-            value={0}
+            value={perceptionScan ? Object.keys(perceptionScan.platformScores || {}).length * 25 : 0}
             trend={0}
-            context="Run a perception scan to track AI crawl activity"
+            context={perceptionScan ? `AI platform coverage (${Object.keys(perceptionScan.platformScores || {}).length}/4 platforms)` : `Run a perception scan to track AI crawl activity`}
             icon={Activity}
           />
         </div>
 
-        {/* Market Landscape - show empty state since competitor data requires AEO scan */}
-        <div className="card p-6 mb-8">
-          <EmptyState
-            title="No Competitors Analyzed"
-            description="Run a perception scan to discover and analyze how your competitors appear in AI responses."
-            icon="search"
-            action={{
-              label: 'Run Perception Scan',
-              onClick: () => router.push(ROUTES.INSIGHTS),
-            }}
-          />
+        {/* Market Landscape */}
+        <div className="mb-8">
+          {competitors.length > 0 ? (
+            <MarketLandscape
+              userBrand={{ name: brandName, presence: perceptionScan?.overallScore || 50 }}
+              competitors={competitors}
+            />
+          ) : (
+            <div className="card p-6">
+              <EmptyState
+                title="No Competitors Analyzed"
+                description="Run a perception scan to discover and analyze how your competitors appear in AI responses."
+                icon="search"
+                action={{
+                  label: 'Run Perception Scan',
+                  onClick: () => router.push(ROUTES.INSIGHTS),
+                }}
+              />
+            </div>
+          )}
         </div>
 
-        {/* Brand Story Visualizer - show empty state since story data requires AEO scan */}
-        <div className="card p-6 mb-8">
-          <EmptyState
-            title="No Brand Story Data"
-            description="Run a perception scan to analyze how AI platforms tell your brand story."
-            icon="file"
-            action={{
-              label: 'Run Perception Scan',
-              onClick: () => router.push(ROUTES.INSIGHTS),
-            }}
-          />
+        {/* Brand Story Visualizer */}
+        <div className="mb-8">
+          {storyNodes.length > 0 ? (
+            <BrandStoryVisualizer storyNodes={storyNodes} />
+          ) : (
+            <div className="card p-6">
+              <EmptyState
+                title="No Brand Story Data"
+                description="Run a perception scan to analyze how AI platforms tell your brand story."
+                icon="file"
+                action={{
+                  label: 'Run Perception Scan',
+                  onClick: () => router.push(ROUTES.INSIGHTS),
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Top Opportunities - show empty state since opportunities require AEO scan */}

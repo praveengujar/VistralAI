@@ -1783,3 +1783,86 @@ model CorrectionWorkflow {
   @@index([brand360Id])
   @@map("correction_workflows")
 }
+
+// ============================================
+// REVIEW WEBSITE INTEGRATION
+// ============================================
+
+// Review site categories (B2B Software, Consumer Electronics, etc.)
+model ReviewCategory {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  name              String   @unique
+  slug              String   @unique
+  description       String?
+  industryKeywords  String[]
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  websites          ReviewWebsite[]
+  brandMappings     BrandCategoryMapping[]
+
+  @@map("review_categories")
+}
+
+// Individual review websites
+model ReviewWebsite {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  categoryId        String   @db.ObjectId
+
+  name              String
+  slug              String
+  domain            String
+  logoUrl           String?
+  reviewType        String   @default("general")  // general, expert, user, aggregate
+  audienceType      String   @default("mixed")    // b2b, b2c, mixed
+  citationFormat    String?
+  isActive          Boolean  @default(true)
+  priority          Int      @default(0)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  category          ReviewCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  promptUsages      PromptReviewSiteUsage[]
+
+  @@unique([categoryId, slug])
+  @@index([categoryId])
+  @@index([isActive])
+  @@map("review_websites")
+}
+
+// Maps brands to review categories
+model BrandCategoryMapping {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  brand360Id        String   @db.ObjectId
+  categoryId        String   @db.ObjectId
+  isPrimary         Boolean  @default(false)
+  confidence        Float?
+  source            String   @default("manual")  // manual, auto, ai
+
+  createdAt         DateTime @default(now())
+
+  category          ReviewCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([brand360Id, categoryId])
+  @@index([brand360Id])
+  @@map("brand_category_mappings")
+}
+
+// Tracks which review sites are used in prompts
+model PromptReviewSiteUsage {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  promptId          String   @db.ObjectId
+  websiteId         String   @db.ObjectId
+  citationStyle     String   @default("inline")  // inline, footnote, list
+
+  createdAt         DateTime @default(now())
+
+  website           ReviewWebsite @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@unique([promptId, websiteId])
+  @@index([promptId])
+  @@index([websiteId])
+  @@map("prompt_review_site_usages")
+}

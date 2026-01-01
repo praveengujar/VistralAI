@@ -68,7 +68,7 @@ export function PositioningStatement({ positioning, onEdit, editable = false }: 
       {positioning?.positioningStatement && (
         <div className="mb-6 p-4 bg-[rgb(var(--background))] rounded-lg">
           <p className="text-[rgb(var(--foreground))] italic">
-            "{positioning.positioningStatement}"
+            &ldquo;{positioning.positioningStatement}&rdquo;
           </p>
         </div>
       )}
@@ -204,7 +204,7 @@ export function ValuePropositionCards({ positioning }: { positioning: MarketPosi
           {/* Customer Quote */}
           {vp.customerQuote && (
             <div className="mt-3 p-2 bg-[rgb(var(--background))] rounded italic text-xs text-[rgb(var(--foreground-secondary))]">
-              "{vp.customerQuote}"
+              &ldquo;{vp.customerQuote}&rdquo;
             </div>
           )}
         </div>

@@ -17,6 +17,13 @@
  * - {commonQuestion}: Common customer question
  * - {misconception}: Common misconception
  * - {nonExistentFeature}: Made-up feature for hallucination testing
+ * - {reviewSite}: Review website name (e.g., G2, Trustpilot)
+ * - {negativeKeyword}: Negative association keyword
+ * - {feature}: Product feature
+ * - {benefit}: Product benefit
+ * - {personaDescription}: Target persona description
+ * - {primaryArchetype}: Primary brand archetype
+ * - {secondaryArchetype}: Secondary brand archetype
  */
 
 import { PromptCategory, PromptTemplate, PromptTemplateCategory } from './types';
@@ -92,6 +99,64 @@ export const NAVIGATIONAL_TEMPLATES: PromptTemplateCategory = {
       expectedThemes: ['functionality', 'features', 'workflow'],
       expectedCitations: false,
       priority: 8,
+    },
+    // Credibility/proof-based
+    {
+      id: 'nav_proof_1',
+      template: 'Has {brandName} won any awards?',
+      intent: 'informational',
+      expectedThemes: ['awards', 'recognition', 'credibility'],
+      expectedCitations: true,
+      priority: 7,
+    },
+    {
+      id: 'nav_proof_2',
+      template: 'What do customers say about {brandName}?',
+      intent: 'informational',
+      expectedThemes: ['testimonials', 'reviews', 'customer_satisfaction'],
+      expectedCitations: true,
+      priority: 7,
+    },
+    {
+      id: 'nav_stats_1',
+      template: 'How many customers does {brandName} have?',
+      intent: 'informational',
+      expectedThemes: ['customer_base', 'scale', 'market_presence'],
+      expectedCitations: true,
+      priority: 6,
+    },
+    {
+      id: 'nav_industry_1',
+      template: 'Is {brandName} a leader in {industry}?',
+      intent: 'informational',
+      expectedThemes: ['market_leadership', 'industry_position', 'reputation'],
+      expectedCitations: true,
+      priority: 7,
+    },
+    // Review website templates
+    {
+      id: 'nav_review_1',
+      template: 'What do customers say about {brandName} on {reviewSite}?',
+      intent: 'informational',
+      expectedThemes: ['customer_reviews', 'ratings', 'testimonials'],
+      expectedCitations: true,
+      priority: 8,
+    },
+    {
+      id: 'nav_review_2',
+      template: "What is {brandName}'s rating on {reviewSite}?",
+      intent: 'informational',
+      expectedThemes: ['ratings', 'score', 'ranking'],
+      expectedCitations: true,
+      priority: 8,
+    },
+    {
+      id: 'nav_review_3',
+      template: 'How many reviews does {brandName} have on {reviewSite}?',
+      intent: 'informational',
+      expectedThemes: ['review_count', 'popularity', 'market_presence'],
+      expectedCitations: true,
+      priority: 6,
     },
   ],
 };
@@ -188,6 +253,74 @@ export const FUNCTIONAL_TEMPLATES: PromptTemplateCategory = {
       expectedCitations: false,
       priority: 7,
     },
+    // Feature-specific
+    {
+      id: 'func_feature_1',
+      template: "How does {productName}'s {feature} work?",
+      intent: 'informational',
+      expectedThemes: ['feature_details', 'functionality', 'implementation'],
+      expectedCitations: false,
+      priority: 8,
+    },
+    {
+      id: 'func_feature_2',
+      template: 'What are the benefits of {feature} in {productName}?',
+      intent: 'commercial',
+      expectedThemes: ['feature_benefits', 'value_proposition', 'use_cases'],
+      expectedCitations: false,
+      priority: 8,
+    },
+    // Benefit-focused
+    {
+      id: 'func_benefit_1',
+      template: 'How can {brandName} help me {benefit}?',
+      intent: 'commercial',
+      expectedThemes: ['solution', 'outcomes', 'value'],
+      expectedCitations: false,
+      priority: 9,
+    },
+    {
+      id: 'func_benefit_2',
+      template: 'What results can I expect from {productName}?',
+      intent: 'commercial',
+      expectedThemes: ['outcomes', 'roi', 'success_stories'],
+      expectedCitations: true,
+      priority: 8,
+    },
+    // Decision journey
+    {
+      id: 'func_journey_1',
+      template: 'Is {brandName} right for {personaDescription}?',
+      intent: 'commercial',
+      expectedThemes: ['fit_assessment', 'target_audience', 'use_cases'],
+      expectedCitations: false,
+      priority: 8,
+    },
+    {
+      id: 'func_journey_2',
+      template: 'What should I consider before buying {productName}?',
+      intent: 'commercial',
+      expectedThemes: ['buying_criteria', 'considerations', 'evaluation'],
+      expectedCitations: false,
+      priority: 7,
+    },
+    // Review website functional templates
+    {
+      id: 'func_review_1',
+      template: 'Does {reviewSite} recommend {brandName} for {useCase}?',
+      intent: 'commercial',
+      expectedThemes: ['recommendation', 'use_case_fit', 'review_opinion'],
+      expectedCitations: true,
+      priority: 8,
+    },
+    {
+      id: 'func_review_2',
+      template: 'What do {reviewSite} reviewers say about {brandName} for small businesses?',
+      intent: 'commercial',
+      expectedThemes: ['segment_fit', 'reviews', 'recommendations'],
+      expectedCitations: true,
+      priority: 7,
+    },
   ],
 };
 
@@ -274,6 +407,23 @@ export const COMPARATIVE_TEMPLATES: PromptTemplateCategory = {
       expectedCitations: true,
       priority: 9,
     },
+    // Review website comparison templates
+    {
+      id: 'comp_review_1',
+      template: 'How does {brandName} compare to {competitorName} on {reviewSite}?',
+      intent: 'commercial',
+      expectedThemes: ['review_comparison', 'ratings_comparison', 'features'],
+      expectedCitations: true,
+      priority: 9,
+    },
+    {
+      id: 'comp_review_2',
+      template: 'Which has better reviews on {reviewSite}, {brandName} or {competitorName}?',
+      intent: 'commercial',
+      expectedThemes: ['review_comparison', 'ratings', 'winner'],
+      expectedCitations: true,
+      priority: 8,
+    },
   ],
 };
 
@@ -338,9 +488,44 @@ export const VOICE_TEMPLATES: PromptTemplateCategory = {
     // Tone probes
     {
       id: 'voice_tone_1',
-      template: 'How would you describe {brandName}\'s communication style?',
+      template: "How would you describe {brandName}'s communication style?",
       intent: 'informational',
       expectedThemes: ['voice', 'tone', 'communication_style'],
+      expectedCitations: false,
+      priority: 6,
+    },
+    // Vocabulary probes
+    {
+      id: 'voice_vocab_1',
+      template: 'Does {brandName} communicate in technical or simple terms?',
+      intent: 'informational',
+      expectedThemes: ['vocabulary', 'accessibility', 'communication_style'],
+      expectedCitations: false,
+      priority: 6,
+    },
+    {
+      id: 'voice_vocab_2',
+      template: "Is {brandName}'s content easy to understand?",
+      intent: 'informational',
+      expectedThemes: ['readability', 'accessibility', 'clarity'],
+      expectedCitations: false,
+      priority: 6,
+    },
+    // Secondary archetype
+    {
+      id: 'voice_arch_3',
+      template: 'Is {brandName} more {primaryArchetype} or {secondaryArchetype}?',
+      intent: 'informational',
+      expectedThemes: ['archetype_comparison', 'personality', 'positioning'],
+      expectedCitations: false,
+      priority: 5,
+    },
+    // Spectrum probes
+    {
+      id: 'voice_spectrum_1',
+      template: 'Is {brandName} formal or casual in tone?',
+      intent: 'informational',
+      expectedThemes: ['formality', 'tone', 'brand_voice'],
       expectedCitations: false,
       priority: 6,
     },
@@ -480,6 +665,69 @@ export const ADVERSARIAL_TEMPLATES: PromptTemplateCategory = {
       hallucinationTest: true,
       priority: 9,
     },
+    // Negative keyword probes
+    {
+      id: 'adv_neg_keyword',
+      template: 'Is {brandName} associated with {negativeKeyword}?',
+      intent: 'informational',
+      expectedThemes: ['brand_perception', 'reputation', 'associations'],
+      expectedCitations: true,
+      adversarialTwist: 'negative_association',
+      hallucinationTest: true,
+      priority: 9,
+    },
+    {
+      id: 'adv_neg_keyword_2',
+      template: "I've heard {brandName} is {negativeKeyword}, true?",
+      intent: 'informational',
+      expectedThemes: ['brand_perception', 'fact_check', 'clarification'],
+      expectedCitations: true,
+      adversarialTwist: 'negative_hearsay',
+      hallucinationTest: true,
+      priority: 9,
+    },
+    // Extended misconception handling
+    {
+      id: 'adv_misc_2',
+      template: 'Does {brandName} really {misconception}?',
+      intent: 'informational',
+      expectedThemes: ['fact_check', 'clarification', 'misconception'],
+      expectedCitations: true,
+      adversarialTwist: 'misconception_direct',
+      hallucinationTest: true,
+      priority: 9,
+    },
+    {
+      id: 'adv_misc_3',
+      template: 'People say {misconception} about {brandName}, is that fair?',
+      intent: 'informational',
+      expectedThemes: ['perception', 'fairness', 'clarification'],
+      expectedCitations: true,
+      adversarialTwist: 'misconception_fairness',
+      hallucinationTest: true,
+      priority: 8,
+    },
+    // Trust probes
+    {
+      id: 'adv_trust_1',
+      template: 'Can I trust {brandName} with my data?',
+      intent: 'informational',
+      expectedThemes: ['data_security', 'privacy', 'trust'],
+      expectedCitations: true,
+      adversarialTwist: 'trust_data',
+      hallucinationTest: false,
+      priority: 8,
+    },
+    {
+      id: 'adv_trust_2',
+      template: 'Has {brandName} had any security incidents?',
+      intent: 'informational',
+      expectedThemes: ['security_history', 'incidents', 'reliability'],
+      expectedCitations: true,
+      adversarialTwist: 'security_history',
+      hallucinationTest: true,
+      priority: 8,
+    },
   ],
 };
 
@@ -538,6 +786,17 @@ export const HALLUCINATION_TRAP_AWARDS = [
   'International Digital Transformation Prize',
   'World Technology Leadership Medal',
   'Universal Best-in-Class Recognition',
+];
+
+// Review website templates collected from all categories
+// These templates use {reviewSite} variable for industry-specific review platforms
+export const REVIEW_WEBSITE_TEMPLATES: PromptTemplate[] = [
+  // From navigational templates
+  ...NAVIGATIONAL_TEMPLATES.templates.filter((t) => t.id.includes('review')),
+  // From functional templates
+  ...FUNCTIONAL_TEMPLATES.templates.filter((t) => t.id.includes('review')),
+  // From comparative templates
+  ...COMPARATIVE_TEMPLATES.templates.filter((t) => t.id.includes('review')),
 ];
 
 /**

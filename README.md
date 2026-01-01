@@ -11,6 +11,7 @@ AI Visibility Optimization Platform — Monitor and optimize how AI platforms pe
 - **Brand 360 Profile**: Comprehensive semantic ground truth engine
 - **Target Audience & Personas**: AI-generated customer personas with pain points
 - **Market Positioning**: Positioning statements, value propositions, and proof points
+- **Review Website Integration**: Industry-specific review site references (G2, Trustpilot, CNET, etc.)
 - **Interactive Dashboards**: Quadrant positioning, radar charts, trend analysis
 
 ## Tech Stack
@@ -78,9 +79,15 @@ app/                  # Next.js App Router pages
 │   ├── audience/     # Target audience endpoints
 │   ├── personas/     # Customer personas CRUD
 │   └── positioning/  # Market positioning endpoints
+├── api/review-sites/ # Review website integration
+│   ├── categories/   # Review categories
+│   ├── websites/     # Review websites by category
+│   ├── brand-mapping/# Brand-to-category mappings
+│   └── auto-detect/  # Auto-detect categories for brand
 components/           # React components
 ├── audience/         # PersonaCard, PersonaForm
-└── positioning/      # PositioningStatement, ValuePropositionCards
+├── positioning/      # PositioningStatement, ValuePropositionCards
+└── aeo/              # ReviewSiteSelector, CategoryMappingManager
 lib/
 ├── api/              # API middleware
 ├── cache/            # Redis caching layer

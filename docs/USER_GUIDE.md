@@ -13,10 +13,11 @@
 5. [Onboarding Wizard](#onboarding-wizard)
 6. [Review Queue](#review-queue)
 7. [AI Visibility Dashboard](#ai-visibility-dashboard)
-8. [Insights & Recommendations](#insights--recommendations)
-9. [Competitor Analysis](#competitor-analysis)
-10. [Alerts & Notifications](#alerts--notifications)
-11. [FAQ & Troubleshooting](#faq--troubleshooting)
+8. [Review Site Integration](#review-site-integration)
+9. [Insights & Recommendations](#insights--recommendations)
+10. [Competitor Analysis](#competitor-analysis)
+11. [Alerts & Notifications](#alerts--notifications)
+12. [FAQ & Troubleshooting](#faq--troubleshooting)
 
 ---
 
@@ -519,6 +520,97 @@ Filter your visibility data by:
 
 **Example**: "Show me positive mentions in Claude over the last 30 days"
 
+---
+
+## Review Site Integration
+
+### What is Review Site Integration?
+
+Review Site Integration allows you to include industry-specific review website references in your AI perception prompts. This helps generate more targeted prompts like:
+- "What do customers say about {brandName} on G2?"
+- "What is {brandName}'s rating on Trustpilot?"
+- "How does {brandName} compare to competitors on CNET?"
+
+### Available Categories
+
+VistralAI supports 15 industry categories, each with 3 authoritative review sites:
+
+| Category | Review Sites |
+|----------|--------------|
+| B2B Software | G2, Capterra, TrustRadius |
+| Consumer Electronics | CNET, TechRadar, Wirecutter |
+| E-commerce & Retail | Trustpilot, Consumer Reports, Yelp |
+| Financial Services | NerdWallet, Bankrate, Forbes Advisor |
+| Healthcare | Healthgrades, WebMD, Vitals |
+| Travel & Hospitality | TripAdvisor, Booking.com, Expedia |
+| Restaurants & Food | Yelp, DoorDash, Zomato |
+| Automotive | Edmunds, Kelley Blue Book, J.D. Power |
+| Home Services | Angi, HomeAdvisor, Thumbtack |
+| Real Estate | Zillow, Realtor.com, Redfin |
+| Legal Services | Avvo, Martindale-Hubbell, Lawyers.com |
+| Education | Niche, Course Report, SwitchUp |
+| Marketing & Agencies | Clutch, DesignRush, UpCity |
+| HR & Recruiting | Glassdoor, Indeed, Comparably |
+| Cybersecurity | Gartner, PeerSpot, G2 Security |
+
+### Using Review Sites in Scans
+
+When creating a new perception scan:
+
+1. Go to **AEO Dashboard** → **New Scan**
+2. Toggle **"Include Review Site Prompts"** ON
+3. Click **"Auto-Detect"** to automatically select relevant categories based on your brand data
+4. Or manually select categories by expanding them and checking individual review sites
+5. Complete the scan configuration and start the scan
+
+### Auto-Detect Feature
+
+The Auto-Detect feature analyzes your brand's products, descriptions, and industry to suggest relevant review site categories:
+
+```
+┌─────────────────────────────────────────────────────┐
+│ Review Site Selection                                │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│ [✓] Include Review Site Prompts    [Auto-Detect]   │
+│                                                     │
+│ Detected Categories:                                │
+│ ┌─────────────────────────────────────────────────┐ │
+│ │ [✓] Consumer Electronics (95% confidence)       │ │
+│ │     Matched: iphone, macbook, ipad, airpods    │ │
+│ │     Sites: CNET, TechRadar, Wirecutter         │ │
+│ └─────────────────────────────────────────────────┘ │
+│                                                     │
+│ 3 review sites selected                             │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+```
+
+**How it works**:
+- Analyzes product names and descriptions
+- Matches industry keywords to categories
+- Ranks by confidence score
+- Suggests top 3 categories by default
+
+### Manual Selection
+
+You can also manually select categories:
+
+1. Click on a category to expand it
+2. Check individual review sites to include
+3. Click the category checkbox to select all sites in that category
+4. Selected sites appear with a count (e.g., "2/3 selected")
+
+### Best Practices
+
+1. **Use Auto-Detect first** - It analyzes your brand data for best matches
+2. **Review the suggestions** - Auto-detect uses keywords, so verify relevance
+3. **Select 1-3 categories** - Too many dilutes focus
+4. **Prioritize high-traffic sites** - G2, Trustpilot, CNET have most AI visibility
+5. **Match your actual presence** - Only include sites where your brand is actually listed
+
+---
+
 ### Interpreting Metrics
 
 **Visibility Score** (0-100)
@@ -917,6 +1009,6 @@ Have an idea? Share it:
 
 ---
 
-**Last Updated**: November 2024
-**Version**: 1.0
+**Last Updated**: December 2024
+**Version**: 1.1
 **Support**: support@vistralai.com

@@ -90,6 +90,9 @@ export async function POST(request: NextRequest) {
       categories: options?.categories as PromptCategory[] | undefined,
       maxPrompts: options?.maxPrompts,
       mockExternalPlatforms: options?.mockExternalPlatforms ?? true,
+      // Review site prompts are always included by default
+      includeReviewWebsites: options?.includeReviewWebsites ?? true,
+      reviewWebsiteIds: options?.reviewWebsiteIds,
     };
 
     const result = await orchestrator.execute(brand360Id, scanOptions);
