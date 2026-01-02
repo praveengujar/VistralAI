@@ -79,6 +79,12 @@ export async function POST(request: NextRequest) {
         break;
       }
 
+      case 'payment_method.attached': {
+        const paymentMethod = event.data.object as Stripe.PaymentMethod;
+        await handlePaymentMethodAttached(paymentMethod);
+        break;
+      }
+
       default:
         console.log(`Unhandled event type: ${event.type}`);
     }
@@ -213,4 +219,60 @@ async function handleTrialEnding(stripeSubscription: Stripe.Subscription) {
 
   // TODO: Send trial ending email notification
   console.log(`Trial ending for user ${subscription.user.email}`);
+}
+
+async function handlePaymentMethodAttached(paymentMethod: Stripe.PaymentMethod) {
+  // Detect wallet type from card metadata
+  const walletType = paymentMethod.card?.wallet?.type;
+  const customer = paymentMethod.customer as string;
+
+  if (!customer) return;
+
+  // Find user by Stripe customer ID
+  const user = await prisma.user.findFirst({
+    where: { stripeCustomerId: customer },
+  });
+
+  if (!user) {
+    console.log('User not found for Stripe customer:', customer);
+    return;
+  }
+
+  // Determine payment method type for storage
+  let methodType: string = 'card';
+  if (walletType === 'apple_pay') {
+    methodType = 'apple_pay';
+  } else if (walletType === 'google_pay') {
+    methodType = 'google_pay';
+  } else if (walletType === 'link') {
+    methodType = 'link';
+  }
+
+  // Check if payment method already exists
+  const existing = await prisma.paymentMethod.findFirst({
+    where: { stripePaymentMethodId: paymentMethod.id },
+  });
+
+  if (existing) {
+    console.log('Payment method already exists:', paymentMethod.id);
+    return;
+  }
+
+  // Create payment method record
+  await prisma.paymentMethod.create({
+    data: {
+      userId: user.id,
+      type: methodType,
+      provider: 'stripe',
+      stripePaymentMethodId: paymentMethod.id,
+      walletType: walletType || null,
+      cardBrand: paymentMethod.card?.brand || null,
+      cardLast4: paymentMethod.card?.last4 || null,
+      cardExpMonth: paymentMethod.card?.exp_month || null,
+      cardExpYear: paymentMethod.card?.exp_year || null,
+      isActive: true,
+    },
+  });
+
+  console.log(`Payment method attached: ${methodType} for user ${user.id}`);
 }

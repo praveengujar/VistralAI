@@ -47,11 +47,14 @@ export class StripeService {
 
   /**
    * Create setup intent for collecting payment method
+   * Uses automatic_payment_methods to enable Apple Pay, Google Pay, and Link
    */
   async createSetupIntent(customerId: string): Promise<Stripe.SetupIntent> {
     return this.getStripe().setupIntents.create({
       customer: customerId,
-      payment_method_types: ['card'],
+      automatic_payment_methods: {
+        enabled: true,
+      },
       usage: 'off_session',
     });
   }
@@ -146,7 +149,8 @@ export class StripeService {
     return this.getStripe().checkout.sessions.create({
       customer: customerId,
       mode: 'subscription',
-      payment_method_types: ['card'],
+      // Removed payment_method_types to allow Stripe Dashboard-configured methods
+      // including Apple Pay, Google Pay, and Link
       line_items: [
         {
           price: priceId,
@@ -288,13 +292,24 @@ export class StripeService {
 
   /**
    * List customer payment methods
+   * Fetches cards and link payment methods (wallets are stored as card type with wallet metadata)
    */
   async listPaymentMethods(customerId: string): Promise<Stripe.PaymentMethod[]> {
-    const methods = await this.getStripe().paymentMethods.list({
-      customer: customerId,
-      type: 'card',
-    });
-    return methods.data;
+    const types = ['card', 'link'] as const;
+    const allMethods: Stripe.PaymentMethod[] = [];
+
+    for (const t of types) {
+      try {
+        const methods = await this.getStripe().paymentMethods.list({
+          customer: customerId,
+          type: t,
+        });
+        allMethods.push(...methods.data);
+      } catch {
+        // Skip if type is not supported
+      }
+    }
+    return allMethods;
   }
 
   /**

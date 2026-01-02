@@ -52,12 +52,13 @@ flowchart TB
     end
 
     subgraph Onboarding["Onboarding Routes"]
-        E1["/api/onboarding/analyze"]
-        E2["/api/onboarding/status"]
-        E3["/api/onboarding/confirm"]
-        E4["/api/onboarding/review-queue"]
-        E5["/api/onboarding/review-queue/approve"]
-        E6["/api/onboarding/products/upload"]
+        E1["/api/onboarding/session"]
+        E2["/api/onboarding/brand"]
+        E3["/api/onboarding/plan"]
+        E4["/api/onboarding/payment"]
+        E5["/api/onboarding/complete"]
+        E6["/api/onboarding/status"]
+        E7["/api/onboarding/analyze"]
     end
 
     subgraph Admin["Admin Routes"]
@@ -696,5 +697,163 @@ quadrantChart
 
 ---
 
-**Last Updated**: December 2024
-**Version**: 1.0
+## Payment & Subscription Flow Diagram
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as User
+    participant PF as PaymentForm
+    participant API as Next.js API
+    participant S as Stripe
+    participant DB as MongoDB
+
+    rect rgb(240, 248, 255)
+        Note over U,DB: Setup Intent Flow
+        U->>PF: Select plan & billing cycle
+        PF->>API: POST /api/payments/stripe/create-setup-intent
+        API->>S: createSetupIntent()
+        S-->>API: clientSecret
+        API-->>PF: { clientSecret }
+        PF->>PF: Initialize PaymentElement
+    end
+
+    rect rgb(255, 248, 240)
+        Note over U,DB: Payment Confirmation
+        U->>PF: Enter payment details / Tap Apple Pay
+        PF->>S: confirmSetup(elements)
+        S-->>PF: setupIntent (succeeded)
+    end
+
+    rect rgb(248, 255, 240)
+        Note over U,DB: Subscription Creation
+        PF->>API: POST /api/subscription
+        API->>S: createSubscription(trial: 15 days)
+        S-->>API: subscription object
+        API->>DB: Create UserSubscription
+        DB-->>API: saved
+        API-->>PF: { success: true }
+        PF-->>U: Redirect to success page
+    end
+```
+
+---
+
+## Pricing Tier Comparison
+
+```mermaid
+graph TB
+    subgraph Monitor["Monitor - $99/mo"]
+        M1[1 Brand]
+        M2[Weekly Updates]
+        M3[3 Platforms]
+        M4[Basic Dashboard]
+    end
+
+    subgraph Growth["Growth - $299/mo (Most Popular)"]
+        G1[10 Brands]
+        G2[Daily Updates]
+        G3[All Platforms]
+        G4[3 Competitors/Brand]
+        G5[Real-Time Alerts]
+    end
+
+    subgraph Dominance["Dominance - $999/mo"]
+        D1[50 Brands]
+        D2[Real-time Updates]
+        D3[All Platforms + Beta]
+        D4[10 Competitors/Brand]
+        D5[API Access]
+        D6[White-Label Reports]
+    end
+```
+
+---
+
+## Unified Onboarding Flow Diagram
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as User
+    participant B as Browser
+    participant API as Next.js API
+    participant MI as MagicImportOrchestrator
+    participant S as Stripe
+    participant DB as MongoDB
+
+    rect rgb(240, 248, 255)
+        Note over U,DB: Step 1: Brand Setup
+        U->>B: Enter website URL
+        B->>API: POST /api/onboarding/brand
+        API->>MI: Start Magic Import
+        MI-->>B: WebSocket: progress updates
+        MI->>DB: Create Brand360Profile
+        MI-->>B: WebSocket: complete
+        B->>API: Mark step 1 complete
+    end
+
+    rect rgb(255, 248, 240)
+        Note over U,DB: Step 2: Choose Plan
+        U->>B: Select tier + billing cycle
+        B->>API: POST /api/onboarding/plan
+        API->>DB: Save plan selection
+        API-->>B: Step 2 complete
+    end
+
+    rect rgb(248, 255, 240)
+        Note over U,DB: Step 3: Payment
+        B->>API: POST /api/payments/stripe/create-setup-intent
+        API->>S: createSetupIntent()
+        S-->>B: clientSecret
+        U->>B: Enter payment / Apple Pay
+        B->>S: confirmSetup(elements)
+        S-->>B: setupIntent succeeded
+        B->>API: POST /api/onboarding/payment
+        API->>S: createSubscription(trial: 15 days)
+        S-->>API: subscription object
+        API->>DB: Create subscription record
+        API-->>B: Step 3 complete
+    end
+
+    rect rgb(255, 240, 248)
+        Note over U,DB: Step 4: First Scan (Optional)
+        U->>B: Click "Start Scan" or "Skip"
+        alt Start Scan
+            B->>API: POST /api/aeo/perception-scan
+            API-->>B: Scan started
+        else Skip
+            B->>API: Skip step 4
+        end
+    end
+
+    rect rgb(248, 240, 255)
+        Note over U,DB: Step 5: Complete
+        B->>API: POST /api/onboarding/complete
+        API->>DB: Mark onboarding complete
+        API-->>B: Redirect to dashboard
+    end
+```
+
+---
+
+## Subscription State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> trialing: User signs up
+    trialing --> active: Trial ends + Payment succeeds
+    trialing --> canceled: User cancels during trial
+    active --> past_due: Payment fails
+    active --> canceled: User cancels
+    past_due --> active: Payment succeeds
+    past_due --> canceled: Grace period expires
+    active --> paused: User pauses
+    paused --> active: User resumes
+    canceled --> [*]
+```
+
+---
+
+**Last Updated**: January 2026
+**Version**: 1.1

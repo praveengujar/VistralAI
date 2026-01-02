@@ -1,49 +1,57 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import OnboardingWizard from '@/components/onboarding/OnboardingWizard';
-import { ROUTES } from '@/lib/constants';
+import { useSession } from 'next-auth/react';
+import { useOnboardingSession } from '@/lib/query/onboardingHooks';
+import { getStepRoute } from '@/lib/config/onboarding';
+import { Loader2 } from 'lucide-react';
 
-export default function OnboardingPage() {
-  const { data: session, status } = useSession();
+export default function OnboardingIndexPage() {
   const router = useRouter();
+  const { data: authSession, status: authStatus } = useSession();
+  const { data: sessionData, isLoading } = useOnboardingSession();
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push(ROUTES.LOGIN);
+    // Redirect to login if not authenticated
+    if (authStatus === 'unauthenticated') {
+      router.push('/auth/login');
+      return;
     }
-  }, [status, router]);
 
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-secondary-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="spinner-lg text-primary-600 mx-auto"></div>
-          <p className="mt-4 text-secondary-500">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+    if (authStatus !== 'authenticated') return;
 
+    // Wait for onboarding session data
+    if (isLoading) return;
+
+    const session = sessionData?.data?.session;
+
+    if (!session) {
+      // No session yet, start at brand setup
+      router.push('/onboarding/brand');
+      return;
+    }
+
+    // If already completed, go to dashboard
+    if (session.status === 'completed') {
+      router.push('/dashboard');
+      return;
+    }
+
+    // Resume at current step
+    const stepRoute = getStepRoute(session.currentStep);
+    router.push(stepRoute);
+
+  }, [authStatus, sessionData, isLoading, router]);
+
+  // Show loading state
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-accent-50" />
-
-      {/* Decorative elements */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-200/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent-200/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3" />
-      <div className="absolute top-1/3 left-1/3 w-72 h-72 bg-primary-100/30 rounded-full blur-2xl" />
-
-      {/* Grid pattern overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:32px_32px]" />
-
-      <div className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <OnboardingWizard />
-        </div>
+    <div className="min-h-screen bg-[rgb(var(--background))] flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[rgb(var(--primary))] mx-auto mb-4" />
+        <p className="text-[rgb(var(--foreground-secondary))]">
+          Loading your onboarding progress...
+        </p>
       </div>
     </div>
   );

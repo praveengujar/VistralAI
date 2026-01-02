@@ -42,7 +42,7 @@ export default function OnboardingSuccessPage() {
 
         {/* Description */}
         <p className="text-lg mb-8" style={{ color: 'rgb(var(--foreground-secondary))' }}>
-          Your {TRIAL_DAYS}-day free trial has started. Let's get you set up for success.
+          Your {TRIAL_DAYS}-day free trial has started. Let&apos;s get you set up for success.
         </p>
 
         {/* Features */}
@@ -53,7 +53,7 @@ export default function OnboardingSuccessPage() {
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="w-5 h-5" style={{ color: 'rgb(var(--primary))' }} />
             <h2 className="font-semibold" style={{ color: 'rgb(var(--foreground))' }}>
-              What's next?
+              What&apos;s next?
             </h2>
           </div>
           <ul className="space-y-3 text-sm" style={{ color: 'rgb(var(--foreground-secondary))' }}>

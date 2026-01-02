@@ -26,6 +26,7 @@ interface NavItem {
 const accountNavItems: NavItem[] = [
   { label: 'Profile', href: '/dashboard/settings/profile', icon: User },
   { label: 'Security', href: '/dashboard/settings/security', icon: Shield },
+  { label: 'Subscription', href: '/dashboard/settings/subscription', icon: CreditCard },
   { label: 'Notifications', href: '/dashboard/settings/notifications', icon: Bell },
   { label: 'Appearance', href: '/dashboard/settings/appearance', icon: Palette },
 ];

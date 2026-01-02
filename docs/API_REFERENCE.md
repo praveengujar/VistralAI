@@ -1036,6 +1036,131 @@ POST /aeo/magic-import
 
 ---
 
+## Payments & Subscriptions API
+
+### Create Setup Intent
+```
+POST /api/payments/stripe/create-setup-intent
+```
+
+Creates a Stripe SetupIntent for collecting payment method. Uses `automatic_payment_methods` to enable Apple Pay, Google Pay, and Link.
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "clientSecret": "seti_xxx_secret_xxx"
+  }
+}
+```
+
+### Create Subscription
+```
+POST /api/subscription
+```
+
+Creates a subscription with a 15-day free trial.
+
+**Request**:
+```json
+{
+  "tierId": "growth",
+  "provider": "stripe",
+  "billingCycle": "monthly",
+  "paymentMethodId": "pm_xxx"
+}
+```
+
+**Response** (201):
+```json
+{
+  "success": true,
+  "data": {
+    "subscriptionId": "sub_xxx",
+    "status": "trialing",
+    "tierId": "growth",
+    "currentPeriodStart": "2026-01-01T00:00:00Z",
+    "currentPeriodEnd": "2026-01-16T00:00:00Z",
+    "trialEndsAt": "2026-01-16T00:00:00Z"
+  }
+}
+```
+
+### Get Current Subscription
+```
+GET /api/subscription
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "id": "subscription_123",
+    "tierId": "growth",
+    "status": "trialing",
+    "provider": "stripe",
+    "billingCycle": "monthly",
+    "currentPeriodStart": "2026-01-01T00:00:00Z",
+    "currentPeriodEnd": "2026-02-01T00:00:00Z",
+    "cancelAtPeriodEnd": false
+  }
+}
+```
+
+### Update Subscription (Upgrade/Downgrade)
+```
+PUT /api/subscription
+```
+
+**Request**:
+```json
+{
+  "tierId": "dominance",
+  "billingCycle": "yearly"
+}
+```
+
+### Cancel Subscription
+```
+DELETE /api/subscription
+```
+
+**Query Parameters**:
+- `immediately=true` - Cancel immediately (default: cancel at period end)
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "cancelAtPeriodEnd": true,
+    "canceledAt": "2026-01-15T00:00:00Z"
+  }
+}
+```
+
+### Stripe Webhook
+```
+POST /api/webhooks/stripe
+```
+
+Receives and processes Stripe webhook events. Requires valid `stripe-signature` header.
+
+**Handled Events**:
+| Event | Action |
+|-------|--------|
+| `customer.subscription.created` | Create subscription record |
+| `customer.subscription.updated` | Update subscription status |
+| `customer.subscription.deleted` | Mark subscription canceled |
+| `invoice.paid` | Create invoice record |
+| `invoice.payment_failed` | Handle payment failure |
+| `customer.subscription.trial_will_end` | Trigger trial ending notification |
+| `payment_method.attached` | Store payment method details |
+
+---
+
 ## Review Sites API
 
 Industry-specific review website integration for AI prompt generation. Maps brands to relevant review platforms (G2, Trustpilot, CNET, etc.) based on industry categories.

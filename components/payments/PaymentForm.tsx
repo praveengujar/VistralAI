@@ -10,6 +10,7 @@ import {
 import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { CreditCard, Wallet } from 'lucide-react';
 import { TRIAL_DAYS, getTierById } from '@/lib/config/pricing';
+import { ExpressCheckout } from './ExpressCheckout';
 
 type PaymentMethod = 'card' | 'paypal';
 
@@ -25,11 +26,18 @@ let stripePromise: Promise<Stripe | null> | null = null;
 function getStripePromise() {
   if (!stripePromise) {
     const key = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+    console.log('[Stripe] Publishable key exists:', !!key);
+    console.log('[Stripe] Key prefix:', key?.substring(0, 12));
     if (!key) {
       console.error('Stripe publishable key not found');
       return null;
     }
-    stripePromise = loadStripe(key);
+    // Trim any whitespace that might have been accidentally added
+    const cleanKey = key.trim();
+    stripePromise = loadStripe(cleanKey).catch((err) => {
+      console.error('[Stripe] Failed to load Stripe.js:', err);
+      return null;
+    });
   }
   return stripePromise;
 }
@@ -166,6 +174,16 @@ function PaymentFormContent({ tierId, billingCycle, onSuccess, onError }: Paymen
         </div>
       </div>
 
+      {/* Express Checkout (Apple Pay / Google Pay / Link) - temporarily disabled for debugging */}
+      {/* {selectedMethod === 'card' && (
+        <ExpressCheckout
+          tierId={tierId}
+          billingCycle={billingCycle}
+          onSuccess={onSuccess}
+          onError={onError}
+        />
+      )} */}
+
       {/* Payment Method Selection */}
       <div>
         <label
@@ -218,6 +236,10 @@ function PaymentFormContent({ tierId, billingCycle, onSuccess, onError }: Paymen
           <PaymentElement
             options={{
               layout: 'tabs',
+              wallets: {
+                applePay: 'auto',
+                googlePay: 'auto',
+              },
             }}
           />
         </div>
@@ -231,14 +253,14 @@ function PaymentFormContent({ tierId, billingCycle, onSuccess, onError }: Paymen
         >
           <Wallet className="w-12 h-12 mx-auto mb-2" style={{ color: '#003087' }} />
           <p className="text-sm" style={{ color: 'rgb(var(--foreground-secondary))' }}>
-            You'll be redirected to PayPal to complete your subscription setup.
+            You&apos;ll be redirected to PayPal to complete your subscription setup.
           </p>
         </div>
       )}
 
       {/* Terms */}
       <p className="text-xs" style={{ color: 'rgb(var(--foreground-muted))' }}>
-        By clicking "Start Free Trial", you agree to our{' '}
+        By clicking &quot;Start Free Trial&quot;, you agree to our{' '}
         <a href="/terms" style={{ color: 'rgb(var(--primary))' }} className="hover:underline">
           Terms of Service
         </a>

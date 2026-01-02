@@ -4,7 +4,8 @@ AI Visibility Optimization Platform — Monitor and optimize how AI platforms pe
 
 ## Features
 
-- **Magic Import**: Auto-extract brand data from any website
+- **Unified Onboarding**: Streamlined 5-step flow (Brand → Plan → Payment → Scan → Complete)
+- **Magic Import**: Auto-extract brand data from any website with real-time progress
 - **AI Perception Scanning**: Evaluate brand perception across ChatGPT, Claude, Gemini, Perplexity
 - **Real-Time Updates**: WebSocket-powered scan progress and insights
 - **Correction Workflows**: AI-generated fixes for perception issues
@@ -13,10 +14,13 @@ AI Visibility Optimization Platform — Monitor and optimize how AI platforms pe
 - **Market Positioning**: Positioning statements, value propositions, and proof points
 - **Review Website Integration**: Industry-specific review site references (G2, Trustpilot, CNET, etc.)
 - **Interactive Dashboards**: Quadrant positioning, radar charts, trend analysis
+- **Subscription Management**: Three-tier pricing (Monitor, Growth, Dominance) with Stripe
+- **Payment Methods**: Credit/debit cards, Apple Pay, Google Pay, PayPal
+- **15-Day Free Trial**: All plans include trial period
 
 ## Tech Stack
 
-Next.js 14 · TypeScript · React Query · Tailwind CSS · MongoDB · Redis · Prisma · Socket.io · NextAuth.js · OpenAI API
+Next.js 14 · TypeScript · React Query · Tailwind CSS · MongoDB · Redis · Prisma · Socket.io · NextAuth.js · OpenAI API · Stripe
 
 ## Quick Start
 
@@ -59,6 +63,11 @@ REDIS_URL=redis://localhost:6379
 # AI Features
 OPENAI_API_KEY=your-openai-key
 FIRECRAWL_INTERNAL_URL=http://localhost:3002
+
+# Stripe Payments
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
 ## Commands
@@ -79,26 +88,59 @@ app/                  # Next.js App Router pages
 │   ├── audience/     # Target audience endpoints
 │   ├── personas/     # Customer personas CRUD
 │   └── positioning/  # Market positioning endpoints
+├── api/onboarding/   # Unified onboarding API
+│   ├── session/      # Session management
+│   ├── brand/        # Magic Import trigger
+│   ├── plan/         # Plan selection
+│   ├── payment/      # Subscription creation
+│   └── complete/     # Finalization
 ├── api/review-sites/ # Review website integration
-│   ├── categories/   # Review categories
-│   ├── websites/     # Review websites by category
-│   ├── brand-mapping/# Brand-to-category mappings
-│   └── auto-detect/  # Auto-detect categories for brand
+├── onboarding/       # Onboarding pages (route group)
+│   └── (steps)/      # Brand, Plan, Payment, Scan, Complete
 components/           # React components
 ├── audience/         # PersonaCard, PersonaForm
 ├── positioning/      # PositioningStatement, ValuePropositionCards
-└── aeo/              # ReviewSiteSelector, CategoryMappingManager
+├── aeo/              # ReviewSiteSelector, CategoryMappingManager
+├── onboarding/unified/ # Unified onboarding flow components
+└── payments/         # PaymentForm, ExpressCheckout, PricingPage
 lib/
 ├── api/              # API middleware
 ├── cache/            # Redis caching layer
+├── config/           # Configuration (pricing.ts, onboarding.ts)
 ├── db/operations/    # Database operations
 ├── hooks/            # Custom React hooks
-├── query/            # React Query setup (hooks.ts, audienceHooks.ts)
-├── realtime/         # WebSocket support
-├── services/agents/  # AI agents (ProductExtractor, AudiencePositioning)
+├── query/            # React Query (hooks.ts, audienceHooks.ts, onboardingHooks.ts)
+├── realtime/         # WebSocket support (onboarding-events.ts)
+├── services/
+│   ├── agents/       # AI agents (MagicImportOrchestrator, etc.)
+│   ├── onboarding/   # OnboardingService (session management)
+│   └── payments/     # StripeService, SubscriptionService
 └── utils/            # Utilities & lazy loading
-prisma/               # Database schema
+prisma/               # Database schema (OnboardingSession, OnboardingEvent)
 ```
+
+## Payment Integration
+
+VistralAI uses Stripe for payment processing with support for:
+- Credit/debit cards
+- Apple Pay (Safari/iOS)
+- Google Pay (Chrome/Android)
+- PayPal (alternative provider)
+
+### Pricing Tiers
+
+| Tier | Monthly | Yearly | Discount |
+|------|---------|--------|----------|
+| Monitor | $99 | $1,045 | 12% |
+| Growth | $299 | $3,050 | 15% |
+| Dominance | $999 | $9,830 | 18% |
+
+### Stripe Setup
+
+1. Get API keys from [Stripe Dashboard](https://dashboard.stripe.com/test/apikeys)
+2. Add keys to `.env.local` (see Environment Variables above)
+3. Enable payment methods in Stripe Dashboard > Settings > Payment methods
+4. For webhooks, run: `stripe listen --forward-to localhost:3000/api/webhooks/stripe`
 
 ## Documentation
 

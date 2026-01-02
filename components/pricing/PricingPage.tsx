@@ -45,12 +45,14 @@ export function PricingPage({ onSelectTier, currentTierId }: PricingPageProps) {
           Monthly
         </span>
         <button
+          type="button"
           onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'yearly' : 'monthly')}
-          className="relative w-14 h-7 rounded-full transition-colors"
+          className="relative w-14 h-7 rounded-full transition-colors cursor-pointer"
           style={{ backgroundColor: billingCycle === 'yearly' ? 'rgb(var(--primary))' : 'rgb(var(--border))' }}
+          aria-label={`Switch to ${billingCycle === 'monthly' ? 'yearly' : 'monthly'} billing`}
         >
           <span
-            className="absolute top-1 w-5 h-5 rounded-full bg-white transition-transform"
+            className="absolute top-1 w-5 h-5 rounded-full bg-white transition-transform pointer-events-none"
             style={{ transform: billingCycle === 'yearly' ? 'translateX(32px)' : 'translateX(4px)' }}
           />
         </button>
@@ -65,7 +67,7 @@ export function PricingPage({ onSelectTier, currentTierId }: PricingPageProps) {
             className="px-2 py-1 text-xs font-medium rounded-full"
             style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'rgb(34, 197, 94)' }}
           >
-            Save up to 17%
+            Save up to 18%
           </span>
         )}
       </div>

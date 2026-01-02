@@ -43,6 +43,7 @@ const protectedPaths = [
   '/api/brand-360',
   '/api/brand-profile',
   '/api/api-keys',
+  '/api/onboarding',
 ];
 
 // Public API routes (no auth required)

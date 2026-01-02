@@ -1,0 +1,11 @@
+PLACEHOLDER: Download this file from Stripe Dashboard
+
+To enable Apple Pay:
+1. Go to Stripe Dashboard > Settings > Payment methods > Apple Pay
+2. Add your domain (e.g., vistralai.com)
+3. Download the domain verification file
+4. Replace this file with the downloaded content
+
+For local development:
+- Apple Pay verification is not required for localhost
+- Use Stripe test mode with supported browsers (Safari on macOS with Touch ID)

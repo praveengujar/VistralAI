@@ -53,7 +53,7 @@ export const PRICING_TIERS: PricingTierConfig[] = [
     description: 'Essential visibility tracking for individuals and small brands',
 
     priceMonthly: 99,
-    priceYearly: 990, // ~17% discount
+    priceYearly: 1045, // 12% discount
 
     targetAudience: 'Freelancers, Solopreneurs, In-House Brand Managers',
 
@@ -93,7 +93,7 @@ export const PRICING_TIERS: PricingTierConfig[] = [
     description: 'Full-featured monitoring with actionable insights for growing teams',
 
     priceMonthly: 299,
-    priceYearly: 2990, // ~17% discount
+    priceYearly: 3050, // 15% discount
 
     targetAudience: 'SMB Agencies, Growth Marketers, Mid-Market Brands',
 
@@ -134,7 +134,7 @@ export const PRICING_TIERS: PricingTierConfig[] = [
     description: 'Enterprise-grade solution with API access and white-label capabilities',
 
     priceMonthly: 999,
-    priceYearly: 9990, // ~17% discount
+    priceYearly: 9830, // 18% discount
 
     targetAudience: 'Large Agencies, Enterprise Aggregators, Multi-Brand Conglomerates',
 

@@ -270,6 +270,64 @@ NUM_WORKERS_PER_QUEUE: '4'    # Crawl concurrency
 LOGGING_LEVEL: 'info'         # Log verbosity
 ```
 
+## Stripe Testing
+
+### Setup Test Keys
+
+1. Go to [Stripe Dashboard](https://dashboard.stripe.com/test/apikeys) (ensure you're in **Test Mode**)
+2. Copy **Publishable key** (`pk_test_...`) and **Secret key** (`sk_test_...`)
+3. Add to `.env.local`:
+   ```env
+   STRIPE_SECRET_KEY=sk_test_51xxx
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51xxx
+   STRIPE_WEBHOOK_SECRET=whsec_xxx
+   ```
+
+### Test Cards
+
+| Card Number | Behavior |
+|-------------|----------|
+| `4242 4242 4242 4242` | Success |
+| `4000 0000 0000 0002` | Decline |
+| `4000 0000 0000 3220` | 3D Secure required |
+| `4000 0000 0000 9995` | Insufficient funds |
+
+Use any future expiry date (e.g., 12/34) and any 3-digit CVC.
+
+### Testing Webhooks Locally
+
+```bash
+# Install Stripe CLI
+brew install stripe/stripe-cli/stripe
+
+# Login to Stripe
+stripe login
+
+# Forward webhooks to localhost
+stripe listen --forward-to localhost:3000/api/webhooks/stripe
+
+# The CLI will output a webhook signing secret (whsec_xxx)
+# Add it to your .env.local as STRIPE_WEBHOOK_SECRET
+```
+
+### Testing Apple Pay / Google Pay
+
+- **Apple Pay**: Requires Safari on macOS with Touch ID or iOS device
+- **Google Pay**: Requires Chrome browser with saved payment methods
+- In test mode, Stripe simulates wallet payments automatically
+- Both work via the `PaymentElement` with `automatic_payment_methods` enabled
+
+### Common Issues
+
+| Issue | Solution |
+|-------|----------|
+| "Failed to load Stripe.js" | Check `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` is set and starts with `pk_test_` |
+| "No such customer" | Customer was created in live mode; clear `stripeCustomerId` from user record |
+| Webhooks not received | Ensure `stripe listen` is running and webhook secret is correct |
+| Payment methods not showing | Enable payment methods in Stripe Dashboard > Settings > Payment methods |
+
+---
+
 ## Running Tests
 
 ```bash
@@ -326,4 +384,4 @@ If you encounter issues:
 
 ---
 
-**Last Updated**: December 2024
+**Last Updated**: January 2026

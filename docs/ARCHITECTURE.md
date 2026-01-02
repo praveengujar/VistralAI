@@ -210,7 +210,22 @@ export const GET = withMiddleware(
 
 ## 5. Key Workflows
 
-### A. Magic Import (Brand Onboarding)
+### A. Unified Onboarding Flow
+
+```
+Step 1: Brand Setup     → Enter website URL → Magic Import
+Step 2: Choose Plan     → Select tier + billing cycle
+Step 3: Payment         → Stripe PaymentElement → Start trial
+Step 4: First Scan      → Optional perception scan
+Step 5: Complete        → Redirect to dashboard
+```
+
+**OnboardingService** (`lib/services/onboarding/OnboardingService.ts`)
+- Session management (create, resume, complete)
+- Step validation and progression
+- Event logging for analytics
+
+### B. Magic Import (Brand Import)
 
 ```
 Website URL
@@ -250,7 +265,7 @@ Website URL
 └───────────────────────────────────────────┘
 ```
 
-### B. AEO Perception Scan
+### C. AEO Perception Scan
 
 ```
 Brand360 Profile
@@ -285,7 +300,7 @@ Brand360 Profile
 └───────────────────────────────────────────────┘
 ```
 
-### C. Corrections Workflow
+### D. Corrections Workflow
 
 ```
 Perception Insight (issue detected)
@@ -388,24 +403,117 @@ NEXTAUTH_URL=http://localhost:3000
 
 ---
 
-## 9. Directory Structure
+## 10. Payment System Architecture
+
+### Payment Flow
+```
+User selects plan
+    │
+    ▼
+┌─────────────────────┐
+│   Payment Form      │ ─── PaymentElement (card) or Express Checkout (wallets)
+└─────────┬───────────┘
+          │
+          ▼
+┌─────────────────────┐
+│  Create SetupIntent │ ─── /api/payments/stripe/create-setup-intent
+└─────────┬───────────┘
+          │
+          ▼
+┌─────────────────────┐
+│  Confirm Payment    │ ─── Stripe.js confirmSetup()
+└─────────┬───────────┘
+          │
+          ▼
+┌─────────────────────┐
+│  Create Subscription│ ─── /api/subscription (with 15-day trial)
+└─────────┬───────────┘
+          │
+          ▼
+┌─────────────────────┐
+│  Webhook Events     │ ─── /api/webhooks/stripe
+└─────────────────────┘
+```
+
+### Pricing Tiers
+
+| Tier | Monthly | Yearly | Discount | Features |
+|------|---------|--------|----------|----------|
+| Monitor | $99 | $1,045 | 12% | 1 brand, weekly updates |
+| Growth | $299 | $3,050 | 15% | 10 brands, daily updates |
+| Dominance | $999 | $9,830 | 18% | 50 brands, real-time, API |
+
+### Subscription States
+
+| State | Meaning |
+|-------|---------|
+| trialing | In 15-day free trial |
+| active | Paying subscription |
+| past_due | Payment failed, grace period |
+| canceled | User canceled |
+| paused | Temporarily paused |
+
+### Payment Services
+
+| Service | Location | Purpose |
+|---------|----------|---------|
+| StripeService | `lib/services/payments/StripeService.ts` | Stripe API wrapper |
+| PayPalService | `lib/services/payments/PayPalService.ts` | PayPal integration |
+| SubscriptionService | `lib/services/SubscriptionService.ts` | Subscription business logic |
+| SubscriptionManagementService | `lib/services/SubscriptionManagementService.ts` | Upgrades/downgrades |
+
+### Supported Payment Methods
+
+- **Card payments**: Stripe PaymentElement
+- **Apple Pay**: Safari on macOS/iOS (via `automatic_payment_methods`)
+- **Google Pay**: Chrome browser (via `automatic_payment_methods`)
+- **Link**: Stripe's one-click checkout
+- **PayPal**: Alternative payment provider
+
+### Webhook Events Handled
+
+| Event | Handler |
+|-------|---------|
+| `customer.subscription.created` | Create subscription record |
+| `customer.subscription.updated` | Update status/period |
+| `customer.subscription.deleted` | Mark as canceled |
+| `invoice.paid` | Create invoice record |
+| `invoice.payment_failed` | Handle payment failure |
+| `payment_method.attached` | Store payment method |
+
+---
+
+## 11. Directory Structure
 
 ```
 lib/
 ├── api/              # API middleware
 ├── auth/             # Authentication (NextAuth, MFA)
 ├── cache/            # Redis caching layer
+├── config/           # Configuration files
+│   ├── pricing.ts    # Pricing tiers & trial config
+│   ├── onboarding.ts # Onboarding steps & validation
+│   └── features.ts   # Feature flags
 ├── db/               # Database adapter & operations
 │   └── operations/   # Domain-specific DB operations
-├── hooks/            # Performance hooks
+├── hooks/            # Performance & custom hooks
+│   └── useOnboardingSocket.ts # Onboarding WebSocket hook
 ├── query/            # React Query hooks
 │   ├── hooks.ts      # Core query hooks
-│   └── audienceHooks.ts # Audience & positioning hooks
+│   ├── audienceHooks.ts # Audience & positioning hooks
+│   └── onboardingHooks.ts # Onboarding session hooks
 ├── realtime/         # Socket.io client/server
+│   └── onboarding-events.ts # Onboarding WebSocket events
 ├── services/
 │   ├── agents/       # AI agent system
+│   │   ├── MagicImportOrchestrator.ts
 │   │   ├── ProductExtractorAgent.ts
 │   │   └── AudiencePositioningAgent.ts
+│   ├── onboarding/   # Onboarding session management
+│   │   └── OnboardingService.ts
+│   ├── payments/     # Payment services
+│   │   ├── StripeService.ts
+│   │   └── SubscriptionService.ts
 │   ├── crawler/      # Web crawling
 │   ├── llm/          # LLM integration
 │   └── queue/        # Job queue system
@@ -419,8 +527,22 @@ app/
 │   │   ├── audience/ # Target audience API
 │   │   ├── personas/ # Customer personas CRUD
 │   │   └── positioning/ # Market positioning API
-│   ├── onboarding/   # Onboarding flow
+│   ├── onboarding/   # Unified onboarding API
+│   │   ├── session/  # Session management
+│   │   ├── brand/    # Magic Import trigger
+│   │   ├── plan/     # Plan selection
+│   │   ├── payment/  # Subscription creation
+│   │   └── complete/ # Finalization
+│   ├── payments/     # Payment API
+│   │   └── stripe/   # Stripe integration
 │   └── admin/        # Admin endpoints
+├── onboarding/       # Onboarding pages
+│   └── (steps)/      # Route group for steps
+│       ├── brand/    # Step 1: Brand Setup
+│       ├── plan/     # Step 2: Choose Plan
+│       ├── payment/  # Step 3: Payment
+│       ├── scan/     # Step 4: First Scan
+│       └── complete/ # Step 5: Complete
 └── dashboard/
     └── brand-profile/
         ├── audience/     # Audience page
@@ -430,10 +552,20 @@ components/
 ├── audience/         # Audience UI components
 │   ├── PersonaCard.tsx
 │   └── PersonaForm.tsx
+├── onboarding/unified/ # Unified onboarding components
+│   ├── OnboardingLayout.tsx
+│   ├── BrandStep.tsx
+│   ├── PlanStep.tsx
+│   ├── PaymentStep.tsx
+│   ├── ScanStep.tsx
+│   └── CompleteStep.tsx
+├── payments/         # Payment components
+│   ├── PaymentForm.tsx
+│   └── ExpressCheckout.tsx
 └── positioning/      # Positioning UI components
     └── PositioningStatement.tsx
 ```
 
 ---
 
-**Last Updated**: December 2024
+**Last Updated**: January 2026

@@ -1,0 +1,49 @@
+'use client';
+
+import { ReactNode, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useOnboardingSession } from '@/lib/query/onboardingHooks';
+import { Loader2 } from 'lucide-react';
+
+interface OnboardingStepsLayoutProps {
+  children: ReactNode;
+}
+
+export default function OnboardingStepsLayout({ children }: OnboardingStepsLayoutProps) {
+  const router = useRouter();
+  const { data: session, status: authStatus } = useSession();
+  const { data: onboardingData, isLoading } = useOnboardingSession();
+
+  useEffect(() => {
+    // Redirect to login if not authenticated
+    if (authStatus === 'unauthenticated') {
+      router.push('/auth/login');
+      return;
+    }
+
+    // Redirect to dashboard if onboarding is already complete
+    if (onboardingData?.data?.session?.status === 'completed') {
+      router.push('/dashboard');
+    }
+  }, [authStatus, onboardingData, router]);
+
+  // Show loading state
+  if (authStatus === 'loading' || isLoading) {
+    return (
+      <div className="min-h-screen bg-[rgb(var(--background))] flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-[rgb(var(--primary))] mx-auto mb-4" />
+          <p className="text-[rgb(var(--foreground-secondary))]">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated
+  if (authStatus === 'unauthenticated') {
+    return null;
+  }
+
+  return <>{children}</>;
+}
