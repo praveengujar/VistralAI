@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VistralAI - Payment & Subscription Flow</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+
+
+
+const Component = () => {
+  const [activePhase, setActivePhase] = useState('setup');
+
+  const participants = [
+    { id: 'user', name: 'User', color: '#3B82F6', icon: '👤' },
+    { id: 'form', name: 'PaymentForm', color: '#8B5CF6', icon: '💳' },
+    { id: 'api', name: 'Next.js API', color: '#10B981', icon: '⚡' },
+    { id: 'stripe', name: 'Stripe', color: '#6366F1', icon: '💰' },
+    { id: 'db', name: 'MongoDB', color: '#22C55E', icon: '🍃' }
+  ];
+
+  const phases = {
+    setup: {
+      name: 'Setup Intent',
+      color: '#3B82F6',
+      steps: [
+        { from: 0, to: 1, label: 'Select plan & billing cycle' },
+        { from: 1, to: 2, label: 'POST /api/payments/stripe/create-setup-intent' },
+        { from: 2, to: 3, label: 'createSetupIntent()' },
+        { from: 3, to: 2, label: 'clientSecret' },
+        { from: 2, to: 1, label: '{ clientSecret }' },
+        { from: 1, to: 1, label: 'Initialize PaymentElement' }
+      ]
+    },
+    payment: {
+      name: 'Payment Confirmation',
+      color: '#F59E0B',
+      steps: [
+        { from: 0, to: 1, label: 'Enter payment / Apple Pay' },
+        { from: 1, to: 3, label: 'confirmSetup(elements)' },
+        { from: 3, to: 1, label: 'setupIntent (succeeded)' }
+      ]
+    },
+    subscription: {
+      name: 'Subscription Creation',
+      color: '#10B981',
+      steps: [
+        { from: 1, to: 2, label: 'POST /api/subscription' },
+        { from: 2, to: 3, label: 'createSubscription(trial: 15 days)' },
+        { from: 3, to: 2, label: 'subscription object' },
+        { from: 2, to: 4, label: 'Create UserSubscription' },
+        { from: 4, to: 2, label: 'saved' },
+        { from: 2, to: 1, label: '{ success: true }' },
+        { from: 1, to: 0, label: 'Redirect to success' }
+      ]
+    }
+  };
+
+  const currentPhase = phases[activePhase];
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0F0F1A 0%, #1A1A2E 50%, #0F0F1A 100%)', padding: '40px 24px', fontFamily: "'Inter', -apple-system, sans-serif" }}>
+      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 8px 0' }}>Payment & Subscription Flow</h1>
+        <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>Stripe integration with 15-day trial</p>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '40px' }}>
+        {Object.entries(phases).map(([key, phase]) => (
+          <button key={key} onClick={() => setActivePhase(key)} style={{ padding: '12px 24px', borderRadius: '8px', border: activePhase === key ? `2px solid ${phase.color}` : '2px solid #334155', background: activePhase === key ? `${phase.color}20` : 'transparent', color: activePhase === key ? phase.color : '#94A3B8', fontWeight: '600', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s' }}>{phase.name}</button>
+        ))}
+      </div>
+
+      <div style={{ maxWidth: '1100px', margin: '0 auto 24px', display: 'grid', gridTemplateColumns: `repeat(${participants.length}, 1fr)`, gap: '12px' }}>
+        {participants.map((p) => (
+          <div key={p.id} style={{ textAlign: 'center', padding: '14px 8px', background: `${p.color}15`, borderRadius: '12px', border: `1px solid ${p.color}40` }}>
+            <div style={{ fontSize: '20px', marginBottom: '6px' }}>{p.icon}</div>
+            <div style={{ color: p.color, fontWeight: '600', fontSize: '11px' }}>{p.name}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative', paddingTop: '20px' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'grid', gridTemplateColumns: `repeat(${participants.length}, 1fr)`, gap: '12px', pointerEvents: 'none' }}>
+          {participants.map((p, i) => (<div key={i} style={{ display: 'flex', justifyContent: 'center' }}><div style={{ width: '2px', height: '100%', background: `linear-gradient(to bottom, ${p.color}60, ${p.color}20)`, borderRadius: '1px' }} /></div>))}
+        </div>
+
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          {currentPhase.steps.map((step, idx) => {
+            const fromPos = (step.from / (participants.length - 1)) * 100;
+            const toPos = (step.to / (participants.length - 1)) * 100;
+            const isLeftToRight = step.to > step.from;
+            const isSameColumn = step.from === step.to;
+
+            return (
+              <div key={idx} style={{ marginBottom: '14px', position: 'relative', height: isSameColumn ? '44px' : '36px' }}>
+                {isSameColumn ? (
+                  <div style={{ position: 'absolute', left: `calc(${fromPos}% + 16px)`, top: '6px', width: '50px', height: '28px', border: `2px solid ${currentPhase.color}`, borderLeft: 'none', borderRadius: '0 8px 8px 0' }}>
+                    <div style={{ position: 'absolute', left: '60px', top: '50%', transform: 'translateY(-50%)', whiteSpace: 'nowrap', background: '#1A1A2E', padding: '3px 10px', borderRadius: '4px', border: `1px solid ${currentPhase.color}30` }}>
+                      <span style={{ color: currentPhase.color, fontSize: '10px', fontWeight: '500' }}>{step.label}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ position: 'absolute', left: `calc(${Math.min(fromPos, toPos)}% + 6px)`, right: `calc(${100 - Math.max(fromPos, toPos)}% + 6px)`, top: '50%', height: '2px', background: currentPhase.color, transform: 'translateY(-50%)' }}>
+                      <div style={{ position: 'absolute', [isLeftToRight ? 'right' : 'left']: '-5px', top: '-4px', width: 0, height: 0, borderTop: '5px solid transparent', borderBottom: '5px solid transparent', [isLeftToRight ? 'borderLeft' : 'borderRight']: `7px solid ${currentPhase.color}` }} />
+                    </div>
+                    <div style={{ position: 'absolute', left: `${(fromPos + toPos) / 2}%`, top: '-6px', transform: 'translateX(-50%)', background: '#1A1A2E', padding: '2px 8px', borderRadius: '4px', whiteSpace: 'nowrap', border: `1px solid ${currentPhase.color}30` }}>
+                      <span style={{ color: currentPhase.color, fontSize: '10px', fontWeight: '500' }}>{step.label}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div style={{ maxWidth: '800px', margin: '48px auto 0', background: '#1A1F2E', borderRadius: '12px', padding: '20px', border: '1px solid #334155' }}>
+        <div style={{ color: '#94A3B8', fontSize: '11px', fontWeight: '600', letterSpacing: '1px', marginBottom: '14px' }}>KEY FEATURES</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+          {[
+            { icon: '🔒', title: 'Secure Setup', desc: 'SetupIntent for card storage' },
+            { icon: '🍎', title: 'Apple Pay', desc: 'Native payment support' },
+            { icon: '⏱️', title: '15-Day Trial', desc: 'Free trial period' }
+          ].map((feature) => (
+            <div key={feature.title} style={{ background: '#0F172A', borderRadius: '8px', padding: '14px', textAlign: 'center' }}>
+              <div style={{ fontSize: '24px', marginBottom: '8px' }}>{feature.icon}</div>
+              <div style={{ color: '#E2E8F0', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>{feature.title}</div>
+              <div style={{ color: '#64748B', fontSize: '10px' }}>{feature.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<Component />);
+  </script>
+</body>
+</html>

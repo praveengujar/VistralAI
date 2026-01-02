@@ -88,49 +88,179 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    subgraph Users["External Users"]
-        Browser["Browser Client"]
+    subgraph Client["Client Layer"]
+        Browser["Browser<br/>(React + React Query)"]
+        WS["WebSocket Client<br/>(Socket.io)"]
     end
 
-    subgraph GCP["Google Cloud Platform"]
-        subgraph CloudRun["Cloud Run Services"]
-            NextJS["VistralAI<br/>Next.js 14<br/>Port 8080<br/>2Gi/2CPU"]
-            Firecrawl["Firecrawl Service<br/>Port 3000<br/>1Gi/1CPU"]
+    subgraph NextJS["Next.js Application (Port 3000/8080)"]
+        subgraph Pages["App Router Pages"]
+            Dashboard["Dashboard"]
+            Onboarding["Onboarding Flow"]
+            Brand360["Brand 360"]
+            AEO["AEO Panel"]
+            Settings["Settings"]
         end
 
-        subgraph VPC["VPC Network"]
-            Connector["VPC Connector<br/>vistralai-connector"]
-            Redis["Cloud Memorystore<br/>Redis 7.0<br/>1GB"]
+        subgraph API["API Routes (/api)"]
+            AuthAPI["Auth API<br/>/auth/*"]
+            OnboardingAPI["Onboarding API<br/>/onboarding/*"]
+            Brand360API["Brand 360 API<br/>/brand-360/*"]
+            AEOAPI["AEO API<br/>/aeo/*"]
+            PaymentsAPI["Payments API<br/>/payments/*"]
+            WebhooksAPI["Webhooks<br/>/webhooks/stripe"]
         end
 
-        subgraph Secrets["Secret Manager"]
-            S1["NEXTAUTH_SECRET"]
-            S2["ANTHROPIC_API_KEY"]
-            S3["OPENAI_API_KEY"]
+        subgraph Services["Service Layer"]
+            subgraph Agents["AI Agents"]
+                MagicImport["MagicImport<br/>Orchestrator"]
+                Crawler["Crawler<br/>Agent"]
+                VibeCheck["VibeCheck<br/>Agent"]
+                Competitor["Competitor<br/>Agent"]
+                ProductExtractor["Product<br/>Extractor"]
+                AudiencePos["Audience<br/>Positioning"]
+                PerceptionEval["Perception<br/>Evaluator"]
+                PromptGen["Prompt<br/>Generator"]
+            end
+
+            OnboardingSvc["Onboarding<br/>Service"]
+            StripeSvc["Stripe<br/>Service"]
+            SubscriptionSvc["Subscription<br/>Service"]
         end
 
-        subgraph Storage["Cloud Storage"]
-            GCR["Container Registry"]
-            Logs["Cloud Logging"]
+        subgraph Realtime["Real-time Layer"]
+            SocketServer["Socket.io Server"]
+            OnboardingEvents["Onboarding Events"]
+            ScanEvents["Scan Events"]
+        end
+
+        Middleware["Middleware<br/>(Auth, RateLimit, Error)"]
+    end
+
+    subgraph DataLayer["Data Layer"]
+        subgraph MongoDB["MongoDB (Primary DB)"]
+            Users[(users)]
+            Sessions[(sessions)]
+            Brand360Profiles[(brand360_profiles)]
+            OnboardingSessions[(onboarding_sessions)]
+            Subscriptions[(subscriptions)]
+            PerceptionScans[(perception_scans)]
+            Prompts[(generated_prompts)]
+        end
+
+        subgraph Redis["Redis (Cache + Queue)"]
+            SessionCache["Session Cache"]
+            ProfileCache["Profile Cache"]
+            RateLimit["Rate Limit Store"]
         end
     end
 
     subgraph External["External Services"]
-        Claude["Claude API<br/>Anthropic"]
-        OpenAI["OpenAI API"]
-        MongoDB["MongoDB Atlas"]
+        subgraph AI["AI Providers"]
+            OpenAI["OpenAI API<br/>(GPT-4o-mini)"]
+            Anthropic["Anthropic API<br/>(Claude)"]
+            Gemini["Google Gemini"]
+            Perplexity["Perplexity AI"]
+        end
+
+        subgraph Payments["Payment Providers"]
+            Stripe["Stripe<br/>(Cards, Apple Pay, Google Pay)"]
+            PayPal["PayPal"]
+        end
+
+        Firecrawl["Firecrawl<br/>(Web Scraping)"]
     end
 
-    Browser -->|HTTPS| NextJS
-    NextJS -->|HTTP Internal| Firecrawl
-    NextJS --> Connector
-    Connector --> Redis
-    NextJS --> Claude
-    NextJS --> OpenAI
-    NextJS --> MongoDB
-    NextJS -.->|Reads| Secrets
-    Firecrawl -.->|Reads| Secrets
+    subgraph GCP["Google Cloud Platform"]
+        CloudRun["Cloud Run"]
+        SecretManager["Secret Manager"]
+        CloudLogging["Cloud Logging"]
+        Memorystore["Memorystore<br/>(Redis)"]
+    end
+
+    %% Client connections
+    Browser -->|HTTPS| Pages
+    Browser -->|REST| API
+    WS <-->|WebSocket| SocketServer
+
+    %% API to Services
+    AuthAPI --> Middleware
+    OnboardingAPI --> OnboardingSvc
+    OnboardingAPI --> MagicImport
+    Brand360API --> Agents
+    AEOAPI --> PerceptionEval
+    AEOAPI --> PromptGen
+    PaymentsAPI --> StripeSvc
+    WebhooksAPI --> SubscriptionSvc
+
+    %% Magic Import Flow
+    MagicImport --> Crawler
+    Crawler --> VibeCheck
+    VibeCheck --> Competitor
+    Competitor --> ProductExtractor
+    ProductExtractor --> AudiencePos
+
+    %% Service to External
+    Crawler -->|Scrape| Firecrawl
+    VibeCheck -->|LLM| OpenAI
+    Competitor -->|LLM| OpenAI
+    ProductExtractor -->|LLM| OpenAI
+    AudiencePos -->|LLM| OpenAI
+    PerceptionEval -->|Multi-LLM| AI
+    StripeSvc -->|API| Stripe
+    SubscriptionSvc -->|API| Stripe
+
+    %% Real-time events
+    MagicImport -.->|Progress| OnboardingEvents
+    PerceptionEval -.->|Progress| ScanEvents
+    OnboardingEvents -.-> SocketServer
+    ScanEvents -.-> SocketServer
+
+    %% Data access
+    Services --> MongoDB
+    Services --> Redis
+    Middleware --> SessionCache
+
+    %% GCP Infrastructure
+    NextJS -.-> CloudRun
+    NextJS -.-> SecretManager
+    Redis -.-> Memorystore
+
+    %% Styling
+    classDef external fill:#f9f,stroke:#333,stroke-width:2px
+    classDef database fill:#69b,stroke:#333,stroke-width:2px
+    classDef service fill:#9f9,stroke:#333,stroke-width:2px
+    class OpenAI,Anthropic,Gemini,Perplexity,Stripe,PayPal,Firecrawl external
+    class Users,Sessions,Brand360Profiles,OnboardingSessions,Subscriptions,PerceptionScans,Prompts database
 ```
+
+---
+
+## 2b. Service Connection Matrix
+
+| Service | Connects To | Protocol | Purpose |
+|---------|-------------|----------|---------|
+| **Next.js App** | MongoDB | TCP/27017 | Primary data storage |
+| | Redis | TCP/6379 | Caching, rate limiting |
+| | Firecrawl | HTTP/3002 | Web scraping |
+| | OpenAI API | HTTPS | LLM inference |
+| | Anthropic API | HTTPS | Claude evaluation |
+| | Stripe API | HTTPS | Payments |
+| | Socket.io | WS/3000 | Real-time updates |
+| **Firecrawl** | Target Websites | HTTPS | Web crawling |
+| | Playwright | HTTP/3001 | JS rendering |
+| **MagicImportOrchestrator** | CrawlerAgent | Internal | Web data |
+| | VibeCheckAgent | Internal | Brand personality |
+| | CompetitorAgent | Internal | Competition |
+| | ProductExtractorAgent | Internal | Products |
+| | AudiencePositioningAgent | Internal | Personas |
+| **PerceptionEvaluator** | ChatGPT | HTTPS | Evaluation |
+| | Claude | HTTPS | Evaluation |
+| | Gemini | HTTPS | Evaluation |
+| | Perplexity | HTTPS | Evaluation |
+| **OnboardingService** | MongoDB | TCP | Session storage |
+| | StripeService | Internal | Subscriptions |
+| | MagicImportOrchestrator | Internal | Brand import |
 
 ---
 
