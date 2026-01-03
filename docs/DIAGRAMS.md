@@ -84,183 +84,474 @@ flowchart TB
 
 ---
 
-## 2. Architecture Diagram
+## 2. System Architecture Diagram
+
+> **Architecture Pattern**: 3-Tier with BFF (Backend for Frontend)
+> - **Tier 1 - Frontend**: Browser-based React UI (never directly accesses databases or external APIs)
+> - **Tier 2 - Mid-Tier/BFF**: Next.js API Routes (handles auth, validation, orchestration)
+> - **Tier 3 - Backend**: Services, Databases, External APIs
 
 ```mermaid
 flowchart TB
-    subgraph Client["Client Layer"]
-        Browser["Browser<br/>(React + React Query)"]
-        WS["WebSocket Client<br/>(Socket.io)"]
+    subgraph Tier1["TIER 1: FRONTEND (Browser)"]
+        Browser["🌐 Browser Client<br/>React 18 + React Query v5<br/>Tailwind CSS"]
+        WSClient["🔌 WebSocket Client<br/>Socket.io-client"]
     end
 
-    subgraph NextJS["Next.js Application (Port 3000/8080)"]
-        subgraph Pages["App Router Pages"]
-            Dashboard["Dashboard"]
-            Onboarding["Onboarding Flow"]
-            Brand360["Brand 360"]
-            AEO["AEO Panel"]
-            Settings["Settings"]
+    subgraph Tier2["TIER 2: MID-TIER / BFF (Next.js API Routes)"]
+        subgraph Presentation["Presentation Layer"]
+            Pages["App Router Pages<br/>/dashboard, /onboarding<br/>/brand-360, /aeo, /settings"]
+            Components["React Components<br/>UI, Charts, Forms"]
         end
 
-        subgraph API["API Routes (/api)"]
-            AuthAPI["Auth API<br/>/auth/*"]
-            OnboardingAPI["Onboarding API<br/>/onboarding/*"]
-            Brand360API["Brand 360 API<br/>/brand-360/*"]
-            AEOAPI["AEO API<br/>/aeo/*"]
-            PaymentsAPI["Payments API<br/>/payments/*"]
-            WebhooksAPI["Webhooks<br/>/webhooks/stripe"]
+        subgraph APILayer["API Layer (/api)"]
+            AuthRoutes["🔐 Auth Routes<br/>/auth/[...nextauth]<br/>/auth/register"]
+            OnboardingRoutes["📋 Onboarding Routes<br/>/onboarding/session<br/>/onboarding/brand<br/>/onboarding/plan<br/>/onboarding/payment<br/>/onboarding/complete"]
+            Brand360Routes["🎯 Brand 360 Routes<br/>/brand-360/*<br/>/brand-360/audience<br/>/brand-360/personas<br/>/brand-360/positioning"]
+            AEORoutes["📊 AEO Routes<br/>/aeo/magic-import<br/>/aeo/perception-scan<br/>/aeo/insights<br/>/aeo/prompts"]
+            PaymentRoutes["💳 Payment Routes<br/>/payments/stripe/*<br/>/webhooks/stripe"]
         end
 
-        subgraph Services["Service Layer"]
-            subgraph Agents["AI Agents"]
-                MagicImport["MagicImport<br/>Orchestrator"]
-                Crawler["Crawler<br/>Agent"]
-                VibeCheck["VibeCheck<br/>Agent"]
-                Competitor["Competitor<br/>Agent"]
-                ProductExtractor["Product<br/>Extractor"]
-                AudiencePos["Audience<br/>Positioning"]
-                PerceptionEval["Perception<br/>Evaluator"]
-                PromptGen["Prompt<br/>Generator"]
+        subgraph ServiceLayer["Service Layer (lib/services)"]
+            subgraph CoreServices["Core Services"]
+                OnboardingSvc["📋 OnboardingService<br/>Session management<br/>Step validation<br/>Event logging"]
+                StripeSvc["💳 StripeService<br/>SetupIntent<br/>Subscriptions<br/>Payment methods"]
+                SubSvc["📦 SubscriptionService<br/>Trial management<br/>Plan changes<br/>Cancellation"]
             end
 
-            OnboardingSvc["Onboarding<br/>Service"]
-            StripeSvc["Stripe<br/>Service"]
-            SubscriptionSvc["Subscription<br/>Service"]
+            subgraph AIAgents["AI Agent Pipeline"]
+                MIO["🎭 MagicImportOrchestrator<br/>Coordinates all agents"]
+                CA["🕷️ CrawlerAgent<br/>Web scraping<br/>Schema.org extraction"]
+                VCA["✨ VibeCheckAgent<br/>Brand personality<br/>Tone analysis"]
+                CMA["🎯 CompetitorAgent<br/>Competitor discovery<br/>Market positioning"]
+                PEA["📦 ProductExtractorAgent<br/>Products/Services<br/>Pricing extraction"]
+                APA["👥 AudiencePositioningAgent<br/>Personas generation<br/>Value propositions"]
+                PGA["📝 PromptGeneratorAgent<br/>Test prompt creation<br/>Category coverage"]
+                PEvA["⚖️ PerceptionEvaluatorAgent<br/>LLM-as-Judge<br/>Multi-platform scoring"]
+                CGA["🔧 CorrectionGeneratorAgent<br/>Fix suggestions<br/>Schema corrections"]
+            end
         end
 
-        subgraph Realtime["Real-time Layer"]
-            SocketServer["Socket.io Server"]
-            OnboardingEvents["Onboarding Events"]
-            ScanEvents["Scan Events"]
+        subgraph DataAccess["Data Access Layer"]
+            Prisma["Prisma ORM<br/>Type-safe queries"]
+            CacheLayer["Cache Layer<br/>withCache wrapper"]
+            DBOps["DB Operations<br/>/lib/db/operations/*"]
         end
 
-        Middleware["Middleware<br/>(Auth, RateLimit, Error)"]
+        subgraph RealtimeLayer["Real-time Layer"]
+            SocketIO["🔌 Socket.io Server<br/>Port 3000"]
+            OnboardingEvt["Onboarding Events<br/>progress, complete, error"]
+            ScanEvt["Scan Events<br/>started, progress, complete"]
+        end
+
+        Middleware["🛡️ Middleware Stack<br/>Auth → RateLimit → ErrorHandler"]
     end
 
-    subgraph DataLayer["Data Layer"]
-        subgraph MongoDB["MongoDB (Primary DB)"]
-            Users[(users)]
-            Sessions[(sessions)]
-            Brand360Profiles[(brand360_profiles)]
-            OnboardingSessions[(onboarding_sessions)]
-            Subscriptions[(subscriptions)]
-            PerceptionScans[(perception_scans)]
-            Prompts[(generated_prompts)]
+    subgraph Tier3["TIER 3: BACKEND (Services, Databases, External APIs)"]
+        subgraph MongoDB["MongoDB 7.0<br/>mongodb://localhost:27017"]
+            UsersCol[("👤 users<br/>email, password<br/>onboardingCompleted")]
+            SessionsCol[("🔑 sessions<br/>NextAuth sessions")]
+            Brand360Col[("🎯 brand360_profiles<br/>brandIdentity, competitors<br/>products, personas")]
+            OnboardingCol[("📋 onboarding_sessions<br/>currentStep, completedSteps<br/>selectedTierId, subscriptionId")]
+            OnboardingEvtCol[("📊 onboarding_events<br/>eventType, step<br/>eventData, errorMessage")]
+            SubscriptionsCol[("💳 subscriptions<br/>stripeCustomerId<br/>status, currentPeriodEnd")]
+            ScansCol[("📈 perception_scans<br/>platforms, overallScore<br/>quadrantPosition")]
+            PromptsCol[("📝 generated_prompts<br/>category, intent<br/>renderedPrompt")]
+            InsightsCol[("💡 perception_insights<br/>issueType, severity<br/>recommendation")]
         end
 
-        subgraph Redis["Redis (Cache + Queue)"]
-            SessionCache["Session Cache"]
-            ProfileCache["Profile Cache"]
-            RateLimit["Rate Limit Store"]
+        subgraph Redis["Redis 7.0<br/>redis://localhost:6379"]
+            SessionCache["🔐 Session Cache<br/>TTL: 24h"]
+            ProfileCache["📦 Profile Cache<br/>TTL: 5min"]
+            RateLimitStore["⏱️ Rate Limit<br/>100 req/min"]
+            JobQueue["📋 Job Queue<br/>Bull queues"]
+        end
+
+        subgraph ExternalServices["EXTERNAL SERVICES"]
+        subgraph AIProviders["AI/LLM Providers"]
+            OpenAI["🤖 OpenAI API<br/>GPT-4o-mini<br/>Brand analysis"]
+            Anthropic["🧠 Anthropic API<br/>Claude 3<br/>Perception eval"]
+            Gemini["💎 Google Gemini<br/>Perception eval"]
+            Perplexity["🔍 Perplexity AI<br/>Perception eval"]
+        end
+
+            subgraph PaymentProviders["Payment Providers"]
+                Stripe["💳 Stripe API<br/>Subscriptions<br/>Apple Pay, Google Pay"]
+                PayPal["🅿️ PayPal API<br/>Alternative payments"]
+            end
+        end
+
+        subgraph FirecrawlStack["FIRECRAWL OPEN SOURCE STACK (Self-Hosted)"]
+        subgraph FirecrawlAPI["Firecrawl API Service"]
+            FCApi["🕷️ Firecrawl API<br/>Port 3002 → 3000<br/>/v1/crawl, /v1/scrape"]
+            FCWorkers["👷 Crawl Workers<br/>NUM_WORKERS: 4<br/>Parallel processing"]
+        end
+
+        subgraph FirecrawlData["Firecrawl Data Layer"]
+            FCPostgres[("🐘 PostgreSQL 17<br/>Port 5432<br/>NUQ Job Queue<br/>postgres/postgres")]
+            FCRabbitMQ["🐰 RabbitMQ 3<br/>Port 5672/15672<br/>Extract Worker Queue<br/>guest/guest"]
+        end
+
+        subgraph FirecrawlBrowser["Browser Automation"]
+            FCPlaywright["🎭 Playwright Service<br/>Internal Port 3000<br/>Headless Chrome<br/>JS Rendering"]
+        end
+
+            TargetSites["🌐 Target Websites<br/>HTTPS crawling"]
+        end
+
+        subgraph Infrastructure["INFRASTRUCTURE (GCP)"]
+            CloudRun["☁️ Cloud Run<br/>0-20 instances<br/>2Gi/2CPU"]
+            SecretMgr["🔒 Secret Manager<br/>API keys<br/>DB credentials"]
+            Memorystore["📦 Memorystore<br/>Redis 7.0<br/>1GB"]
+            CloudLog["📊 Cloud Logging<br/>Structured logs"]
+            VPC["🔗 VPC Connector<br/>Private networking"]
         end
     end
 
-    subgraph External["External Services"]
-        subgraph AI["AI Providers"]
-            OpenAI["OpenAI API<br/>(GPT-4o-mini)"]
-            Anthropic["Anthropic API<br/>(Claude)"]
-            Gemini["Google Gemini"]
-            Perplexity["Perplexity AI"]
-        end
+    %% ===== TIER 1 → TIER 2 CONNECTIONS (Frontend → Mid-Tier) =====
+    %% Frontend NEVER directly accesses Tier 3 (databases, external APIs)
+    Browser -->|"HTTPS :3000<br/>REST API calls"| APILayer
+    Browser -->|"HTTPS :3000<br/>Page requests"| Presentation
+    WSClient <-->|"WS :3000<br/>Real-time events"| SocketIO
 
-        subgraph Payments["Payment Providers"]
-            Stripe["Stripe<br/>(Cards, Apple Pay, Google Pay)"]
-            PayPal["PayPal"]
-        end
+    %% ===== TIER 2 INTERNAL (API Routes → Services) =====
+    AuthRoutes -->|"Validate session"| Middleware
+    OnboardingRoutes -->|"Session ops"| OnboardingSvc
+    OnboardingRoutes -->|"Start import"| MIO
+    OnboardingRoutes -->|"Create sub"| StripeSvc
+    Brand360Routes -->|"Profile CRUD"| DBOps
+    AEORoutes -->|"Generate prompts"| PGA
+    AEORoutes -->|"Run scans"| PEvA
+    AEORoutes -->|"Start import"| MIO
+    PaymentRoutes -->|"Setup intents"| StripeSvc
+    PaymentRoutes -->|"Webhook events"| SubSvc
 
-        Firecrawl["Firecrawl<br/>(Web Scraping)"]
-    end
+    %% ===== TIER 2 → TIER 3 CONNECTIONS (Mid-Tier → Backend) =====
+    AuthRoutes -->|"CRUD users"| UsersCol
+    AuthRoutes -->|"Manage sessions"| SessionsCol
+    Brand360Routes -->|"Query profiles"| Brand360Col
+    OnboardingSvc -->|"R/W sessions"| OnboardingCol
+    OnboardingSvc -->|"Log events"| OnboardingEvtCol
+    StripeSvc -->|"Store payment"| SubscriptionsCol
+    SubSvc -->|"Update status"| SubscriptionsCol
+    SubSvc -->|"Update user"| UsersCol
 
-    subgraph GCP["Google Cloud Platform"]
-        CloudRun["Cloud Run"]
-        SecretManager["Secret Manager"]
-        CloudLogging["Cloud Logging"]
-        Memorystore["Memorystore<br/>(Redis)"]
-    end
+    %% ===== TIER 2 → TIER 3: EXTERNAL SERVICES =====
+    StripeSvc -->|"API calls"| Stripe
+    SubSvc -->|"Webhook handling"| Stripe
 
-    %% Client connections
-    Browser -->|HTTPS| Pages
-    Browser -->|REST| API
-    WS <-->|WebSocket| SocketServer
+    %% ===== TIER 2 → TIER 3: AI AGENT PIPELINE =====
+    MIO -->|"1. Crawl website"| CA
+    CA -->|"2. Analyze brand"| VCA
+    VCA -->|"3. Find competitors"| CMA
+    CMA -->|"4. Extract products"| PEA
+    PEA -->|"5. Build personas"| APA
+    APA -->|"Save profile"| Brand360Col
 
-    %% API to Services
-    AuthAPI --> Middleware
-    OnboardingAPI --> OnboardingSvc
-    OnboardingAPI --> MagicImport
-    Brand360API --> Agents
-    AEOAPI --> PerceptionEval
-    AEOAPI --> PromptGen
-    PaymentsAPI --> StripeSvc
-    WebhooksAPI --> SubscriptionSvc
+    CA -->|"HTTP :3002<br/>POST /v1/crawl"| FCApi
 
-    %% Magic Import Flow
-    MagicImport --> Crawler
-    Crawler --> VibeCheck
-    VibeCheck --> Competitor
-    Competitor --> ProductExtractor
-    ProductExtractor --> AudiencePos
+    %% ===== FIRECRAWL INTERNAL CONNECTIONS =====
+    FCApi -->|"TCP :5432<br/>Job queue storage"| FCPostgres
+    FCApi -->|"TCP :6379<br/>Cache + Rate limit"| Redis
+    FCApi -->|"AMQP :5672<br/>Worker messages"| FCRabbitMQ
+    FCApi --> FCWorkers
+    FCWorkers -->|"HTTP :3000<br/>JS rendering"| FCPlaywright
+    FCPlaywright -->|"HTTPS<br/>Headless browse"| TargetSites
+    FCRabbitMQ --> FCWorkers
 
-    %% Service to External
-    Crawler -->|Scrape| Firecrawl
-    VibeCheck -->|LLM| OpenAI
-    Competitor -->|LLM| OpenAI
-    ProductExtractor -->|LLM| OpenAI
-    AudiencePos -->|LLM| OpenAI
-    PerceptionEval -->|Multi-LLM| AI
-    StripeSvc -->|API| Stripe
-    SubscriptionSvc -->|API| Stripe
+    VCA -->|"POST /chat/completions"| OpenAI
+    CMA -->|"POST /chat/completions"| OpenAI
+    PEA -->|"POST /chat/completions"| OpenAI
+    APA -->|"POST /chat/completions"| OpenAI
 
-    %% Real-time events
-    MagicImport -.->|Progress| OnboardingEvents
-    PerceptionEval -.->|Progress| ScanEvents
-    OnboardingEvents -.-> SocketServer
-    ScanEvents -.-> SocketServer
+    PGA -->|"Generate prompts"| OpenAI
+    PGA -->|"Store prompts"| PromptsCol
 
-    %% Data access
-    Services --> MongoDB
-    Services --> Redis
-    Middleware --> SessionCache
+    PEvA -->|"Query ChatGPT"| OpenAI
+    PEvA -->|"Query Claude"| Anthropic
+    PEvA -->|"Query Gemini"| Gemini
+    PEvA -->|"Query Perplexity"| Perplexity
+    PEvA -->|"Store results"| ScansCol
+    PEvA -->|"Create insights"| InsightsCol
 
-    %% GCP Infrastructure
-    NextJS -.-> CloudRun
-    NextJS -.-> SecretManager
-    Redis -.-> Memorystore
+    CGA -->|"Generate fixes"| OpenAI
 
-    %% Styling
-    classDef external fill:#f9f,stroke:#333,stroke-width:2px
-    classDef database fill:#69b,stroke:#333,stroke-width:2px
-    classDef service fill:#9f9,stroke:#333,stroke-width:2px
-    class OpenAI,Anthropic,Gemini,Perplexity,Stripe,PayPal,Firecrawl external
-    class Users,Sessions,Brand360Profiles,OnboardingSessions,Subscriptions,PerceptionScans,Prompts database
+    %% ===== TIER 2: REAL-TIME EVENT FLOW =====
+    MIO -.->|"Emit progress"| OnboardingEvt
+    PEvA -.->|"Emit progress"| ScanEvt
+    OnboardingEvt -.->|"Broadcast"| SocketIO
+    ScanEvt -.->|"Broadcast"| SocketIO
+    SocketIO -.->|"Push to client"| WSClient
+
+    %% ===== DATA ACCESS PATTERNS =====
+    Prisma -->|"TCP :27017"| MongoDB
+    CacheLayer -->|"TCP :6379<br/>GET/SET"| Redis
+    DBOps --> Prisma
+    DBOps --> CacheLayer
+
+    Middleware -->|"Check session"| SessionCache
+    Middleware -->|"Check rate"| RateLimitStore
+
+    %% ===== TIER 2 → INFRASTRUCTURE CONNECTIONS =====
+    Tier2 -.->|"Deployed to"| CloudRun
+    CloudRun -.->|"Read secrets"| SecretMgr
+    CloudRun -.->|"VPC access"| VPC
+    VPC -.->|"Connect"| Memorystore
+    Tier2 -.->|"Send logs"| CloudLog
+
+    %% ===== STYLING =====
+    classDef client fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef api fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef service fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef agent fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef database fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef external fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef infra fill:#eceff1,stroke:#546e7a,stroke-width:2px
+    classDef firecrawl fill:#fff8e1,stroke:#f57c00,stroke-width:2px
+    classDef fcdata fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+
+    class Browser,WSClient client
+    class AuthRoutes,OnboardingRoutes,Brand360Routes,AEORoutes,PaymentRoutes api
+    class OnboardingSvc,StripeSvc,SubSvc service
+    class MIO,CA,VCA,CMA,PEA,APA,PGA,PEvA,CGA agent
+    class UsersCol,SessionsCol,Brand360Col,OnboardingCol,SubscriptionsCol,ScansCol,PromptsCol,InsightsCol,OnboardingEvtCol database
+    class OpenAI,Anthropic,Gemini,Perplexity,Stripe,PayPal external
+    class CloudRun,SecretMgr,Memorystore,CloudLog,VPC infra
+    class FCApi,FCWorkers,FCPlaywright,TargetSites firecrawl
+    class FCPostgres,FCRabbitMQ fcdata
 ```
 
 ---
 
-## 2b. Service Connection Matrix
+## 2b. Service Interconnection Details
 
-| Service | Connects To | Protocol | Purpose |
-|---------|-------------|----------|---------|
-| **Next.js App** | MongoDB | TCP/27017 | Primary data storage |
-| | Redis | TCP/6379 | Caching, rate limiting |
-| | Firecrawl | HTTP/3002 | Web scraping |
-| | OpenAI API | HTTPS | LLM inference |
-| | Anthropic API | HTTPS | Claude evaluation |
-| | Stripe API | HTTPS | Payments |
-| | Socket.io | WS/3000 | Real-time updates |
-| **Firecrawl** | Target Websites | HTTPS | Web crawling |
-| | Playwright | HTTP/3001 | JS rendering |
-| **MagicImportOrchestrator** | CrawlerAgent | Internal | Web data |
-| | VibeCheckAgent | Internal | Brand personality |
-| | CompetitorAgent | Internal | Competition |
-| | ProductExtractorAgent | Internal | Products |
-| | AudiencePositioningAgent | Internal | Personas |
-| **PerceptionEvaluator** | ChatGPT | HTTPS | Evaluation |
-| | Claude | HTTPS | Evaluation |
-| | Gemini | HTTPS | Evaluation |
-| | Perplexity | HTTPS | Evaluation |
-| **OnboardingService** | MongoDB | TCP | Session storage |
-| | StripeService | Internal | Subscriptions |
-| | MagicImportOrchestrator | Internal | Brand import |
+### API Routes → Services
+
+| API Route | Calls Service | Database Writes | External Calls |
+|-----------|---------------|-----------------|----------------|
+| `/api/auth/*` | NextAuth.js | `users`, `sessions` | - |
+| `/api/onboarding/session` | OnboardingService | `onboarding_sessions` | - |
+| `/api/onboarding/brand` | MagicImportOrchestrator | `brand360_profiles`, `onboarding_sessions` | Firecrawl, OpenAI |
+| `/api/onboarding/plan` | OnboardingService | `onboarding_sessions` | - |
+| `/api/onboarding/payment` | StripeService, SubscriptionService | `subscriptions`, `onboarding_sessions` | Stripe API |
+| `/api/onboarding/complete` | OnboardingService | `users`, `onboarding_sessions` | - |
+| `/api/brand-360/*` | DBOps (Prisma) | `brand360_profiles` | - |
+| `/api/aeo/magic-import` | MagicImportOrchestrator | `brand360_profiles` | Firecrawl, OpenAI |
+| `/api/aeo/perception-scan` | PerceptionEvaluatorAgent | `perception_scans`, `ai_perception_results` | OpenAI, Anthropic, Gemini, Perplexity |
+| `/api/aeo/prompts/generate` | PromptGeneratorAgent | `generated_prompts` | OpenAI |
+| `/api/payments/stripe/*` | StripeService | `subscriptions` | Stripe API |
+| `/api/webhooks/stripe` | SubscriptionService | `subscriptions`, `users` | - |
+
+### AI Agent Pipeline Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        MagicImportOrchestrator                               │
+│                                                                              │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                  │
+│  │ CrawlerAgent │───▶│VibeCheckAgent│───▶│CompetitorAgent│                  │
+│  │              │    │              │    │              │                  │
+│  │ Firecrawl    │    │ OpenAI       │    │ OpenAI       │                  │
+│  │ Schema.org   │    │ Personality  │    │ 3 competitors│                  │
+│  └──────────────┘    └──────────────┘    └──────────────┘                  │
+│         │                   │                   │                           │
+│         ▼                   ▼                   ▼                           │
+│  ┌──────────────────────────────────────────────────────┐                  │
+│  │              ProductExtractorAgent                    │                  │
+│  │              OpenAI │ Products + Pricing              │                  │
+│  └──────────────────────────────────────────────────────┘                  │
+│                              │                                              │
+│                              ▼                                              │
+│  ┌──────────────────────────────────────────────────────┐                  │
+│  │           AudiencePositioningAgent                    │                  │
+│  │           OpenAI │ Personas + Positioning             │                  │
+│  └──────────────────────────────────────────────────────┘                  │
+│                              │                                              │
+│                              ▼                                              │
+│                     brand360_profiles (MongoDB)                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Database Collection Dependencies
+
+| Collection | Written By | Read By |
+|------------|------------|---------|
+| `users` | AuthRoutes, SubscriptionService, OnboardingService | AuthRoutes, all authenticated routes |
+| `sessions` | NextAuth.js | Middleware (auth check) |
+| `brand360_profiles` | MagicImportOrchestrator, Brand360Routes | AEORoutes, Dashboard, all brand queries |
+| `onboarding_sessions` | OnboardingService | OnboardingRoutes, complete page |
+| `onboarding_events` | OnboardingService | Analytics, debugging |
+| `subscriptions` | StripeService, SubscriptionService | PaymentRoutes, feature gating |
+| `perception_scans` | PerceptionEvaluatorAgent | AEORoutes, Dashboard |
+| `generated_prompts` | PromptGeneratorAgent | PerceptionEvaluatorAgent, Prompts page |
+| `perception_insights` | PerceptionEvaluatorAgent | Insights page, Dashboard |
+
+### External Service Dependencies
+
+| Internal Service | External Service | Data Exchanged | Rate Limits |
+|------------------|------------------|----------------|-------------|
+| CrawlerAgent | Firecrawl API | URLs → HTML/Markdown | 20 pages/domain |
+| VibeCheckAgent | OpenAI API | Brand data → Personality | 10K TPM |
+| CompetitorAgent | OpenAI API | Brand data → Competitors | 10K TPM |
+| ProductExtractorAgent | OpenAI API | Page content → Products | 10K TPM |
+| AudiencePositioningAgent | OpenAI API | Brand data → Personas | 10K TPM |
+| PromptGeneratorAgent | OpenAI API | Brand data → Prompts | 10K TPM |
+| PerceptionEvaluatorAgent | OpenAI, Anthropic, Gemini, Perplexity | Prompts → Responses → Scores | Varies |
+| StripeService | Stripe API | Payment data | 100 req/sec |
+| SubscriptionService | Stripe Webhooks | Event notifications | - |
+
+### Firecrawl Internal Connections
+
+| Firecrawl Component | Connects To | Protocol | Purpose |
+|---------------------|-------------|----------|---------|
+| Firecrawl API | PostgreSQL | TCP :5432 | NUQ job queue storage |
+| Firecrawl API | Redis | TCP :6379 | Caching, rate limiting |
+| Firecrawl API | RabbitMQ | AMQP :5672 | Worker message queue |
+| Crawl Workers | RabbitMQ | AMQP :5672 | Receive job messages |
+| Crawl Workers | Playwright | HTTP :3000 | JS page rendering |
+| Playwright | Target Sites | HTTPS | Headless browsing |
+
+### Real-time Event Flow
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│ MagicImport     │────▶│ OnboardingEvents│────▶│ Socket.io Server│
+│ Orchestrator    │     │ - progress      │     │                 │
+│                 │     │ - complete      │     │   Broadcast to  │
+│ Perception      │────▶│ ScanEvents      │────▶│   room members  │
+│ Evaluator       │     │ - started       │     │                 │
+│                 │     │ - progress      │     │                 │
+└─────────────────┘     │ - complete      │     └────────┬────────┘
+                        └─────────────────┘              │
+                                                         ▼
+                                               ┌─────────────────┐
+                                               │ Browser Client  │
+                                               │ (useSocket hook)│
+                                               └─────────────────┘
+```
+
+### Cache Strategy
+
+| Cache Key Pattern | TTL | Purpose |
+|-------------------|-----|---------|
+| `session:{userId}` | 24h | User session data |
+| `brand360:{orgId}` | 5min | Brand profile |
+| `scans:{brand360Id}` | 5min | Perception scans |
+| `insights:{brand360Id}` | 5min | Perception insights |
+| `pricing:tiers` | 1h | Pricing tiers |
+| `ratelimit:{ip}:{route}` | 1min | Rate limiting |
+
+---
+
+## 2c. Firecrawl Open Source Stack
+
+Firecrawl is self-hosted as an integrated service within the VistralAI infrastructure, providing web scraping capabilities with JavaScript rendering support.
+
+### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    FIRECRAWL OPEN SOURCE STACK                               │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                     Firecrawl API (Port 3002)                        │   │
+│  │                     /v1/crawl, /v1/scrape, /v1/map                   │   │
+│  └───────────┬─────────────────┬─────────────────┬─────────────────────┘   │
+│              │                 │                 │                          │
+│              ▼                 ▼                 ▼                          │
+│  ┌───────────────┐  ┌──────────────┐  ┌─────────────────┐                  │
+│  │ PostgreSQL 17 │  │   Redis 7    │  │   RabbitMQ 3    │                  │
+│  │  Port: 5432   │  │  Port: 6379  │  │  Port: 5672     │                  │
+│  │  NUQ Queue    │  │  Cache/Rate  │  │  Worker Queue   │                  │
+│  └───────────────┘  └──────────────┘  └────────┬────────┘                  │
+│                                                 │                           │
+│                                                 ▼                           │
+│                                      ┌─────────────────┐                   │
+│                                      │  Crawl Workers  │                   │
+│                                      │  (4 parallel)   │                   │
+│                                      └────────┬────────┘                   │
+│                                               │                             │
+│                                               ▼                             │
+│                                    ┌───────────────────┐                   │
+│                                    │ Playwright Service│                   │
+│                                    │  Internal :3000   │                   │
+│                                    │  Headless Chrome  │                   │
+│                                    └────────┬──────────┘                   │
+│                                             │                               │
+└─────────────────────────────────────────────┼───────────────────────────────┘
+                                              │
+                                              ▼
+                                    ┌───────────────────┐
+                                    │  Target Websites  │
+                                    │     (HTTPS)       │
+                                    └───────────────────┘
+```
+
+### Service Components
+
+| Service | Container | Port | Purpose |
+|---------|-----------|------|---------|
+| **Firecrawl API** | vistralai-firecrawl | 3002 → 3000 | Main scraping API, job management |
+| **PostgreSQL** | vistralai-postgres | 5432 | NUQ job queue persistence |
+| **Redis** | vistralai-redis | 6379 | Caching, rate limiting (shared with VistralAI) |
+| **RabbitMQ** | vistralai-rabbitmq | 5672, 15672 | Extract worker message queue |
+| **Playwright** | vistralai-playwright | 3000 (internal) | Headless browser for JS rendering |
+
+### Environment Configuration
+
+| Variable | Value | Purpose |
+|----------|-------|---------|
+| `REDIS_URL` | `redis://redis:6379` | Cache connection |
+| `REDIS_RATE_LIMIT_URL` | `redis://redis:6379` | Rate limit storage |
+| `NUQ_DATABASE_URL` | `postgresql://postgres:postgres@postgres:5432/postgres` | Job queue DB |
+| `NUQ_RABBITMQ_URL` | `amqp://guest:guest@rabbitmq:5672` | Worker messaging |
+| `PLAYWRIGHT_MICROSERVICE_URL` | `http://playwright:3000/scrape` | JS rendering |
+| `NUM_WORKERS_PER_QUEUE` | `4` | Parallel crawl workers |
+| `USE_DB_AUTHENTICATION` | `false` | Auth disabled for local |
+| `RATE_LIMIT_TEST_MODE` | `true` | Generous limits for dev |
+
+### API Endpoints
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/v1/crawl` | POST | Start async crawl job |
+| `/v1/crawl/{id}` | GET | Get crawl job status/results |
+| `/v1/scrape` | POST | Single page scrape |
+| `/v1/map` | POST | Get site map |
+| `/` | GET | Health check |
+
+### Data Flow
+
+1. **VistralAI CrawlerAgent** calls `POST /v1/crawl` with target URL
+2. **Firecrawl API** creates job in PostgreSQL, returns job ID
+3. **Workers** pick up job from RabbitMQ queue
+4. **Playwright Service** renders JavaScript-heavy pages
+5. **Results** stored in PostgreSQL, status cached in Redis
+6. **CrawlerAgent** polls `/v1/crawl/{id}` until complete
+7. **Markdown content** returned to agent pipeline
+
+### Docker Network
+
+All Firecrawl services run on `vistralai-network` (bridge driver):
+- Internal DNS resolution (e.g., `redis:6379`, `postgres:5432`)
+- Isolated from host network except exposed ports
+- Shared Redis instance with VistralAI application
+
+### Starting Firecrawl Stack
+
+```bash
+# Start all services
+docker-compose up -d
+
+# Check service health
+docker-compose ps
+
+# View Firecrawl logs
+docker-compose logs -f firecrawl
+
+# Access RabbitMQ management UI
+open http://localhost:15672  # guest/guest
+```
 
 ---
 

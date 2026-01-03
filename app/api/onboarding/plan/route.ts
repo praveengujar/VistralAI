@@ -51,7 +51,15 @@ export async function POST(request: NextRequest) {
       session.user.id
     );
 
-    // Validate step data
+    // Check that step 1 (brand) is completed before allowing plan selection
+    if (!onboardingSession.completedSteps.includes(1)) {
+      return NextResponse.json(
+        { success: false, error: 'Please complete brand setup first' },
+        { status: 400 }
+      );
+    }
+
+    // Validate step 2 data
     const sessionData: OnboardingSessionData = {
       currentStep: onboardingSession.currentStep,
       completedSteps: onboardingSession.completedSteps,
@@ -60,7 +68,7 @@ export async function POST(request: NextRequest) {
       selectedBillingCycle: billingCycle,
     };
 
-    const validation = validateStepData(1, sessionData);
+    const validation = validateStepData(2, sessionData);
     if (!validation.valid) {
       return NextResponse.json(
         { success: false, error: validation.errors.join(', ') },

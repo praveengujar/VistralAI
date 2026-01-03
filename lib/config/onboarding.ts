@@ -1,5 +1,5 @@
 // VistralAI Onboarding Configuration
-// Unified onboarding flow: Brand → Plan → Payment → Scan → Complete
+// Unified onboarding flow: Brand → Plan → Payment → Build Profile → Complete
 
 import { TRIAL_DAYS, PRICING_TIERS, type PricingTierConfig } from './pricing';
 
@@ -23,11 +23,11 @@ export const ONBOARDING_STEPS: OnboardingStepConfig[] = [
     id: 1,
     name: 'brand',
     route: '/onboarding/brand',
-    label: 'Brand Setup',
-    description: 'Enter your website URL to import your brand profile',
+    label: 'Set Up Your Brand',
+    description: 'Enter your website URL and brand name',
     icon: 'Globe',
     optional: false,
-    requiredFields: ['websiteUrl', 'brandName', 'brand360Id'],
+    requiredFields: ['websiteUrl', 'brandName'],
   },
   {
     id: 2,
@@ -51,13 +51,13 @@ export const ONBOARDING_STEPS: OnboardingStepConfig[] = [
   },
   {
     id: 4,
-    name: 'scan',
-    route: '/onboarding/scan',
-    label: 'First Scan',
-    description: 'Run your first AI perception scan (optional)',
-    icon: 'Radar',
-    optional: true,
-    requiredFields: [],
+    name: 'profile',
+    route: '/onboarding/profile',
+    label: 'Build Profile',
+    description: 'We\'ll analyze your website to create your brand profile',
+    icon: 'Sparkles',
+    optional: false,
+    requiredFields: ['brand360Id'],
   },
   {
     id: 5,
@@ -246,8 +246,11 @@ export function validateStepData(
       }
       break;
 
-    case 'scan':
-      // Optional step, no validation required
+    case 'profile':
+      // Brand profile must be created (Magic Import complete)
+      if (!data.brand360Id) {
+        errors.push('Brand profile creation is required');
+      }
       break;
 
     case 'complete':

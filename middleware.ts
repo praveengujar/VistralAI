@@ -17,11 +17,12 @@ const securityHeaders = {
   // Content Security Policy
   'Content-Security-Policy': [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Required for Next.js
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com", // Required for Next.js + Stripe
     "style-src 'self' 'unsafe-inline'", // Required for Tailwind
     "img-src 'self' data: https: blob:",
     "font-src 'self' data:",
     "connect-src 'self' https:",
+    "frame-src https://js.stripe.com https://hooks.stripe.com", // Stripe iframes
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",

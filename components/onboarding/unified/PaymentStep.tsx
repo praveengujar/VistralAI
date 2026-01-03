@@ -8,12 +8,17 @@ import {
   useStripe,
   useElements,
 } from '@stripe/react-stripe-js';
-import { Loader2, Shield, CreditCard, Lock } from 'lucide-react';
+import { Loader2, Shield, CreditCard, Lock, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { TRIAL_DAYS, getTierById, formatPriceDollars } from '@/lib/config/pricing';
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+// Initialize Stripe
+const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+
+const stripePromise = stripePublishableKey
+  ? loadStripe(stripePublishableKey)
+  : Promise.resolve(null);
 
 interface PaymentStepProps {
   tierId: string;
@@ -161,10 +166,65 @@ export function PaymentStep({
   onError,
   isProcessing,
 }: PaymentStepProps) {
+  const [stripeLoadError, setStripeLoadError] = useState(false);
+  const [stripeReady, setStripeReady] = useState(false);
+
+  useEffect(() => {
+    // Check if Stripe loaded successfully
+    stripePromise.then((stripe) => {
+      if (!stripe) {
+        setStripeLoadError(true);
+        onError('Payment system failed to load. Please check your connection and try again.');
+      } else {
+        setStripeReady(true);
+      }
+    });
+  }, [onError]);
+
   if (!clientSecret) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="w-8 h-8 animate-spin text-[rgb(var(--primary))]" />
+      </div>
+    );
+  }
+
+  if (stripeLoadError) {
+    return (
+      <div className="p-6 bg-red-900/20 border border-red-500/30 rounded-lg">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <h3 className="font-medium text-red-300">Payment System Unavailable</h3>
+            <p className="text-sm text-red-400 mt-1">
+              We couldn&apos;t load the payment form. This could be due to:
+            </p>
+            <ul className="list-disc list-inside text-sm text-red-400 mt-2 space-y-1">
+              <li>Invalid or deactivated Stripe publishable key</li>
+              <li>Network connectivity issues</li>
+              <li>Browser extensions blocking js.stripe.com</li>
+            </ul>
+            <p className="text-xs text-red-500 mt-3">
+              Check browser console for details. Verify your Stripe key in the Dashboard.
+            </p>
+            <Button
+              className="mt-4"
+              variant="outline"
+              onClick={() => window.location.reload()}
+            >
+              Refresh Page
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!stripeReady) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-[rgb(var(--primary))]" />
+        <p className="text-sm text-[rgb(var(--foreground-secondary))]">Loading payment form...</p>
       </div>
     );
   }

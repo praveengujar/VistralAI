@@ -1,0 +1,411 @@
+import React, { useState } from 'react';
+
+const ArchitectureDiagram = () => {
+  const [activeSection, setActiveSection] = useState(null);
+  const [hoveredAgent, setHoveredAgent] = useState(null);
+
+  const aiAgents = [
+    { id: 'MIO', name: 'MagicImportOrchestrator', icon: '🎭', desc: 'Coordinates all agents', color: '#8B5CF6' },
+    { id: 'CA', name: 'CrawlerAgent', icon: '🕷️', desc: 'Web scraping, Schema.org', color: '#3B82F6' },
+    { id: 'VCA', name: 'VibeCheckAgent', icon: '✨', desc: 'Brand personality, Tone', color: '#EC4899' },
+    { id: 'CMA', name: 'CompetitorAgent', icon: '🎯', desc: 'Competitor discovery', color: '#F59E0B' },
+    { id: 'PEA', name: 'ProductExtractorAgent', icon: '📦', desc: 'Products/Services, Pricing', color: '#10B981' },
+    { id: 'APA', name: 'AudiencePositioningAgent', icon: '👥', desc: 'Personas, Value props', color: '#6366F1' },
+    { id: 'PGA', name: 'PromptGeneratorAgent', icon: '📝', desc: 'Test prompt creation', color: '#14B8A6' },
+    { id: 'PEvA', name: 'PerceptionEvaluatorAgent', icon: '⚖️', desc: 'LLM-as-Judge scoring', color: '#EF4444' },
+    { id: 'CGA', name: 'CorrectionGeneratorAgent', icon: '🔧', desc: 'Fix suggestions', color: '#78716C' }
+  ];
+
+  const apiRoutes = [
+    { name: 'Auth Routes', icon: '🔐', paths: ['/auth/[...nextauth]', '/auth/register'], color: '#3B82F6' },
+    { name: 'Onboarding Routes', icon: '📋', paths: ['/onboarding/session', '/onboarding/brand', '/onboarding/plan', '/onboarding/payment', '/onboarding/complete'], color: '#14B8A6' },
+    { name: 'Brand 360 Routes', icon: '🎯', paths: ['/brand-360/*', '/brand-360/audience', '/brand-360/personas', '/brand-360/positioning'], color: '#10B981' },
+    { name: 'AEO Routes', icon: '📊', paths: ['/aeo/magic-import', '/aeo/perception-scan', '/aeo/insights', '/aeo/prompts'], color: '#8B5CF6' },
+    { name: 'Payment Routes', icon: '💳', paths: ['/payments/stripe/*', '/webhooks/stripe'], color: '#EC4899' }
+  ];
+
+  const mongoCollections = [
+    { name: 'users', icon: '👤', fields: 'email, password, onboardingCompleted' },
+    { name: 'sessions', icon: '🔑', fields: 'NextAuth sessions' },
+    { name: 'brand360_profiles', icon: '🎯', fields: 'brandIdentity, competitors, products, personas' },
+    { name: 'onboarding_sessions', icon: '📋', fields: 'currentStep, completedSteps, selectedTierId' },
+    { name: 'onboarding_events', icon: '📊', fields: 'eventType, step, eventData' },
+    { name: 'subscriptions', icon: '💳', fields: 'stripeCustomerId, status, currentPeriodEnd' },
+    { name: 'perception_scans', icon: '📈', fields: 'platforms, overallScore, quadrantPosition' },
+    { name: 'generated_prompts', icon: '📝', fields: 'category, intent, renderedPrompt' },
+    { name: 'perception_insights', icon: '💡', fields: 'issueType, severity, recommendation' }
+  ];
+
+  const redisCaches = [
+    { name: 'Session Cache', icon: '🔐', ttl: '24h' },
+    { name: 'Profile Cache', icon: '📦', ttl: '5min' },
+    { name: 'Rate Limit', icon: '⏱️', ttl: '100 req/min' },
+    { name: 'Job Queue', icon: '📋', ttl: 'Bull queues' }
+  ];
+
+  const externalServices = {
+    ai: [
+      { name: 'OpenAI', icon: '🤖', desc: 'GPT-4o-mini', color: '#10B981' },
+      { name: 'Anthropic', icon: '🧠', desc: 'Claude 3', color: '#EA580C' },
+      { name: 'Gemini', icon: '💎', desc: 'Google', color: '#4285F4' },
+      { name: 'Perplexity', icon: '🔍', desc: 'AI', color: '#8B5CF6' }
+    ],
+    payments: [
+      { name: 'Stripe', icon: '💳', desc: 'Cards, Apple/Google Pay', color: '#6366F1' },
+      { name: 'PayPal', icon: '🅿️', desc: 'Alternative', color: '#003087' }
+    ],
+    crawling: [
+      { name: 'Firecrawl', icon: '🕷️', desc: 'Port 3002', color: '#F97316' },
+      { name: 'Playwright', icon: '🎭', desc: 'Port 3001', color: '#22C55E' }
+    ]
+  };
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0C0F1A 0%, #131825 50%, #0C0F1A 100%)', padding: '24px 16px', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
+      <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 6px 0' }}>VistralAI System Architecture</h1>
+        <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>Full-stack architecture with 9 AI agents, real-time events, and GCP deployment</p>
+      </div>
+
+      <div style={{ maxWidth: '1500px', margin: '0 auto' }}>
+        
+        {/* CLIENT LAYER */}
+        <div style={{ marginBottom: '12px' }}>
+          <div style={{ color: '#64748B', fontSize: '9px', fontWeight: '600', letterSpacing: '1px', marginBottom: '8px', textAlign: 'center' }}>CLIENT LAYER</div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '16px' }}>
+            <div style={{ background: 'linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%)', borderRadius: '10px', padding: '12px 20px', textAlign: 'center', boxShadow: '0 4px 16px rgba(59, 130, 246, 0.3)' }}>
+              <div style={{ fontSize: '16px', marginBottom: '4px' }}>🌐</div>
+              <div style={{ color: 'white', fontWeight: '600', fontSize: '12px' }}>Browser Client</div>
+              <div style={{ color: '#93C5FD', fontSize: '9px' }}>React 18 + React Query v5</div>
+              <div style={{ color: '#93C5FD', fontSize: '9px' }}>Tailwind CSS</div>
+            </div>
+            <div style={{ background: 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)', borderRadius: '10px', padding: '12px 20px', textAlign: 'center', boxShadow: '0 4px 16px rgba(139, 92, 246, 0.3)' }}>
+              <div style={{ fontSize: '16px', marginBottom: '4px' }}>🔌</div>
+              <div style={{ color: 'white', fontWeight: '600', fontSize: '12px' }}>WebSocket Client</div>
+              <div style={{ color: '#C4B5FD', fontSize: '9px' }}>Socket.io-client</div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
+          <svg width="240" height="20"><line x1="80" y1="0" x2="80" y2="20" stroke="#3B82F6" strokeWidth="2" markerEnd="url(#arrow)" /><line x1="160" y1="0" x2="160" y2="20" stroke="#8B5CF6" strokeWidth="2" strokeDasharray="4 2" /></svg>
+        </div>
+
+        {/* NEXT.JS APPLICATION */}
+        <div style={{ background: '#1A1F2E', borderRadius: '14px', border: '2px solid #334155', padding: '16px', marginBottom: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px', paddingBottom: '10px', borderBottom: '1px solid #334155' }}>
+            <span style={{ fontSize: '18px' }}>▲</span>
+            <div>
+              <div style={{ color: '#F8FAFC', fontWeight: '700', fontSize: '14px' }}>NEXT.JS 14 APPLICATION</div>
+              <div style={{ color: '#64748B', fontSize: '10px' }}>Port 3000 (dev) / 8080 (prod)</div>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '0.8fr 1fr 1.5fr 0.7fr', gap: '12px' }}>
+            
+            {/* Presentation Layer */}
+            <div style={{ background: '#0F172A', borderRadius: '8px', padding: '10px', border: '1px solid #334155' }}>
+              <div style={{ color: '#94A3B8', fontSize: '8px', fontWeight: '600', letterSpacing: '1px', marginBottom: '8px' }}>PRESENTATION</div>
+              <div style={{ background: '#1E293B', borderRadius: '6px', padding: '8px', marginBottom: '6px' }}>
+                <div style={{ color: '#E2E8F0', fontSize: '9px', fontWeight: '600' }}>App Router Pages</div>
+                <div style={{ color: '#64748B', fontSize: '8px' }}>/dashboard, /onboarding</div>
+                <div style={{ color: '#64748B', fontSize: '8px' }}>/brand-360, /aeo, /settings</div>
+              </div>
+              <div style={{ background: '#1E293B', borderRadius: '6px', padding: '8px' }}>
+                <div style={{ color: '#E2E8F0', fontSize: '9px', fontWeight: '600' }}>React Components</div>
+                <div style={{ color: '#64748B', fontSize: '8px' }}>UI, Charts, Forms</div>
+              </div>
+            </div>
+
+            {/* API Layer */}
+            <div style={{ background: '#0F172A', borderRadius: '8px', padding: '10px', border: '1px solid #F59E0B40' }}>
+              <div style={{ color: '#F59E0B', fontSize: '8px', fontWeight: '600', letterSpacing: '1px', marginBottom: '8px' }}>API LAYER (/api)</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {apiRoutes.map((route) => (
+                  <div key={route.name} style={{ background: `${route.color}10`, borderRadius: '4px', padding: '4px 6px', borderLeft: `2px solid ${route.color}` }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ fontSize: '10px' }}>{route.icon}</span>
+                      <span style={{ color: route.color, fontSize: '8px', fontWeight: '600' }}>{route.name}</span>
+                    </div>
+                    <div style={{ color: '#64748B', fontSize: '7px', marginLeft: '14px' }}>{route.paths[0]}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Service Layer */}
+            <div style={{ background: '#0F172A', borderRadius: '8px', padding: '10px', border: '1px solid #8B5CF640' }}>
+              <div style={{ color: '#8B5CF6', fontSize: '8px', fontWeight: '600', letterSpacing: '1px', marginBottom: '8px' }}>SERVICE LAYER</div>
+              
+              {/* Core Services */}
+              <div style={{ marginBottom: '8px' }}>
+                <div style={{ color: '#64748B', fontSize: '7px', marginBottom: '4px' }}>Core Services</div>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  {[
+                    { name: 'OnboardingSvc', icon: '📋' },
+                    { name: 'StripeSvc', icon: '💳' },
+                    { name: 'SubscriptionSvc', icon: '📦' }
+                  ].map((svc) => (
+                    <div key={svc.name} style={{ background: '#10B98115', borderRadius: '4px', padding: '4px 6px', flex: 1, textAlign: 'center', border: '1px solid #10B98130' }}>
+                      <span style={{ fontSize: '10px' }}>{svc.icon}</span>
+                      <div style={{ color: '#10B981', fontSize: '7px', fontWeight: '500' }}>{svc.name}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* AI Agent Pipeline */}
+              <div style={{ color: '#A78BFA', fontSize: '7px', marginBottom: '4px' }}>AI Agent Pipeline (9 Agents)</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '3px' }}>
+                {aiAgents.slice(0, 5).map((agent) => (
+                  <div key={agent.id} onMouseEnter={() => setHoveredAgent(agent.id)} onMouseLeave={() => setHoveredAgent(null)} style={{ background: hoveredAgent === agent.id ? `${agent.color}30` : `${agent.color}15`, borderRadius: '4px', padding: '4px', textAlign: 'center', border: `1px solid ${agent.color}40`, cursor: 'pointer', transition: 'all 0.2s' }}>
+                    <div style={{ fontSize: '12px' }}>{agent.icon}</div>
+                    <div style={{ color: agent.color, fontSize: '6px', fontWeight: '600' }}>{agent.id}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '3px', marginTop: '3px' }}>
+                {aiAgents.slice(5).map((agent) => (
+                  <div key={agent.id} onMouseEnter={() => setHoveredAgent(agent.id)} onMouseLeave={() => setHoveredAgent(null)} style={{ background: hoveredAgent === agent.id ? `${agent.color}30` : `${agent.color}15`, borderRadius: '4px', padding: '4px', textAlign: 'center', border: `1px solid ${agent.color}40`, cursor: 'pointer', transition: 'all 0.2s' }}>
+                    <div style={{ fontSize: '12px' }}>{agent.icon}</div>
+                    <div style={{ color: agent.color, fontSize: '6px', fontWeight: '600' }}>{agent.id}</div>
+                  </div>
+                ))}
+              </div>
+              {hoveredAgent && (
+                <div style={{ marginTop: '6px', background: '#1E293B', borderRadius: '4px', padding: '6px', borderLeft: `2px solid ${aiAgents.find(a => a.id === hoveredAgent)?.color}` }}>
+                  <div style={{ color: '#E2E8F0', fontSize: '8px', fontWeight: '600' }}>{aiAgents.find(a => a.id === hoveredAgent)?.name}</div>
+                  <div style={{ color: '#94A3B8', fontSize: '7px' }}>{aiAgents.find(a => a.id === hoveredAgent)?.desc}</div>
+                </div>
+              )}
+            </div>
+
+            {/* Real-time + Data Access */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {/* Real-time Layer */}
+              <div style={{ background: '#0F172A', borderRadius: '8px', padding: '10px', border: '1px solid #EC489940', flex: 1 }}>
+                <div style={{ color: '#EC4899', fontSize: '8px', fontWeight: '600', letterSpacing: '1px', marginBottom: '6px' }}>REAL-TIME</div>
+                <div style={{ background: '#EC489920', borderRadius: '4px', padding: '6px', textAlign: 'center', marginBottom: '4px' }}>
+                  <span style={{ fontSize: '12px' }}>🔌</span>
+                  <div style={{ color: '#F472B6', fontSize: '8px', fontWeight: '600' }}>Socket.io</div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  {['Onboarding Events', 'Scan Events'].map((evt) => (
+                    <div key={evt} style={{ background: '#1E293B', borderRadius: '3px', padding: '3px 6px' }}>
+                      <span style={{ color: '#94A3B8', fontSize: '7px' }}>{evt}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Data Access */}
+              <div style={{ background: '#0F172A', borderRadius: '8px', padding: '10px', border: '1px solid #334155' }}>
+                <div style={{ color: '#94A3B8', fontSize: '8px', fontWeight: '600', letterSpacing: '1px', marginBottom: '6px' }}>DATA ACCESS</div>
+                {['Prisma ORM', 'Cache Layer', 'DB Operations'].map((item) => (
+                  <div key={item} style={{ background: '#1E293B', borderRadius: '3px', padding: '3px 6px', marginBottom: '2px' }}>
+                    <span style={{ color: '#E2E8F0', fontSize: '7px' }}>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Middleware Bar */}
+          <div style={{ marginTop: '10px', background: 'linear-gradient(90deg, #0EA5E9 0%, #06B6D4 100%)', borderRadius: '6px', padding: '6px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '12px' }}>🛡️</span>
+              <span style={{ color: 'white', fontSize: '9px', fontWeight: '600' }}>MIDDLEWARE STACK</span>
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {['Auth', 'RateLimit', 'ErrorHandler'].map((mw) => (
+                <span key={mw} style={{ color: 'white', fontSize: '8px', background: 'rgba(255,255,255,0.2)', padding: '2px 6px', borderRadius: '8px' }}>{mw}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}><div style={{ width: '2px', height: '16px', background: '#475569' }} /></div>
+
+        {/* DATA LAYER + EXTERNAL SERVICES */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '12px', marginBottom: '12px' }}>
+          
+          {/* DATA LAYER */}
+          <div style={{ background: '#1A1F2E', borderRadius: '12px', padding: '14px', border: '1px solid #22C55E40' }}>
+            <div style={{ color: '#22C55E', fontSize: '10px', fontWeight: '600', letterSpacing: '1px', marginBottom: '10px' }}>DATA LAYER</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '10px' }}>
+              
+              {/* MongoDB */}
+              <div style={{ background: '#0F172A', borderRadius: '8px', padding: '10px', border: '1px solid #22C55E30' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '14px' }}>🍃</span>
+                  <div>
+                    <span style={{ color: '#22C55E', fontSize: '10px', fontWeight: '600' }}>MongoDB 7.0</span>
+                    <div style={{ color: '#64748B', fontSize: '8px' }}>localhost:27017</div>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '3px' }}>
+                  {mongoCollections.map((col) => (
+                    <div key={col.name} style={{ background: '#22C55E10', borderRadius: '4px', padding: '4px', textAlign: 'center' }}>
+                      <span style={{ fontSize: '10px' }}>{col.icon}</span>
+                      <div style={{ color: '#4ADE80', fontSize: '7px', fontWeight: '500' }}>{col.name}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Redis */}
+              <div style={{ background: '#0F172A', borderRadius: '8px', padding: '10px', border: '1px solid #DC262630' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '14px' }}>⚡</span>
+                  <div>
+                    <span style={{ color: '#DC2626', fontSize: '10px', fontWeight: '600' }}>Redis 7.0</span>
+                    <div style={{ color: '#64748B', fontSize: '8px' }}>localhost:6379</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  {redisCaches.map((cache) => (
+                    <div key={cache.name} style={{ background: '#DC262610', borderRadius: '4px', padding: '4px 6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ fontSize: '10px' }}>{cache.icon}</span>
+                        <span style={{ color: '#FCA5A5', fontSize: '8px' }}>{cache.name}</span>
+                      </div>
+                      <span style={{ color: '#64748B', fontSize: '7px' }}>{cache.ttl}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* EXTERNAL SERVICES */}
+          <div style={{ background: '#1A1F2E', borderRadius: '12px', padding: '14px', border: '1px solid #F59E0B40' }}>
+            <div style={{ color: '#F59E0B', fontSize: '10px', fontWeight: '600', letterSpacing: '1px', marginBottom: '10px' }}>EXTERNAL SERVICES</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+              
+              {/* AI Providers */}
+              <div>
+                <div style={{ color: '#64748B', fontSize: '8px', fontWeight: '500', marginBottom: '4px' }}>AI/LLM</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  {externalServices.ai.map((svc) => (
+                    <div key={svc.name} style={{ background: `${svc.color}15`, borderRadius: '4px', padding: '4px 6px', borderLeft: `2px solid ${svc.color}` }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                        <span style={{ fontSize: '10px' }}>{svc.icon}</span>
+                        <span style={{ color: svc.color, fontSize: '8px', fontWeight: '600' }}>{svc.name}</span>
+                      </div>
+                      <div style={{ color: '#64748B', fontSize: '7px', marginLeft: '13px' }}>{svc.desc}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Payments */}
+              <div>
+                <div style={{ color: '#64748B', fontSize: '8px', fontWeight: '500', marginBottom: '4px' }}>Payments</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  {externalServices.payments.map((svc) => (
+                    <div key={svc.name} style={{ background: `${svc.color}15`, borderRadius: '4px', padding: '4px 6px', borderLeft: `2px solid ${svc.color}` }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                        <span style={{ fontSize: '10px' }}>{svc.icon}</span>
+                        <span style={{ color: svc.color, fontSize: '8px', fontWeight: '600' }}>{svc.name}</span>
+                      </div>
+                      <div style={{ color: '#64748B', fontSize: '7px', marginLeft: '13px' }}>{svc.desc}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Crawling */}
+              <div>
+                <div style={{ color: '#64748B', fontSize: '8px', fontWeight: '500', marginBottom: '4px' }}>Crawling</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  {externalServices.crawling.map((svc) => (
+                    <div key={svc.name} style={{ background: `${svc.color}15`, borderRadius: '4px', padding: '4px 6px', borderLeft: `2px solid ${svc.color}` }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                        <span style={{ fontSize: '10px' }}>{svc.icon}</span>
+                        <span style={{ color: svc.color, fontSize: '8px', fontWeight: '600' }}>{svc.name}</span>
+                      </div>
+                      <div style={{ color: '#64748B', fontSize: '7px', marginLeft: '13px' }}>{svc.desc}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* GCP INFRASTRUCTURE */}
+        <div style={{ background: 'linear-gradient(135deg, #4285F415, #34A85315)', borderRadius: '12px', padding: '14px', border: '1px solid #4285F440', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+            <div style={{ width: '24px', height: '24px', background: 'linear-gradient(135deg, #4285F4 25%, #34A853 25%, #34A853 50%, #FBBC05 50%, #FBBC05 75%, #EA4335 75%)', borderRadius: '5px' }} />
+            <div style={{ color: '#F8FAFC', fontSize: '12px', fontWeight: '600' }}>INFRASTRUCTURE (GCP)</div>
+          </div>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            {[
+              { name: 'Cloud Run', icon: '☁️', desc: '0-20 instances, 2Gi/2CPU' },
+              { name: 'Secret Manager', icon: '🔒', desc: 'API keys, DB credentials' },
+              { name: 'Memorystore', icon: '📦', desc: 'Redis 7.0, 1GB' },
+              { name: 'Cloud Logging', icon: '📊', desc: 'Structured logs' },
+              { name: 'VPC Connector', icon: '🔗', desc: 'Private networking' }
+            ].map((svc) => (
+              <div key={svc.name} style={{ background: '#0F172A', borderRadius: '6px', padding: '8px 12px', border: '1px solid #334155', flex: '1 1 150px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                  <span style={{ fontSize: '12px' }}>{svc.icon}</span>
+                  <span style={{ color: '#E2E8F0', fontSize: '10px', fontWeight: '600' }}>{svc.name}</span>
+                </div>
+                <div style={{ color: '#64748B', fontSize: '8px', marginLeft: '18px' }}>{svc.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* AI AGENT PIPELINE FLOW */}
+        <div style={{ background: '#1A1F2E', borderRadius: '12px', padding: '14px', border: '1px solid #8B5CF640', marginBottom: '16px' }}>
+          <div style={{ color: '#8B5CF6', fontSize: '10px', fontWeight: '600', letterSpacing: '1px', marginBottom: '12px' }}>AI AGENT PIPELINE FLOW (MagicImportOrchestrator)</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+            {[
+              { step: '1', agent: 'CrawlerAgent', action: 'Crawl website', icon: '🕷️' },
+              { step: '2', agent: 'VibeCheckAgent', action: 'Analyze brand', icon: '✨' },
+              { step: '3', agent: 'CompetitorAgent', action: 'Find competitors', icon: '🎯' },
+              { step: '4', agent: 'ProductExtractor', action: 'Extract products', icon: '📦' },
+              { step: '5', agent: 'AudiencePos', action: 'Build personas', icon: '👥' }
+            ].map((item, idx, arr) => (
+              <React.Fragment key={item.step}>
+                <div style={{ background: '#0F172A', borderRadius: '8px', padding: '10px', textAlign: 'center', minWidth: '100px', border: '1px solid #8B5CF630' }}>
+                  <div style={{ fontSize: '16px', marginBottom: '4px' }}>{item.icon}</div>
+                  <div style={{ color: '#A78BFA', fontSize: '8px', fontWeight: '600' }}>{item.step}. {item.agent}</div>
+                  <div style={{ color: '#64748B', fontSize: '7px' }}>{item.action}</div>
+                </div>
+                {idx < arr.length - 1 && (
+                  <svg width="24" height="12" viewBox="0 0 24 12"><line x1="0" y1="6" x2="18" y2="6" stroke="#8B5CF6" strokeWidth="2" /><polygon points="18,2 24,6 18,10" fill="#8B5CF6" /></svg>
+                )}
+              </React.Fragment>
+            ))}
+            <svg width="24" height="12" viewBox="0 0 24 12"><line x1="0" y1="6" x2="18" y2="6" stroke="#22C55E" strokeWidth="2" /><polygon points="18,2 24,6 18,10" fill="#22C55E" /></svg>
+            <div style={{ background: '#22C55E20', borderRadius: '8px', padding: '10px', textAlign: 'center', border: '1px solid #22C55E40' }}>
+              <span style={{ fontSize: '14px' }}>🍃</span>
+              <div style={{ color: '#22C55E', fontSize: '8px', fontWeight: '600' }}>brand360_profiles</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Connection Legend */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
+          {[
+            { type: 'HTTPS/REST', color: '#3B82F6' },
+            { type: 'WebSocket', color: '#8B5CF6', dashed: true },
+            { type: 'Database', color: '#22C55E' },
+            { type: 'External API', color: '#F59E0B' },
+            { type: 'Real-time Events', color: '#EC4899', dashed: true }
+          ].map((item) => (
+            <div key={item.type} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <div style={{ width: '16px', height: '2px', background: item.color, borderStyle: item.dashed ? 'dashed' : 'solid' }} />
+              <span style={{ color: '#64748B', fontSize: '9px' }}>{item.type}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ArchitectureDiagram;

@@ -81,6 +81,35 @@ interface ScanResponse {
   error?: string;
 }
 
+interface ProfileBuildResponse {
+  success: boolean;
+  data?: {
+    status: 'pending' | 'running' | 'completed' | 'already_completed' | 'failed';
+    brand360Id?: string;
+    completionScore?: number;
+    entityHealthScore?: number;
+    discoveries?: {
+      entityHome: boolean;
+      organizationSchema: boolean;
+      brandIdentity: boolean;
+      competitors: number;
+      products: number;
+      personas: number;
+      positioning: boolean;
+    };
+    stages?: Array<{ name: string; status: string; confidence?: number }>;
+    totalDuration?: number;
+    nextStep?: number;
+    message?: string;
+    profile?: {
+      id: string;
+      completionScore: number;
+      entityHealthScore: number;
+    };
+  };
+  error?: string;
+}
+
 interface CompleteResponse {
   success: boolean;
   data?: {
@@ -107,6 +136,7 @@ interface CompleteResponse {
 export const onboardingQueryKeys = {
   session: () => ['onboarding', 'session'] as const,
   brandStatus: () => ['onboarding', 'brand', 'status'] as const,
+  profileStatus: () => ['onboarding', 'profile', 'status'] as const,
   completionStatus: () => ['onboarding', 'completion', 'status'] as const,
 };
 
@@ -238,7 +268,25 @@ export function useConfirmPayment() {
 }
 
 /**
- * Start MagicImport for brand setup
+ * Save brand info only (Step 1 - no Magic Import)
+ */
+export function useSaveBrand() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { websiteUrl: string; brandName: string }) =>
+      fetchJson<BrandSetupResponse>('/api/onboarding/brand', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['onboarding'] });
+    },
+  });
+}
+
+/**
+ * Start MagicImport for brand setup (legacy - kept for compatibility)
  */
 export function useStartMagicImport() {
   const queryClient = useQueryClient();
@@ -256,7 +304,7 @@ export function useStartMagicImport() {
 }
 
 /**
- * Retry failed MagicImport
+ * Retry failed MagicImport (legacy - kept for compatibility)
  */
 export function useRetryMagicImport() {
   const queryClient = useQueryClient();
@@ -264,6 +312,65 @@ export function useRetryMagicImport() {
   return useMutation({
     mutationFn: () =>
       fetchJson<BrandSetupResponse>('/api/onboarding/brand', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'retry' }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['onboarding'] });
+    },
+  });
+}
+
+// ============================================
+// Profile Build Hooks (Step 4)
+// ============================================
+
+/**
+ * Check profile build status
+ */
+export function useProfileStatus(enabled: boolean = true) {
+  return useQuery({
+    queryKey: onboardingQueryKeys.profileStatus(),
+    queryFn: () => fetchJson<ProfileBuildResponse>('/api/onboarding/profile'),
+    enabled,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      // Poll every 3 seconds while running
+      if (data?.data?.status === 'running') {
+        return 3000;
+      }
+      return false;
+    },
+  });
+}
+
+/**
+ * Start profile build (Magic Import on Step 4)
+ */
+export function useStartBuildProfile() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      fetchJson<ProfileBuildResponse>('/api/onboarding/profile', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['onboarding'] });
+    },
+  });
+}
+
+/**
+ * Retry failed profile build
+ */
+export function useRetryBuildProfile() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      fetchJson<ProfileBuildResponse>('/api/onboarding/profile', {
         method: 'POST',
         body: JSON.stringify({ action: 'retry' }),
       }),

@@ -38,20 +38,25 @@ export default function PaymentPage() {
 
   // Create SetupIntent on mount
   useEffect(() => {
-    if (session?.selectedTierId && !clientSecret) {
+    if (session?.selectedTierId && !clientSecret && !createSetupIntent.isPending) {
+      console.log('[Payment] Creating SetupIntent for tier:', session.selectedTierId);
       createSetupIntent.mutateAsync()
         .then((response) => {
+          console.log('[Payment] SetupIntent response:', response);
           if (response.data?.clientSecret) {
+            console.log('[Payment] Got clientSecret, length:', response.data.clientSecret.length);
             setClientSecret(response.data.clientSecret);
           } else {
+            console.error('[Payment] No clientSecret in response:', response);
             setError('Failed to initialize payment. Please try again.');
           }
         })
         .catch((err) => {
+          console.error('[Payment] SetupIntent error:', err);
           setError(err.message || 'Failed to initialize payment');
         });
     }
-  }, [session?.selectedTierId]);
+  }, [session?.selectedTierId, clientSecret, createSetupIntent.isPending]);
 
   const handleBack = () => {
     router.push('/onboarding/plan');
@@ -62,7 +67,7 @@ export default function PaymentPage() {
     try {
       await confirmPayment.mutateAsync({ paymentMethodId });
       await refetch();
-      router.push('/onboarding/scan');
+      router.push('/onboarding/profile');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Payment failed');
     }

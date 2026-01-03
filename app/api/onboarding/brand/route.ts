@@ -1,10 +1,11 @@
 // API Route: POST /api/onboarding/brand
-// Run MagicImport for brand setup during onboarding
+// Save brand website URL and name during onboarding (Step 1)
+// Magic Import is deferred to Step 4 (Build Profile)
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth.config';
-import { onboardingService, onboardingMagicImport } from '@/lib/services/onboarding';
+import { onboardingService } from '@/lib/services/onboarding';
 import { normalizeUrl, validateStepData } from '@/lib/config/onboarding';
 import type { OnboardingSessionData, OnboardingStatus } from '@/lib/config/onboarding';
 
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { websiteUrl, brandName, action } = body;
+    const { websiteUrl, brandName } = body;
 
     // Get onboarding session
     const onboardingSession = await onboardingService.getSessionByUserId(
@@ -31,54 +32,6 @@ export async function POST(request: NextRequest) {
         { success: false, error: 'No onboarding session found' },
         { status: 404 }
       );
-    }
-
-    // Verify payment is complete
-    if (!onboardingSession.subscriptionId) {
-      return NextResponse.json(
-        { success: false, error: 'Please complete payment first' },
-        { status: 400 }
-      );
-    }
-
-    // Handle status check
-    if (action === 'status') {
-      const status = await onboardingMagicImport.getStatus(onboardingSession.id);
-      return NextResponse.json({
-        success: true,
-        data: status,
-      });
-    }
-
-    // Handle retry
-    if (action === 'retry') {
-      const savedUrl = onboardingSession.websiteUrl;
-      const savedBrandName = onboardingSession.brandName;
-
-      if (!savedUrl || !savedBrandName) {
-        return NextResponse.json(
-          { success: false, error: 'No previous brand setup to retry' },
-          { status: 400 }
-        );
-      }
-
-      // Execute retry in background
-      onboardingMagicImport.retry({
-        sessionId: onboardingSession.id,
-        userId: session.user.id,
-        websiteUrl: savedUrl,
-        brandName: savedBrandName,
-      }).catch(err => {
-        console.error('MagicImport retry error:', err);
-      });
-
-      return NextResponse.json({
-        success: true,
-        data: {
-          status: 'running',
-          message: 'Retrying brand import...',
-        },
-      });
     }
 
     // Validate required fields
@@ -101,7 +54,7 @@ export async function POST(request: NextRequest) {
       brandName,
     };
 
-    const validation = validateStepData(3, sessionData);
+    const validation = validateStepData(1, sessionData);
     if (!validation.valid) {
       return NextResponse.json(
         { success: false, error: validation.errors.join(', ') },
@@ -109,48 +62,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Start MagicImport in background (non-blocking)
-    // The client will poll for status or receive WebSocket updates
-    onboardingMagicImport.execute({
-      sessionId: onboardingSession.id,
-      userId: session.user.id,
-      websiteUrl: normalizedUrl,
-      brandName,
-      onProgress: (progressData) => {
-        // Progress will be emitted via WebSocket
-        console.log('MagicImport progress:', progressData);
-      },
-      onComplete: async (completeData) => {
-        // Complete the brand step (step 1)
-        try {
-          await onboardingService.completeStep(
-            onboardingSession.id,
-            1,
-            {
-              websiteUrl: normalizedUrl,
-              brandName,
-              brand360Id: completeData.brand360Id,
-            }
-          );
-        } catch (err) {
-          console.error('Error completing brand step:', err);
-        }
-      },
-      onError: (errorData) => {
-        console.error('MagicImport error:', errorData);
-      },
-    }).catch(err => {
-      console.error('MagicImport execution error:', err);
-    });
+    // Save brand info and complete step 1
+    await onboardingService.completeStep(
+      onboardingSession.id,
+      1,
+      {
+        websiteUrl: normalizedUrl,
+        brandName,
+      }
+    );
 
-    // Return immediately with running status
     return NextResponse.json({
       success: true,
       data: {
-        status: 'running',
-        message: 'Brand import started. You will receive real-time updates.',
         websiteUrl: normalizedUrl,
         brandName,
+        message: 'Brand info saved. Proceed to choose your plan.',
       },
     });
   } catch (error) {
@@ -163,7 +90,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET endpoint to check status
+// GET endpoint to check brand info
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -185,16 +112,18 @@ export async function GET() {
       );
     }
 
-    const status = await onboardingMagicImport.getStatus(onboardingSession.id);
-
     return NextResponse.json({
       success: true,
-      data: status,
+      data: {
+        websiteUrl: onboardingSession.websiteUrl,
+        brandName: onboardingSession.brandName,
+        completed: onboardingSession.completedSteps.includes(1),
+      },
     });
   } catch (error) {
-    console.error('Error getting brand status:', error);
+    console.error('Error getting brand info:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to get status' },
+      { success: false, error: 'Failed to get brand info' },
       { status: 500 }
     );
   }
