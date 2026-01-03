@@ -24,10 +24,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid input', details: error.errors }, { status: 400 });
     }
 
-    if (error instanceof Error && error.message === 'User already exists') {
-      return NextResponse.json({ error: error.message }, { status: 409 });
+    if (error instanceof Error && (error.message === 'EMAIL_EXISTS' || error.message === 'User already exists')) {
+      return NextResponse.json(
+        {
+          error: 'An account with this email already exists. Please sign in or use a different email.',
+          code: 'EMAIL_EXISTS'
+        },
+        { status: 409 }
+      );
     }
 
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Registration error:', error);
+    return NextResponse.json({ error: 'Registration failed. Please try again.' }, { status: 500 });
   }
 }

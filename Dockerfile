@@ -7,6 +7,7 @@ WORKDIR /app
 
 # Set environment variables for build
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV OPENAI_API_KEY=sk-dummy-key-for-build-only
 
 # Copy package files
 COPY package.json package-lock.json* ./

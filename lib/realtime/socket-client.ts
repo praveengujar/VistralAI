@@ -43,7 +43,7 @@ export interface SocketHookReturn {
 let socketInstance: Socket | null = null;
 let connectionCount = 0;
 
-function getSocket(): Socket {
+export function getSocket(): Socket {
   if (!socketInstance) {
     socketInstance = io({
       path: '/api/socket',

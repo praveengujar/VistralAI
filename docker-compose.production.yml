@@ -1,0 +1,301 @@
+# ============================================
+# Docker Compose for VistralAI Production (Single VM)
+# ============================================
+# Complete stack for GCE VM deployment
+# Estimated VM: e2-medium (2 vCPU, 4GB RAM) ~$25/month
+#
+# Services:
+#   - vistralai: Next.js application (port 80/443)
+#   - mongodb: MongoDB database (internal)
+#   - redis: Redis cache (internal)
+#   - firecrawl: Firecrawl API (internal)
+#   - playwright: Browser service (internal)
+#   - postgres: Firecrawl queue DB (internal)
+#   - rabbitmq: Firecrawl message queue (internal)
+#   - nginx: Reverse proxy with SSL (port 80/443)
+#
+# Run with: docker-compose -f docker-compose.production.yml up -d
+
+services:
+  # ============================================
+  # Nginx Reverse Proxy
+  # ============================================
+  nginx:
+    image: nginx:alpine
+    container_name: vistralai-nginx
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_cache:/var/cache/nginx
+    depends_on:
+      - vistralai
+    networks:
+      - vistralai-prod-network
+    restart: unless-stopped
+
+  # ============================================
+  # VistralAI Next.js Application
+  # ============================================
+  vistralai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vistralai-app
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+
+      # Auth
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+
+      # Database
+      DATABASE_URL: mongodb://vistralai:${MONGO_PASSWORD}@mongodb:27017/vistralai?authSource=admin&replicaSet=rs0
+      DATABASE_MODE: mongodb
+
+      # Redis
+      REDIS_URL: redis://redis:6379
+
+      # Firecrawl (internal network)
+      USE_FIRECRAWL: 'true'
+      FIRECRAWL_INTERNAL_URL: http://firecrawl:3000
+      FIRECRAWL_MAX_PAGES: 20
+      FIRECRAWL_MAX_DEPTH: 2
+
+      # AI APIs
+      USE_REAL_API: 'true'
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+
+      # Optional: Anthropic fallback
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+
+      # Features
+      CONFIDENCE_THRESHOLD: '0.85'
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      firecrawl:
+        condition: service_healthy
+    networks:
+      - vistralai-prod-network
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:8080/api/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # MongoDB Database (Replica Set)
+  # ============================================
+  mongodb:
+    image: mongo:7.0
+    container_name: vistralai-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: vistralai
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: vistralai
+    command: ["--replSet", "rs0", "--bind_ip_all", "--keyFile", "/etc/mongo-keyfile"]
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+      - ./scripts/mongo-keyfile:/etc/mongo-keyfile:ro
+    networks:
+      - vistralai-prod-network
+    healthcheck:
+      test: |
+        mongosh --username vistralai --password ${MONGO_PASSWORD} --authenticationDatabase admin --eval "
+          try {
+            rs.status();
+            print('Replica set OK');
+          } catch (e) {
+            if (e.codeName === 'NotYetInitialized') {
+              rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'localhost:27017'}]});
+              print('Replica set initialized');
+            } else {
+              throw e;
+            }
+          }
+        " --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # ============================================
+  # Redis Cache
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: vistralai-redis
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - vistralai-prod-network
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # ============================================
+  # PostgreSQL (Firecrawl Queue)
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: vistralai-postgres
+    environment:
+      POSTGRES_USER: firecrawl
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-firecrawl_prod}
+      POSTGRES_DB: firecrawl
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - vistralai-prod-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U firecrawl']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================
+  # RabbitMQ (Firecrawl Message Queue)
+  # ============================================
+  rabbitmq:
+    image: rabbitmq:3-alpine
+    container_name: vistralai-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: firecrawl
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-firecrawl_prod}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - vistralai-prod-network
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', 'check_running']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================
+  # Playwright Service (Firecrawl Browser)
+  # ============================================
+  playwright:
+    image: ghcr.io/firecrawl/playwright-service:latest
+    platform: linux/amd64
+    container_name: vistralai-playwright
+    environment:
+      PORT: '3000'
+      PROXY_SERVER: ''
+      BLOCK_MEDIA: 'true'  # Save bandwidth in production
+    networks:
+      - vistralai-prod-network
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3000/health']
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    # Limit resources for Playwright
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  # ============================================
+  # Firecrawl API Service
+  # ============================================
+  firecrawl:
+    image: ghcr.io/firecrawl/firecrawl:latest
+    platform: linux/amd64
+    container_name: vistralai-firecrawl
+    environment:
+      # Redis
+      REDIS_URL: 'redis://redis:6379'
+      REDIS_RATE_LIMIT_URL: 'redis://redis:6379'
+
+      # PostgreSQL
+      NUQ_DATABASE_URL: 'postgresql://firecrawl:${POSTGRES_PASSWORD:-firecrawl_prod}@postgres:5432/firecrawl'
+      POSTGRES_HOST: 'postgres'
+      POSTGRES_PORT: '5432'
+      POSTGRES_USER: 'firecrawl'
+      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD:-firecrawl_prod}'
+      POSTGRES_DB: 'firecrawl'
+
+      # RabbitMQ
+      NUQ_RABBITMQ_URL: 'amqp://firecrawl:${RABBITMQ_PASSWORD:-firecrawl_prod}@rabbitmq:5672'
+
+      # Firecrawl config
+      NUM_WORKERS_PER_QUEUE: '2'  # Reduced for smaller VM
+      PORT: '3000'
+      HOST: '0.0.0.0'
+
+      # Playwright
+      PLAYWRIGHT_MICROSERVICE_URL: 'http://playwright:3000/scrape'
+
+      # Logging
+      LOGGING_LEVEL: 'warn'  # Reduced logging in production
+
+      # Auth disabled (internal only)
+      USE_DB_AUTHENTICATION: 'false'
+
+      # Rate limiting
+      RATE_LIMIT_TEST_MODE: 'false'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      playwright:
+        condition: service_healthy
+    networks:
+      - vistralai-prod-network
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3000/']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+    restart: unless-stopped
+    # Limit resources
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+volumes:
+  nginx_cache:
+    driver: local
+  mongodb_data:
+    driver: local
+  mongodb_config:
+    driver: local
+  redis_data:
+    driver: local
+  postgres_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+
+networks:
+  vistralai-prod-network:
+    driver: bridge

@@ -39,12 +39,82 @@ model User {
   mfaSecret         String?
   mfaBackupCodes    String[]
 
+  // Subscription & Billing
+  stripeCustomerId  String?          @unique
+  paypalCustomerId  String?
+
+  // Onboarding
+  onboardingCompleted Boolean        @default(false)
+  onboardingStep    Int              @default(0)
+
   // Relations
-  brandProfile BrandProfile?
-  sessions     Session[]
-  memberships  Membership[]
+  brandProfile      BrandProfile?
+  sessions          Session[]
+  memberships       Membership[]
+  userSubscriptions UserSubscription[]
+  paymentMethods    PaymentMethod[]
+  invoices          Invoice[]
+  onboardingSession OnboardingSession?
 
   @@map("users")
+}
+
+// ============================================
+// Onboarding Session & Events
+// ============================================
+
+model OnboardingSession {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId                String   @db.ObjectId @unique
+  currentStep           Int      @default(1)
+  completedSteps        Int[]    @default([])
+  status                String   @default("in_progress") // in_progress, completed, abandoned
+
+  // Step data
+  selectedTierId        String?
+  selectedBillingCycle  String?  // monthly, yearly
+  paymentMethodId       String?
+  stripeCustomerId      String?
+  subscriptionId        String?  @db.ObjectId
+  brand360Id            String?  @db.ObjectId
+  firstScanId           String?  @db.ObjectId
+
+  // Brand setup data
+  websiteUrl            String?
+  brandName             String?
+
+  // Tracking
+  startedAt             DateTime @default(now())
+  completedAt           DateTime?
+  lastActiveAt          DateTime @default(now())
+
+  // Resume context
+  metadata              Json?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events                OnboardingEvent[]
+
+  @@map("onboarding_sessions")
+}
+
+model OnboardingEvent {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId    String   @db.ObjectId
+  eventType    String   // step_started, step_completed, step_skipped, error, retry, abandoned
+  step         Int?
+  stepName     String?  // plan_selection, payment, brand_setup, first_scan, complete
+  eventData    Json?
+  errorMessage String?
+  createdAt    DateTime @default(now())
+
+  session      OnboardingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([eventType, createdAt])
+  @@map("onboarding_events")
 }
 
 model Organization {
@@ -1865,4 +1935,320 @@ model PromptReviewSiteUsage {
   @@index([promptId])
   @@index([websiteId])
   @@map("prompt_review_site_usages")
+}
+
+// ============================================
+// PRICING & SUBSCRIPTION SYSTEM
+// ============================================
+
+model PricingTier {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  // Tier identification
+  name                  String   @unique  // "monitor", "growth", "dominance"
+  displayName           String   // "Monitor", "Growth", "Dominance"
+  description           String?
+  tagline               String?  // "Perfect for testing the waters"
+
+  // Pricing
+  priceMonthly          Int      // Price in cents: 9900, 29900, 99900
+  priceYearly           Int?     // Annual price in cents (with discount)
+  currency              String   @default("USD")
+
+  // Stripe IDs
+  stripePriceIdMonthly  String?
+  stripePriceIdYearly   String?
+  stripeProductId       String?
+
+  // PayPal IDs
+  paypalPlanIdMonthly   String?
+  paypalPlanIdYearly    String?
+  paypalProductId       String?
+
+  // Limits
+  brandLimit            Int      // 1, 10, 50
+  teamSeatLimit         Int      @default(1) // 1, 2, unlimited (-1)
+  competitorLimitPerBrand Int    @default(0) // 0, 3, 10
+  customTopicsPerBrand  Int      @default(0) // 0, 20, 50
+
+  // Update frequency
+  updateFrequency       String   // "weekly", "daily", "realtime"
+
+  // Feature flags
+  features              Json     // Detailed feature configuration
+
+  // Platform coverage
+  platformsCovered      String[] // ["chatgpt", "perplexity", "gemini"] or ["all"]
+
+  // Display
+  isPopular             Boolean  @default(false)
+  sortOrder             Int      @default(0)
+  isActive              Boolean  @default(true)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  subscriptions         UserSubscription[]
+
+  @@map("pricing_tiers")
+}
+
+model UserSubscription {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId                String   @db.ObjectId
+  organizationId        String?  @db.ObjectId
+  tierId                String   @db.ObjectId
+
+  // Status
+  status                String   // "trialing", "active", "past_due", "canceled", "paused", "pending"
+
+  // Trial
+  trialStartDate        DateTime?
+  trialEndDate          DateTime?
+  trialDaysRemaining    Int?
+
+  // Billing
+  billingCycle          String   @default("monthly") // "monthly", "yearly"
+  currentPeriodStart    DateTime?
+  currentPeriodEnd      DateTime?
+  cancelAtPeriodEnd     Boolean  @default(false)
+  canceledAt            DateTime?
+
+  // Stripe
+  stripeSubscriptionId  String?  @unique
+  stripeCustomerId      String?
+
+  // PayPal
+  paypalSubscriptionId  String?  @unique
+
+  // Usage tracking
+  brandsUsed            Int      @default(0)
+  lastUsageCalculatedAt DateTime?
+
+  // Scheduled changes (downgrade/billing cycle change)
+  scheduledTierId       String?  @db.ObjectId
+  scheduledBillingCycle String?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier                  PricingTier @relation(fields: [tierId], references: [id])
+  usageRecords          UsageRecord[]
+  invoices              Invoice[]
+  changes               SubscriptionChange[]
+  scheduledChange       ScheduledChange?
+
+  @@index([userId])
+  @@index([status])
+  @@map("user_subscriptions")
+}
+
+model PaymentMethod {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId                String   @db.ObjectId
+
+  // Type
+  type                  String   // "card", "paypal", "apple_pay", "google_pay"
+  provider              String   // "stripe", "paypal"
+
+  // Stripe
+  stripePaymentMethodId String?
+
+  // PayPal
+  paypalPayerId         String?
+  paypalEmail           String?
+
+  // Card details (for display only)
+  cardBrand             String?  // "visa", "mastercard", "amex"
+  cardLast4             String?
+  cardExpMonth          Int?
+  cardExpYear           Int?
+
+  // Wallet details
+  walletType            String?  // "apple_pay", "google_pay"
+
+  // Status
+  isDefault             Boolean  @default(false)
+  isActive              Boolean  @default(true)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("payment_methods")
+}
+
+model Invoice {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  subscriptionId        String   @db.ObjectId
+  userId                String   @db.ObjectId
+
+  // Invoice details
+  invoiceNumber         String   @unique
+  status                String   // "draft", "open", "paid", "void", "uncollectible"
+
+  // Amounts (in cents)
+  subtotal              Int
+  tax                   Int      @default(0)
+  total                 Int
+  amountPaid            Int      @default(0)
+  amountDue             Int
+
+  currency              String   @default("USD")
+
+  // Dates
+  invoiceDate           DateTime
+  dueDate               DateTime?
+  paidAt                DateTime?
+
+  // Stripe
+  stripeInvoiceId       String?  @unique
+  stripeInvoiceUrl      String?
+  stripePdfUrl          String?
+
+  // PayPal
+  paypalInvoiceId       String?
+
+  // Line items
+  lineItems             Json     // Array of line items
+
+  createdAt             DateTime @default(now())
+
+  subscription          UserSubscription @relation(fields: [subscriptionId], references: [id])
+  user                  User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([subscriptionId])
+  @@map("invoices")
+}
+
+model UsageRecord {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  subscriptionId        String   @db.ObjectId
+
+  // Usage period
+  periodStart           DateTime
+  periodEnd             DateTime
+
+  // Metrics
+  brandsMonitored       Int      @default(0)
+  promptsGenerated      Int      @default(0)
+  scansPerformed        Int      @default(0)
+  customTopicsUsed      Int      @default(0)
+  apiCallsMade          Int      @default(0)
+
+  // Limits at time of record
+  brandLimit            Int
+
+  createdAt             DateTime @default(now())
+
+  subscription          UserSubscription @relation(fields: [subscriptionId], references: [id])
+
+  @@index([subscriptionId])
+  @@index([periodStart, periodEnd])
+  @@map("usage_records")
+}
+
+// Track feature usage for fair use policy
+model FeatureUsage {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId                String   @db.ObjectId
+  brand360Id            String?  @db.ObjectId
+
+  // Feature tracking
+  featureName           String   // "custom_topics", "api_calls", "exports"
+  usageCount            Int      @default(0)
+  limitValue            Int      // The limit for this feature
+
+  // Period
+  periodType            String   // "daily", "monthly", "lifetime"
+  periodStart           DateTime
+  periodEnd             DateTime?
+
+  lastUsedAt            DateTime?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([userId, brand360Id, featureName, periodStart])
+  @@index([userId])
+  @@map("feature_usages")
+}
+
+// ============================================
+// SUBSCRIPTION CHANGE TRACKING
+// ============================================
+
+model SubscriptionChange {
+  id                           String   @id @default(auto()) @map("_id") @db.ObjectId
+  subscriptionId               String   @db.ObjectId
+  userId                       String   @db.ObjectId
+
+  // Change details
+  changeType                   String   // "upgrade", "downgrade", "billing_cycle", "cancel", "reactivate"
+
+  // From state
+  fromTierId                   String?  @db.ObjectId
+  fromTierName                 String?
+  fromBillingCycle             String?
+  fromPrice                    Int?     // in cents
+
+  // To state
+  toTierId                     String?  @db.ObjectId
+  toTierName                   String?
+  toBillingCycle               String?
+  toPrice                      Int?     // in cents
+
+  // Proration
+  proratedAmount               Int?     // Amount credited/charged
+  prorationDate                DateTime?
+
+  // Timing
+  effectiveDate                DateTime // When change takes effect
+  isImmediate                  Boolean  @default(false)
+
+  // Status
+  status                       String   @default("pending") // "pending", "completed", "failed", "canceled"
+  failureReason                String?
+
+  // Stripe
+  stripeSubscriptionScheduleId String?
+  stripeProrationInvoiceId     String?
+
+  createdAt                    DateTime @default(now())
+  completedAt                  DateTime?
+
+  subscription                 UserSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+  @@index([userId])
+  @@index([status])
+  @@map("subscription_changes")
+}
+
+// Scheduled downgrades (execute at period end)
+model ScheduledChange {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  subscriptionId    String   @db.ObjectId @unique
+
+  // Scheduled change
+  newTierId         String   @db.ObjectId
+  newBillingCycle   String
+
+  // Schedule
+  scheduledFor      DateTime
+
+  // Status
+  status            String   @default("scheduled") // "scheduled", "executed", "canceled"
+
+  createdAt         DateTime @default(now())
+
+  subscription      UserSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([scheduledFor])
+  @@index([status])
+  @@map("scheduled_changes")
 }

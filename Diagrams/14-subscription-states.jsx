@@ -1,0 +1,125 @@
+import React, { useState } from 'react';
+
+const SubscriptionStatesDiagram = () => {
+  const [hoveredState, setHoveredState] = useState(null);
+
+  const states = [
+    { id: 'trialing', name: 'Trialing', color: '#3B82F6', x: 200, y: 100, desc: '15-day free trial' },
+    { id: 'active', name: 'Active', color: '#10B981', x: 400, y: 200, desc: 'Paid subscription' },
+    { id: 'past_due', name: 'Past Due', color: '#F59E0B', x: 600, y: 200, desc: 'Payment failed' },
+    { id: 'paused', name: 'Paused', color: '#8B5CF6', x: 400, y: 350, desc: 'User paused' },
+    { id: 'canceled', name: 'Canceled', color: '#EF4444', x: 600, y: 350, desc: 'Subscription ended' }
+  ];
+
+  const transitions = [
+    { from: 'trialing', to: 'active', label: 'Trial ends + Payment succeeds', color: '#10B981' },
+    { from: 'trialing', to: 'canceled', label: 'User cancels during trial', color: '#EF4444' },
+    { from: 'active', to: 'past_due', label: 'Payment fails', color: '#F59E0B' },
+    { from: 'active', to: 'canceled', label: 'User cancels', color: '#EF4444' },
+    { from: 'active', to: 'paused', label: 'User pauses', color: '#8B5CF6' },
+    { from: 'past_due', to: 'active', label: 'Payment succeeds', color: '#10B981' },
+    { from: 'past_due', to: 'canceled', label: 'Grace period expires', color: '#EF4444' },
+    { from: 'paused', to: 'active', label: 'User resumes', color: '#10B981' }
+  ];
+
+  const getState = (id) => states.find(s => s.id === id);
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0A0A12 0%, #12121F 50%, #0A0A12 100%)', padding: '40px 24px', fontFamily: "'Inter', -apple-system, sans-serif" }}>
+      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 8px 0' }}>Subscription State Machine</h1>
+        <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>Lifecycle states and transitions</p>
+      </div>
+
+      {/* State Diagram */}
+      <div style={{ maxWidth: '800px', margin: '0 auto 40px', position: 'relative', height: '450px', background: '#1A1F2E', borderRadius: '20px', border: '1px solid #334155' }}>
+        {/* Entry Point */}
+        <div style={{ position: 'absolute', left: '60px', top: '95px' }}>
+          <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#475569', marginBottom: '6px' }} />
+          <div style={{ color: '#64748B', fontSize: '10px', whiteSpace: 'nowrap' }}>User signs up</div>
+        </div>
+        <svg style={{ position: 'absolute', left: '80px', top: '105px' }} width="100" height="20">
+          <line x1="0" y1="10" x2="90" y2="10" stroke="#475569" strokeWidth="2" />
+          <polygon points="90,6 100,10 90,14" fill="#475569" />
+        </svg>
+
+        {/* States */}
+        {states.map((state) => (
+          <div
+            key={state.id}
+            onMouseEnter={() => setHoveredState(state.id)}
+            onMouseLeave={() => setHoveredState(null)}
+            style={{
+              position: 'absolute',
+              left: state.x,
+              top: state.y,
+              transform: 'translate(-50%, -50%)',
+              cursor: 'pointer'
+            }}
+          >
+            <div style={{
+              width: hoveredState === state.id ? '110px' : '100px',
+              height: hoveredState === state.id ? '110px' : '100px',
+              borderRadius: '50%',
+              background: `${state.color}15`,
+              border: `3px solid ${state.color}`,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s',
+              boxShadow: hoveredState === state.id ? `0 8px 32px ${state.color}40` : 'none'
+            }}>
+              <div style={{ color: state.color, fontSize: '13px', fontWeight: '700' }}>{state.name}</div>
+              {hoveredState === state.id && (
+                <div style={{ color: '#94A3B8', fontSize: '9px', marginTop: '4px' }}>{state.desc}</div>
+              )}
+            </div>
+          </div>
+        ))}
+
+        {/* Exit Point */}
+        <div style={{ position: 'absolute', right: '60px', bottom: '60px' }}>
+          <div style={{ width: '24px', height: '24px', borderRadius: '50%', border: '3px solid #EF4444', background: '#EF444420' }} />
+        </div>
+      </div>
+
+      {/* Transitions Table */}
+      <div style={{ maxWidth: '800px', margin: '0 auto', background: '#1A1F2E', borderRadius: '16px', padding: '20px', border: '1px solid #334155' }}>
+        <div style={{ color: '#94A3B8', fontSize: '11px', fontWeight: '600', letterSpacing: '1px', marginBottom: '14px' }}>STATE TRANSITIONS</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {transitions.map((t, idx) => {
+            const fromState = getState(t.from);
+            const toState = getState(t.to);
+            return (
+              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: '#0F172A', borderRadius: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '100px' }}>
+                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: fromState.color }} />
+                  <span style={{ color: fromState.color, fontSize: '12px', fontWeight: '600' }}>{fromState.name}</span>
+                </div>
+                <svg width="24" height="16" viewBox="0 0 24 16"><line x1="0" y1="8" x2="18" y2="8" stroke={t.color} strokeWidth="2" /><polygon points="18,4 24,8 18,12" fill={t.color} /></svg>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '100px' }}>
+                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: toState.color }} />
+                  <span style={{ color: toState.color, fontSize: '12px', fontWeight: '600' }}>{toState.name}</span>
+                </div>
+                <span style={{ color: '#94A3B8', fontSize: '11px', marginLeft: 'auto' }}>{t.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* State Legend */}
+      <div style={{ maxWidth: '800px', margin: '24px auto 0', display: 'flex', justifyContent: 'center', gap: '24px', flexWrap: 'wrap' }}>
+        {states.map((state) => (
+          <div key={state.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: `${state.color}30`, border: `2px solid ${state.color}` }} />
+            <span style={{ color: '#94A3B8', fontSize: '12px' }}>{state.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default SubscriptionStatesDiagram;

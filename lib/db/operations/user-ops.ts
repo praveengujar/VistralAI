@@ -9,24 +9,41 @@ export const createUser = async (
   password: string,
   accountType: User['accountType']
 ) => {
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const user = await prisma.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-      accountType: accountType as any,
-    },
+  // Check if user already exists
+  const existingUser = await prisma.user.findUnique({
+    where: { email },
   });
 
-  return {
-    id: user.id,
-    email: user.email,
-    password: user.password,
-    accountType: user.accountType as User['accountType'],
-    createdAt: user.createdAt,
-    subscription: user.subscription as User['subscription'],
-  };
+  if (existingUser) {
+    throw new Error('EMAIL_EXISTS');
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  try {
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        accountType: accountType as any,
+      },
+    });
+
+    return {
+      id: user.id,
+      email: user.email,
+      password: user.password,
+      accountType: user.accountType as User['accountType'],
+      createdAt: user.createdAt,
+      subscription: user.subscription as User['subscription'],
+    };
+  } catch (error: any) {
+    // Handle Prisma unique constraint error (race condition)
+    if (error.code === 'P2002') {
+      throw new Error('EMAIL_EXISTS');
+    }
+    throw error;
+  }
 };
 
 export const getUserByEmail = async (email: string) => {

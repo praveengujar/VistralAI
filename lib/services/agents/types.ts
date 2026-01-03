@@ -297,6 +297,7 @@ export interface MagicImportResult {
     brandIdentity: boolean;
     competitors: number;
     products: number;
+    personas: number;
   };
   stages: MagicImportStage[];
   errors: string[];

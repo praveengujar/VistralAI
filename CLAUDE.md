@@ -12,15 +12,19 @@ npm run dev
 ```
 lib/db/operations/    - Database operations (10 files, includes review-website-ops.ts)
 lib/cache/            - Redis caching layer
-lib/realtime/         - WebSocket support
-lib/query/            - React Query hooks (hooks.ts, audienceHooks.ts)
+lib/realtime/         - WebSocket support (includes onboarding-events.ts)
+lib/query/            - React Query hooks (hooks.ts, audienceHooks.ts, onboardingHooks.ts)
 lib/api/              - API middleware
-lib/hooks/            - Performance hooks
+lib/hooks/            - Performance hooks (includes useOnboardingSocket.ts)
 lib/utils/            - Lazy loading utilities
+lib/config/           - Config files (pricing.ts, onboarding.ts, features.ts)
+lib/services/onboarding/ - OnboardingService.ts (session management)
 components/ui/        - State components (EmptyState, LoadingState, ErrorState, DataWrapper)
 components/audience/  - PersonaCard, PersonaForm
 components/positioning/ - PositioningStatement, ValuePropositionCards, ProofPointsList
 components/aeo/       - ReviewSiteSelector, CategoryMappingManager
+components/onboarding/unified/ - Unified onboarding flow components
+components/payments/  - PaymentForm, ExpressCheckout, PricingPage
 lib/services/         - ReviewWebsiteService.ts (review site integration)
 ```
 
@@ -159,6 +163,114 @@ audienceQueryKeys.audience(brand360Id)
 audienceQueryKeys.personas(brand360Id)
 audienceQueryKeys.positioning(brand360Id)
 ```
+
+---
+
+## Unified Onboarding Flow
+
+### Flow: Brand → Plan → Payment → Scan → Complete
+
+```
+Step 1: Brand Setup     → Enter website URL, Magic Import runs
+Step 2: Choose Plan     → Select tier (Monitor/Growth/Dominance) + billing cycle
+Step 3: Payment         → Add payment method, start 15-day trial
+Step 4: First Scan      → Run initial perception scan (optional)
+Step 5: Complete        → Redirect to dashboard
+```
+
+### Onboarding Components (`components/onboarding/unified/`)
+| Component | Purpose |
+|-----------|---------|
+| `OnboardingLayout` | Step progress bar, navigation |
+| `BrandStep` | Website URL input + Magic Import progress |
+| `PlanStep` | Tier selection with billing toggle |
+| `PaymentStep` | Stripe PaymentElement integration |
+| `ScanStep` | First perception scan (optional) |
+| `CompleteStep` | Success state + dashboard redirect |
+
+### Onboarding Service (`lib/services/onboarding/`)
+| Method | Purpose |
+|--------|---------|
+| `getOrCreateSession(userId)` | Get or create onboarding session |
+| `completeStep(sessionId, step, data)` | Mark step complete, advance |
+| `skipStep(sessionId, step)` | Skip optional step |
+| `markComplete(userId)` | Finalize onboarding |
+| `getResumeState(userId)` | Get resume point + progress |
+
+### Onboarding API Routes
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/api/onboarding/session` | GET/POST | Session management |
+| `/api/onboarding/brand` | POST | Start Magic Import |
+| `/api/onboarding/plan` | POST | Save plan selection |
+| `/api/onboarding/payment` | POST | Create subscription |
+| `/api/onboarding/complete` | POST | Finalize onboarding |
+
+### Onboarding Hooks (`lib/query/onboardingHooks.ts`)
+| Hook | Purpose |
+|------|---------|
+| `useOnboardingSession()` | Fetch current session |
+| `useCompleteOnboarding()` | Mutation to finalize |
+| `useMagicImportProgress(sessionId)` | WebSocket progress |
+
+### Magic Import Stages
+| Stage | Progress | Description |
+|-------|----------|-------------|
+| crawler | 0-20% | Web crawling + Schema.org |
+| vibecheck | 20-40% | Brand personality analysis |
+| competitors | 40-55% | Competitor discovery |
+| products | 55-70% | Product extraction |
+| audience | 70-90% | Personas + positioning |
+| scoring | 90-100% | Profile completeness |
+
+---
+
+## Payments & Subscriptions
+
+### Pricing Tiers (lib/config/pricing.ts)
+| Tier | Monthly | Yearly | Discount |
+|------|---------|--------|----------|
+| Monitor | $99 | $1,045 | 12% |
+| Growth | $299 | $3,050 | 15% |
+| Dominance | $999 | $9,830 | 18% |
+
+Trial period: 15 days on all plans.
+
+### Payment Services (lib/services/payments/)
+| Service | Purpose |
+|---------|---------|
+| `StripeService.ts` | Stripe API integration, subscriptions, wallets |
+| `PayPalService.ts` | PayPal subscription integration |
+| `SubscriptionService.ts` | Subscription management logic |
+| `SubscriptionManagementService.ts` | Upgrades, downgrades, cancellation |
+
+### Payment Components (components/payments/)
+| Component | Purpose |
+|-----------|---------|
+| `PaymentForm.tsx` | Main payment form with Stripe Elements |
+| `ExpressCheckout.tsx` | Apple Pay / Google Pay buttons |
+| `PricingPage.tsx` | Tier selection with billing toggle |
+
+### Environment Variables
+```env
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+### Stripe Wallet Support
+- Apple Pay (via `automatic_payment_methods`)
+- Google Pay (via `automatic_payment_methods`)
+- Link (Stripe's one-click checkout)
+
+### Payment API Routes
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/api/payments/stripe/create-setup-intent` | POST | Create SetupIntent for payment method |
+| `/api/subscription` | POST | Create subscription with trial |
+| `/api/subscription` | GET | Get current subscription |
+| `/api/subscription` | DELETE | Cancel subscription |
+| `/api/webhooks/stripe` | POST | Handle Stripe webhook events |
 
 ---
 

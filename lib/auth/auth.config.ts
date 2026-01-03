@@ -100,9 +100,16 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.accountType = (user as any).accountType || 'brand';
         token.provider = account?.provider;
+
+        // Check onboarding status on initial sign in
+        const onboardingSession = await prisma.onboardingSession.findUnique({
+          where: { userId: user.id },
+          select: { status: true },
+        });
+        token.onboardingCompleted = onboardingSession?.status === 'completed';
       }
 
-      // Session update (e.g., after profile update)
+      // Session update (e.g., after profile update or onboarding complete)
       if (trigger === 'update') {
         // Re-fetch user data from database
         const dbUser = await prisma.user.findUnique({
@@ -113,6 +120,9 @@ export const authOptions: NextAuthOptions = {
               include: { organization: true },
               take: 1,
             },
+            onboardingSession: {
+              select: { status: true },
+            },
           },
         });
 
@@ -120,6 +130,7 @@ export const authOptions: NextAuthOptions = {
           token.name = dbUser.name;
           token.email = dbUser.email;
           token.accountType = dbUser.accountType;
+          token.onboardingCompleted = dbUser.onboardingSession?.status === 'completed';
 
           // Add organization context if user belongs to one
           if (dbUser.memberships.length > 0) {
@@ -138,6 +149,7 @@ export const authOptions: NextAuthOptions = {
       if (token && session.user) {
         session.user.id = token.id as string;
         session.user.accountType = token.accountType as string;
+        (session.user as any).onboardingCompleted = token.onboardingCompleted ?? false;
 
         // Add organization context to session
         if (token.organizationId) {
