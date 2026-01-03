@@ -6,3 +6,4 @@ export { PaymentStep } from './PaymentStep';
 export { BrandStep } from './BrandStep';
 export { BuildProfileStep } from './BuildProfileStep';
 export { CompleteStep } from './CompleteStep';
+export { InvitedUserWelcome } from './InvitedUserWelcome';

@@ -272,8 +272,8 @@ class OnboardingService {
       throw new Error('Session not found');
     }
 
-    // Validate all required steps are complete
-    const requiredSteps = ONBOARDING_STEPS.filter(s => !s.optional);
+    // Validate all required steps are complete (steps 1-4, not step 5 "Complete" which is this step)
+    const requiredSteps = ONBOARDING_STEPS.filter(s => !s.optional && s.id < 5);
     const missingSteps = requiredSteps.filter(
       s => !session.completedSteps.includes(s.id)
     );

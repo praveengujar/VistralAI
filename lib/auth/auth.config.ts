@@ -101,12 +101,32 @@ export const authOptions: NextAuthOptions = {
         token.accountType = (user as any).accountType || 'brand';
         token.provider = account?.provider;
 
-        // Check onboarding status on initial sign in
-        const onboardingSession = await prisma.onboardingSession.findUnique({
-          where: { userId: user.id },
-          select: { status: true },
+        // Fetch user data including onboarding and organization membership
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          include: {
+            memberships: {
+              where: { status: 'ACTIVE' },
+              include: { organization: true },
+              take: 1,
+            },
+            onboardingSession: {
+              select: { status: true },
+            },
+          },
         });
-        token.onboardingCompleted = onboardingSession?.status === 'completed';
+
+        if (dbUser) {
+          token.onboardingCompleted = dbUser.onboardingSession?.status === 'completed';
+
+          // Add organization context if user belongs to one
+          if (dbUser.memberships.length > 0) {
+            const membership = dbUser.memberships[0];
+            token.organizationId = membership.organizationId;
+            token.organizationName = membership.organization.name;
+            token.organizationRole = membership.role;
+          }
+        }
       }
 
       // Session update (e.g., after profile update or onboarding complete)

@@ -109,26 +109,49 @@ export async function POST(request: NextRequest) {
     // Get or create organization for this user
     let organization = await prisma.organization.findFirst({
       where: {
-        members: {
+        memberships: {
           some: { userId: session.user.id },
         },
       },
     });
 
     if (!organization) {
-      // Create organization for user
-      organization = await prisma.organization.create({
-        data: {
-          name: onboardingSession.brandName,
-          slug: onboardingSession.brandName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-          members: {
-            create: {
-              userId: session.user.id,
-              role: 'owner',
+      // Generate unique slug with random suffix to avoid collisions
+      const baseSlug = onboardingSession.brandName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const uniqueSlug = `${baseSlug}-${Date.now().toString(36)}`;
+
+      try {
+        // Create organization for user
+        organization = await prisma.organization.create({
+          data: {
+            name: onboardingSession.brandName,
+            slug: uniqueSlug,
+            memberships: {
+              create: {
+                userId: session.user.id,
+                role: 'ADMIN',
+              },
             },
           },
-        },
-      });
+        });
+      } catch (createError: unknown) {
+        // Handle race condition - organization might have been created by parallel request
+        if (createError && typeof createError === 'object' && 'code' in createError && createError.code === 'P2002') {
+          // Re-fetch the organization
+          organization = await prisma.organization.findFirst({
+            where: {
+              memberships: {
+                some: { userId: session.user.id },
+              },
+            },
+          });
+          if (!organization) {
+            throw new Error('Failed to create or find organization');
+          }
+        } else {
+          throw createError;
+        }
+      }
     }
 
     // Execute Magic Import

@@ -154,8 +154,50 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Skip payment for testing (development only)
+    if (action === 'skip_payment') {
+      if (process.env.NODE_ENV !== 'development') {
+        return NextResponse.json(
+          { success: false, error: 'Skip payment is only available in development' },
+          { status: 403 }
+        );
+      }
+
+      // Complete the payment step (step 3) without actual payment
+      // Note: subscriptionId must be undefined (not a string) as it's a @db.ObjectId field
+      const result = await onboardingService.completeStep(
+        onboardingSession.id,
+        3,
+        {
+          paymentMethodId: 'test_skip_payment',
+          stripeCustomerId: 'test_skip_customer',
+          // subscriptionId is omitted - it's an ObjectId field and we don't have a real subscription
+        }
+      );
+
+      // Log the event
+      await onboardingService.logEvent(onboardingSession.id, 'step_completed', {
+        step: 3,
+        stepName: 'payment',
+        skipped: true,
+        reason: 'Testing mode - payment skipped',
+      });
+
+      console.log('[Payment] Skipped payment for testing - step 3 marked complete');
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          session: result.session,
+          nextStep: result.nextStep,
+          skipped: true,
+          message: 'Payment skipped for testing',
+        },
+      });
+    }
+
     return NextResponse.json(
-      { success: false, error: 'Invalid action. Use: create_setup_intent, confirm_payment' },
+      { success: false, error: 'Invalid action. Use: create_setup_intent, confirm_payment, skip_payment' },
       { status: 400 }
     );
   } catch (error) {
