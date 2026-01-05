@@ -38,12 +38,12 @@
     /* ---- Border Colors ---- */
     --border: 226 232 240; /* #e2e8f0 */
     --border-secondary: 203 213 225; /* #cbd5e1 */
-    --border-focus: 99 102 241; /* #6366f1 */
+    --border-focus: 16 185 129; /* #10b981 - emerald-500 */
 
-    /* ---- Primary Brand Colors (Indigo) ---- */
-    --primary: 99 102 241; /* #6366f1 */
+    /* ---- Primary Brand Colors (Emerald) ---- */
+    --primary: 16 185 129; /* #10b981 - emerald-500 */
     --primary-foreground: 255 255 255; /* #ffffff */
-    --primary-hover: 79 70 229; /* #4f46e5 */
+    --primary-hover: 5 150 105; /* #059669 - emerald-600 */
 
     /* ---- Status Colors (Accessible) ---- */
     /* Success - Green */
@@ -72,7 +72,7 @@
 
     /* ---- Chart Colors (IBM Color Blind Safe Palette) ---- */
     --chart-1: 100 143 255; /* #648fff - Blue */
-    --chart-2: 120 94 240; /* #785ef0 - Purple */
+    --chart-2: 6 182 212; /* #06b6d4 - Cyan */
     --chart-3: 220 38 127; /* #dc267f - Magenta */
     --chart-4: 254 97 0; /* #fe6100 - Orange */
     --chart-5: 255 176 0; /* #ffb000 - Gold */
@@ -89,7 +89,7 @@
     /* ---- Input Colors ---- */
     --input: 255 255 255; /* #ffffff */
     --input-border: 203 213 225; /* #cbd5e1 */
-    --input-focus: 99 102 241; /* #6366f1 */
+    --input-focus: 16 185 129; /* #10b981 - emerald-500 */
     --input-placeholder: 148 163 184; /* #94a3b8 */
 
     /* ---- Sidebar Colors ---- */
@@ -97,10 +97,10 @@
     --sidebar-foreground: 51 65 85; /* #334155 */
     --sidebar-border: 226 232 240; /* #e2e8f0 */
     --sidebar-hover: 241 245 249; /* #f1f5f9 */
-    --sidebar-active: 238 242 255; /* #eef2ff - primary-50 */
+    --sidebar-active: 236 253 245; /* #ecfdf5 - emerald-50 */
 
     /* ---- Misc ---- */
-    --ring: 99 102 241; /* #6366f1 */
+    --ring: 16 185 129; /* #10b981 - emerald-500 */
     --radius: 0.5rem;
   }
 
@@ -130,12 +130,12 @@
     /* ---- Border Colors ---- */
     --border: 56 68 77; /* #38444d - Twitter's border */
     --border-secondary: 70 85 96; /* #465560 */
-    --border-focus: 29 161 242; /* #1da1f2 - Twitter blue */
+    --border-focus: 52 211 153; /* #34d399 - emerald-400 */
 
-    /* ---- Primary Brand Colors (Twitter Blue adjusted) ---- */
-    --primary: 129 140 248; /* #818cf8 */
+    /* ---- Primary Brand Colors (Emerald for dim mode) ---- */
+    --primary: 52 211 153; /* #34d399 - emerald-400 */
     --primary-foreground: 21 32 43; /* #15202B */
-    --primary-hover: 165 180 252; /* #a5b4fc */
+    --primary-hover: 110 231 183; /* #6ee7b7 - emerald-300 */
 
     /* ---- Status Colors (Adjusted for Evening mode) ---- */
     --success: 52 211 153; /* #34d399 */
@@ -160,7 +160,7 @@
 
     /* ---- Chart Colors ---- */
     --chart-1: 129 140 248;
-    --chart-2: 167 139 250;
+    --chart-2: 34 211 238; /* #22d3ee - cyan-400 */
     --chart-3: 244 114 182;
     --chart-4: 251 146 60;
     --chart-5: 252 211 77;
@@ -177,7 +177,7 @@
     /* ---- Input Colors ---- */
     --input: 30 42 56; /* #1e2a38 */
     --input-border: 56 68 77; /* #38444d */
-    --input-focus: 129 140 248; /* #818cf8 */
+    --input-focus: 52 211 153; /* #34d399 - emerald-400 */
     --input-placeholder: 136 153 166; /* #8899a6 */
 
     /* ---- Sidebar Colors ---- */
@@ -185,10 +185,10 @@
     --sidebar-foreground: 217 228 232; /* #d9e4e8 */
     --sidebar-border: 56 68 77; /* #38444d */
     --sidebar-hover: 45 62 80; /* #2d3e50 */
-    --sidebar-active: 30 58 138; /* #1e3a8a */
+    --sidebar-active: 6 78 59; /* #064e3b - emerald-900 */
 
     /* ---- Misc ---- */
-    --ring: 129 140 248; /* #818cf8 */
+    --ring: 52 211 153; /* #34d399 - emerald-400 */
   }
 
   /* ========================================
@@ -218,12 +218,12 @@
     /* ---- Border Colors ---- */
     --border: 47 51 54; /* #2f3336 - Night mode border */
     --border-secondary: 62 65 68; /* #3e4144 */
-    --border-focus: 129 140 248; /* #818cf8 */
+    --border-focus: 52 211 153; /* #34d399 - emerald-400 */
 
-    /* ---- Primary Brand Colors ---- */
-    --primary: 129 140 248; /* #818cf8 */
+    /* ---- Primary Brand Colors (Emerald for dark mode) ---- */
+    --primary: 52 211 153; /* #34d399 - emerald-400 */
     --primary-foreground: 0 0 0; /* #000000 */
-    --primary-hover: 165 180 252; /* #a5b4fc */
+    --primary-hover: 110 231 183; /* #6ee7b7 - emerald-300 */
 
     /* ---- Status Colors ---- */
     --success: 52 211 153; /* #34d399 */
@@ -248,7 +248,7 @@
 
     /* ---- Chart Colors ---- */
     --chart-1: 129 140 248;
-    --chart-2: 167 139 250;
+    --chart-2: 34 211 238; /* #22d3ee - cyan-400 */
     --chart-3: 244 114 182;
     --chart-4: 251 146 60;
     --chart-5: 252 211 77;
@@ -265,7 +265,7 @@
     /* ---- Input Colors ---- */
     --input: 15 15 15; /* #0f0f0f */
     --input-border: 47 51 54; /* #2f3336 */
-    --input-focus: 129 140 248; /* #818cf8 */
+    --input-focus: 52 211 153; /* #34d399 - emerald-400 */
     --input-placeholder: 113 118 123; /* #71767b */
 
     /* ---- Sidebar Colors ---- */
@@ -273,10 +273,10 @@
     --sidebar-foreground: 217 217 217; /* #d9d9d9 */
     --sidebar-border: 47 51 54; /* #2f3336 */
     --sidebar-hover: 32 32 32; /* #202020 */
-    --sidebar-active: 30 58 138; /* #1e3a8a */
+    --sidebar-active: 6 78 59; /* #064e3b - emerald-900 */
 
     /* ---- Misc ---- */
-    --ring: 129 140 248; /* #818cf8 */
+    --ring: 52 211 153; /* #34d399 - emerald-400 */
   }
 
   /* ========================================
@@ -950,7 +950,7 @@ textarea::placeholder {
 
   /* Ensure colored headers print correctly */
   .bg-brand-primary {
-    background-color: #6366f1 !important;
+    background-color: #10b981 !important;
     color: white !important;
   }
 

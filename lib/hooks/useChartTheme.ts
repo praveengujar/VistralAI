@@ -84,12 +84,12 @@ export function useChartTheme(): ChartTheme {
 
         // Data colors (brightened for dim mode)
         colors: [
-          '#818cf8', // Indigo
-          '#a78bfa', // Purple
+          '#34d399', // Emerald
+          '#22d3ee', // Cyan
           '#f472b6', // Pink
           '#fb923c', // Orange
           '#fcd34d', // Amber
-          '#34d399', // Emerald
+          '#818cf8', // Indigo
           '#38bdf8', // Sky
           '#facc15', // Yellow
         ],
@@ -147,12 +147,12 @@ export function useChartTheme(): ChartTheme {
 
         // Data colors (brightened for dark mode - IBM Color Blind Safe)
         colors: [
-          '#818cf8', // Indigo
-          '#a78bfa', // Purple
+          '#34d399', // Emerald
+          '#22d3ee', // Cyan
           '#f472b6', // Pink
           '#fb923c', // Orange
           '#fcd34d', // Amber
-          '#34d399', // Emerald
+          '#818cf8', // Indigo
           '#38bdf8', // Sky
           '#facc15', // Yellow
         ],
@@ -209,12 +209,12 @@ export function useChartTheme(): ChartTheme {
 
       // Data colors (IBM Color Blind Safe Palette)
       colors: [
-        '#648fff', // Blue
-        '#785ef0', // Purple
+        '#10b981', // Emerald
+        '#06b6d4', // Cyan
         '#dc267f', // Magenta
         '#fe6100', // Orange
         '#ffb000', // Gold
-        '#009e73', // Teal
+        '#648fff', // Blue
         '#56b4e9', // Sky Blue
         '#e69f00', // Amber
       ],
@@ -241,7 +241,7 @@ export function useChartTheme(): ChartTheme {
         chatgpt: '#10a37f',
         claude: '#d97706',
         gemini: '#4285f4',
-        perplexity: '#6366f1',
+        perplexity: '#1fb8cd',
       },
     };
   }, [resolvedTheme]);
