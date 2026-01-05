@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VistralAI - Payment & Subscription Flow</title>
+  <title>VistralAI - Payment Flow</title>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -20,127 +20,159 @@
 
 
 const Component = () => {
-  const [activePhase, setActivePhase] = useState('setup');
+  const [activePhase, setActivePhase] = useState('all');
 
-  const participants = [
-    { id: 'user', name: 'User', color: '#3B82F6', icon: '👤' },
-    { id: 'form', name: 'PaymentForm', color: '#8B5CF6', icon: '💳' },
-    { id: 'api', name: 'Next.js API', color: '#10B981', icon: '⚡' },
-    { id: 'stripe', name: 'Stripe', color: '#6366F1', icon: '💰' },
-    { id: 'db', name: 'MongoDB', color: '#22C55E', icon: '🍃' }
+  const phases = [
+    { id: 'setup', name: 'Setup Intent', color: '#3B82F6' },
+    { id: 'confirm', name: 'Payment Confirm', color: '#F59E0B' },
+    { id: 'subscription', name: 'Subscription', color: '#22C55E' }
   ];
 
-  const phases = {
-    setup: {
-      name: 'Setup Intent',
-      color: '#3B82F6',
-      steps: [
-        { from: 0, to: 1, label: 'Select plan & billing cycle' },
-        { from: 1, to: 2, label: 'POST /api/payments/stripe/create-setup-intent' },
-        { from: 2, to: 3, label: 'createSetupIntent()' },
-        { from: 3, to: 2, label: 'clientSecret' },
-        { from: 2, to: 1, label: '{ clientSecret }' },
-        { from: 1, to: 1, label: 'Initialize PaymentElement' }
-      ]
-    },
-    payment: {
-      name: 'Payment Confirmation',
-      color: '#F59E0B',
-      steps: [
-        { from: 0, to: 1, label: 'Enter payment / Apple Pay' },
-        { from: 1, to: 3, label: 'confirmSetup(elements)' },
-        { from: 3, to: 1, label: 'setupIntent (succeeded)' }
-      ]
-    },
-    subscription: {
-      name: 'Subscription Creation',
-      color: '#10B981',
-      steps: [
-        { from: 1, to: 2, label: 'POST /api/subscription' },
-        { from: 2, to: 3, label: 'createSubscription(trial: 15 days)' },
-        { from: 3, to: 2, label: 'subscription object' },
-        { from: 2, to: 4, label: 'Create UserSubscription' },
-        { from: 4, to: 2, label: 'saved' },
-        { from: 2, to: 1, label: '{ success: true }' },
-        { from: 1, to: 0, label: 'Redirect to success' }
-      ]
-    }
+  const participants = [
+    { id: 'user', name: 'User', icon: '👤' },
+    { id: 'form', name: 'PaymentForm', icon: '📝' },
+    { id: 'api', name: 'Next.js API', icon: '▲' },
+    { id: 'stripe', name: 'Stripe', icon: '💳' },
+    { id: 'db', name: 'MongoDB', icon: '🍃' }
+  ];
+
+  const setupSteps = [
+    { from: 0, to: 1, label: 'Select plan & billing cycle', color: '#3B82F6' },
+    { from: 1, to: 2, label: 'POST /api/payments/stripe/create-setup-intent', color: '#3B82F6' },
+    { from: 2, to: 3, label: 'createSetupIntent()', color: '#3B82F6' },
+    { from: 3, to: 2, label: 'clientSecret', color: '#22C55E' },
+    { from: 2, to: 1, label: '{ clientSecret }', color: '#22C55E' },
+    { from: 1, to: 1, label: 'Initialize PaymentElement', color: '#8B5CF6' }
+  ];
+
+  const confirmSteps = [
+    { from: 0, to: 1, label: 'Enter payment / Tap Apple Pay', color: '#F59E0B' },
+    { from: 1, to: 3, label: 'confirmSetup(elements)', color: '#F59E0B' },
+    { from: 3, to: 1, label: 'setupIntent (succeeded)', color: '#22C55E' }
+  ];
+
+  const subscriptionSteps = [
+    { from: 1, to: 2, label: 'POST /api/subscription', color: '#22C55E' },
+    { from: 2, to: 3, label: 'createSubscription(trial: 15 days)', color: '#22C55E' },
+    { from: 3, to: 2, label: 'subscription object', color: '#22C55E' },
+    { from: 2, to: 4, label: 'Create UserSubscription', color: '#22C55E' },
+    { from: 4, to: 2, label: 'saved', color: '#22C55E' },
+    { from: 2, to: 1, label: '{ success: true }', color: '#22C55E' },
+    { from: 1, to: 0, label: 'Redirect to success page', color: '#22C55E' }
+  ];
+
+  const getSteps = () => {
+    if (activePhase === 'setup') return setupSteps;
+    if (activePhase === 'confirm') return confirmSteps;
+    if (activePhase === 'subscription') return subscriptionSteps;
+    return [...setupSteps, ...confirmSteps, ...subscriptionSteps];
   };
 
-  const currentPhase = phases[activePhase];
-
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0F0F1A 0%, #1A1A2E 50%, #0F0F1A 100%)', padding: '40px 24px', fontFamily: "'Inter', -apple-system, sans-serif" }}>
-      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 8px 0' }}>Payment & Subscription Flow</h1>
-        <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>Stripe integration with 15-day trial</p>
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '40px' }}>
-        {Object.entries(phases).map(([key, phase]) => (
-          <button key={key} onClick={() => setActivePhase(key)} style={{ padding: '12px 24px', borderRadius: '8px', border: activePhase === key ? `2px solid ${phase.color}` : '2px solid #334155', background: activePhase === key ? `${phase.color}20` : 'transparent', color: activePhase === key ? phase.color : '#94A3B8', fontWeight: '600', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s' }}>{phase.name}</button>
-        ))}
-      </div>
-
-      <div style={{ maxWidth: '1100px', margin: '0 auto 24px', display: 'grid', gridTemplateColumns: `repeat(${participants.length}, 1fr)`, gap: '12px' }}>
-        {participants.map((p) => (
-          <div key={p.id} style={{ textAlign: 'center', padding: '14px 8px', background: `${p.color}15`, borderRadius: '12px', border: `1px solid ${p.color}40` }}>
-            <div style={{ fontSize: '20px', marginBottom: '6px' }}>{p.icon}</div>
-            <div style={{ color: p.color, fontWeight: '600', fontSize: '11px' }}>{p.name}</div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative', paddingTop: '20px' }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'grid', gridTemplateColumns: `repeat(${participants.length}, 1fr)`, gap: '12px', pointerEvents: 'none' }}>
-          {participants.map((p, i) => (<div key={i} style={{ display: 'flex', justifyContent: 'center' }}><div style={{ width: '2px', height: '100%', background: `linear-gradient(to bottom, ${p.color}60, ${p.color}20)`, borderRadius: '1px' }} /></div>))}
-        </div>
-
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          {currentPhase.steps.map((step, idx) => {
-            const fromPos = (step.from / (participants.length - 1)) * 100;
-            const toPos = (step.to / (participants.length - 1)) * 100;
-            const isLeftToRight = step.to > step.from;
-            const isSameColumn = step.from === step.to;
-
-            return (
-              <div key={idx} style={{ marginBottom: '14px', position: 'relative', height: isSameColumn ? '44px' : '36px' }}>
-                {isSameColumn ? (
-                  <div style={{ position: 'absolute', left: `calc(${fromPos}% + 16px)`, top: '6px', width: '50px', height: '28px', border: `2px solid ${currentPhase.color}`, borderLeft: 'none', borderRadius: '0 8px 8px 0' }}>
-                    <div style={{ position: 'absolute', left: '60px', top: '50%', transform: 'translateY(-50%)', whiteSpace: 'nowrap', background: '#1A1A2E', padding: '3px 10px', borderRadius: '4px', border: `1px solid ${currentPhase.color}30` }}>
-                      <span style={{ color: currentPhase.color, fontSize: '10px', fontWeight: '500' }}>{step.label}</span>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div style={{ position: 'absolute', left: `calc(${Math.min(fromPos, toPos)}% + 6px)`, right: `calc(${100 - Math.max(fromPos, toPos)}% + 6px)`, top: '50%', height: '2px', background: currentPhase.color, transform: 'translateY(-50%)' }}>
-                      <div style={{ position: 'absolute', [isLeftToRight ? 'right' : 'left']: '-5px', top: '-4px', width: 0, height: 0, borderTop: '5px solid transparent', borderBottom: '5px solid transparent', [isLeftToRight ? 'borderLeft' : 'borderRight']: `7px solid ${currentPhase.color}` }} />
-                    </div>
-                    <div style={{ position: 'absolute', left: `${(fromPos + toPos) / 2}%`, top: '-6px', transform: 'translateX(-50%)', background: '#1A1A2E', padding: '2px 8px', borderRadius: '4px', whiteSpace: 'nowrap', border: `1px solid ${currentPhase.color}30` }}>
-                      <span style={{ color: currentPhase.color, fontSize: '10px', fontWeight: '500' }}>{step.label}</span>
-                    </div>
-                  </>
-                )}
-              </div>
-            );
-          })}
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0C0F1A 0%, #131825 50%, #0C0F1A 100%)', padding: '24px 16px', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 6px 0' }}>VistralAI Payment Flow</h1>
+        <p style={{ fontSize: '12px', color: '#64748B', margin: '0 0 16px 0' }}>Stripe Payment Integration</p>
+        
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+          <button onClick={() => setActivePhase('all')} style={{ background: activePhase === 'all' ? '#8B5CF620' : '#1A1F2E', border: `2px solid ${activePhase === 'all' ? '#8B5CF6' : '#334155'}`, borderRadius: '8px', padding: '8px 16px', cursor: 'pointer' }}>
+            <span style={{ color: activePhase === 'all' ? '#8B5CF6' : '#94A3B8', fontSize: '11px', fontWeight: '600' }}>All Phases</span>
+          </button>
+          {phases.map((phase) => (
+            <button key={phase.id} onClick={() => setActivePhase(phase.id)} style={{ background: activePhase === phase.id ? `${phase.color}20` : '#1A1F2E', border: `2px solid ${activePhase === phase.id ? phase.color : '#334155'}`, borderRadius: '8px', padding: '8px 16px', cursor: 'pointer' }}>
+              <span style={{ color: activePhase === phase.id ? phase.color : '#94A3B8', fontSize: '11px', fontWeight: '600' }}>{phase.name}</span>
+            </button>
+          ))}
         </div>
       </div>
 
-      <div style={{ maxWidth: '800px', margin: '48px auto 0', background: '#1A1F2E', borderRadius: '12px', padding: '20px', border: '1px solid #334155' }}>
-        <div style={{ color: '#94A3B8', fontSize: '11px', fontWeight: '600', letterSpacing: '1px', marginBottom: '14px' }}>KEY FEATURES</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-          {[
-            { icon: '🔒', title: 'Secure Setup', desc: 'SetupIntent for card storage' },
-            { icon: '🍎', title: 'Apple Pay', desc: 'Native payment support' },
-            { icon: '⏱️', title: '15-Day Trial', desc: 'Free trial period' }
-          ].map((feature) => (
-            <div key={feature.title} style={{ background: '#0F172A', borderRadius: '8px', padding: '14px', textAlign: 'center' }}>
-              <div style={{ fontSize: '24px', marginBottom: '8px' }}>{feature.icon}</div>
-              <div style={{ color: '#E2E8F0', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>{feature.title}</div>
-              <div style={{ color: '#64748B', fontSize: '10px' }}>{feature.desc}</div>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        {/* Participants */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', marginBottom: '20px' }}>
+          {participants.map((p, idx) => (
+            <div key={p.id} style={{ background: '#1A1F2E', borderRadius: '8px', padding: '12px', textAlign: 'center', border: '1px solid #334155' }}>
+              <span style={{ fontSize: '24px' }}>{p.icon}</span>
+              <div style={{ color: '#E2E8F0', fontSize: '10px', fontWeight: '600' }}>{p.name}</div>
             </div>
           ))}
+        </div>
+
+        {/* Flow Phases */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {(activePhase === 'all' || activePhase === 'setup') && (
+            <div style={{ background: '#3B82F610', borderRadius: '12px', border: '2px solid #3B82F640', padding: '16px' }}>
+              <div style={{ color: '#3B82F6', fontSize: '11px', fontWeight: '700', marginBottom: '12px' }}>PHASE 1: Setup Intent Flow</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {setupSteps.map((step, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px', background: '#0F172A', borderRadius: '6px' }}>
+                    <div style={{ width: '24px', height: '24px', background: step.color, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '10px', fontWeight: '700' }}>{idx + 1}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ background: '#1E293B', color: '#94A3B8', fontSize: '9px', padding: '3px 8px', borderRadius: '4px' }}>{participants[step.from].name}</span>
+                      <svg width="20" height="10"><line x1="0" y1="5" x2="14" y2="5" stroke={step.color} strokeWidth="2" /><polygon points="14,2 20,5 14,8" fill={step.color} /></svg>
+                      <span style={{ background: '#1E293B', color: '#94A3B8', fontSize: '9px', padding: '3px 8px', borderRadius: '4px' }}>{participants[step.to].name}</span>
+                    </div>
+                    <span style={{ color: '#E2E8F0', fontSize: '10px', flex: 1 }}>{step.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {(activePhase === 'all' || activePhase === 'confirm') && (
+            <div style={{ background: '#F59E0B10', borderRadius: '12px', border: '2px solid #F59E0B40', padding: '16px' }}>
+              <div style={{ color: '#F59E0B', fontSize: '11px', fontWeight: '700', marginBottom: '12px' }}>PHASE 2: Payment Confirmation</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {confirmSteps.map((step, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px', background: '#0F172A', borderRadius: '6px' }}>
+                    <div style={{ width: '24px', height: '24px', background: step.color, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '10px', fontWeight: '700' }}>{idx + 1}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ background: '#1E293B', color: '#94A3B8', fontSize: '9px', padding: '3px 8px', borderRadius: '4px' }}>{participants[step.from].name}</span>
+                      <svg width="20" height="10"><line x1="0" y1="5" x2="14" y2="5" stroke={step.color} strokeWidth="2" /><polygon points="14,2 20,5 14,8" fill={step.color} /></svg>
+                      <span style={{ background: '#1E293B', color: '#94A3B8', fontSize: '9px', padding: '3px 8px', borderRadius: '4px' }}>{participants[step.to].name}</span>
+                    </div>
+                    <span style={{ color: '#E2E8F0', fontSize: '10px', flex: 1 }}>{step.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {(activePhase === 'all' || activePhase === 'subscription') && (
+            <div style={{ background: '#22C55E10', borderRadius: '12px', border: '2px solid #22C55E40', padding: '16px' }}>
+              <div style={{ color: '#22C55E', fontSize: '11px', fontWeight: '700', marginBottom: '12px' }}>PHASE 3: Subscription Creation</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {subscriptionSteps.map((step, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px', background: '#0F172A', borderRadius: '6px' }}>
+                    <div style={{ width: '24px', height: '24px', background: step.color, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '10px', fontWeight: '700' }}>{idx + 1}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ background: '#1E293B', color: '#94A3B8', fontSize: '9px', padding: '3px 8px', borderRadius: '4px' }}>{participants[step.from].name}</span>
+                      <svg width="20" height="10"><line x1="0" y1="5" x2="14" y2="5" stroke={step.color} strokeWidth="2" /><polygon points="14,2 20,5 14,8" fill={step.color} /></svg>
+                      <span style={{ background: '#1E293B', color: '#94A3B8', fontSize: '9px', padding: '3px 8px', borderRadius: '4px' }}>{participants[step.to].name}</span>
+                    </div>
+                    <span style={{ color: '#E2E8F0', fontSize: '10px', flex: 1 }}>{step.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Payment Methods */}
+        <div style={{ marginTop: '20px', background: '#1A1F2E', borderRadius: '12px', padding: '16px', border: '1px solid #334155' }}>
+          <div style={{ color: '#94A3B8', fontSize: '10px', fontWeight: '600', marginBottom: '12px' }}>SUPPORTED PAYMENT METHODS</div>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            {[
+              { name: 'Credit Card', icon: '💳' },
+              { name: 'Apple Pay', icon: '🍎' },
+              { name: 'Google Pay', icon: '🔵' },
+              { name: 'PayPal', icon: '🅿️' }
+            ].map((method) => (
+              <div key={method.name} style={{ background: '#0F172A', borderRadius: '8px', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid #334155' }}>
+                <span style={{ fontSize: '16px' }}>{method.icon}</span>
+                <span style={{ color: '#E2E8F0', fontSize: '10px', fontWeight: '500' }}>{method.name}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -56,9 +56,9 @@ flowchart TB
         E2["/api/onboarding/brand"]
         E3["/api/onboarding/plan"]
         E4["/api/onboarding/payment"]
-        E5["/api/onboarding/complete"]
-        E6["/api/onboarding/status"]
-        E7["/api/onboarding/analyze"]
+        E5["/api/onboarding/profile"]
+        E6["/api/onboarding/scan"]
+        E7["/api/onboarding/complete"]
     end
 
     subgraph Admin["Admin Routes"]
@@ -1205,13 +1205,10 @@ sequenceDiagram
 
     rect rgb(240, 248, 255)
         Note over U,DB: Step 1: Brand Setup
-        U->>B: Enter website URL
+        U->>B: Enter website URL + brand name
         B->>API: POST /api/onboarding/brand
-        API->>MI: Start Magic Import
-        MI-->>B: WebSocket: progress updates
-        MI->>DB: Create Brand360Profile
-        MI-->>B: WebSocket: complete
-        B->>API: Mark step 1 complete
+        API->>DB: Save brand info to session
+        API-->>B: Step 1 complete
     end
 
     rect rgb(255, 248, 240)
@@ -1238,18 +1235,29 @@ sequenceDiagram
     end
 
     rect rgb(255, 240, 248)
-        Note over U,DB: Step 4: First Scan (Optional)
-        U->>B: Click "Start Scan" or "Skip"
-        alt Start Scan
-            B->>API: POST /api/aeo/perception-scan
-            API-->>B: Scan started
-        else Skip
-            B->>API: Skip step 4
-        end
+        Note over U,DB: Step 4: Build Profile
+        B->>API: POST /api/onboarding/profile
+        API->>MI: Start Magic Import
+        MI-->>B: SSE: progress updates
+        MI->>DB: Create Brand360Profile
+        MI-->>B: SSE: complete
+        API-->>B: Step 4 complete
     end
 
     rect rgb(248, 240, 255)
-        Note over U,DB: Step 5: Complete
+        Note over U,DB: Step 5: First Scan (Optional)
+        U->>B: Choose Quick/Comprehensive/Skip
+        alt Start Scan
+            B->>API: POST /api/onboarding/scan
+            API-->>B: Scan started
+        else Skip
+            B->>API: POST /api/onboarding/scan (skip)
+            API-->>B: Step 5 skipped
+        end
+    end
+
+    rect rgb(240, 255, 248)
+        Note over U,DB: Step 6: Complete
         B->>API: POST /api/onboarding/complete
         API->>DB: Mark onboarding complete
         API-->>B: Redirect to dashboard

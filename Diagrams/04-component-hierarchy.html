@@ -20,131 +20,190 @@
 
 
 const Component = () => {
-  const [expandedNodes, setExpandedNodes] = useState({
-    root: true, providers: true, auth: true, dashboard: true, brand360: false,
-    aeo: false, review: false, settings: false, onboarding: false, shared: false
-  });
+  const [expandedSection, setExpandedSection] = useState('pages');
 
-  const toggleNode = (id) => {
-    setExpandedNodes(prev => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const getTypeColor = (type) => {
-    switch (type) {
-      case 'layout': return '#6366F1';
-      case 'page': return '#3B82F6';
-      case 'component': return '#64748B';
-      case 'provider': return '#8B5CF6';
-      case 'group': return '#10B981';
-      default: return '#64748B';
+  const hierarchy = {
+    app: {
+      name: 'App Router',
+      icon: '▲',
+      color: '#000',
+      children: [
+        {
+          name: 'RootLayout',
+          type: 'layout',
+          children: [
+            { name: 'SessionProvider', type: 'provider' },
+            { name: 'ThemeProvider', type: 'provider' }
+          ]
+        }
+      ]
+    },
+    authPages: {
+      name: 'Auth Pages',
+      icon: '🔐',
+      color: '#3B82F6',
+      children: [
+        { name: 'LoginPage', path: '/auth/login' },
+        { name: 'RegisterPage', path: '/auth/register' },
+        { name: 'ErrorPage', path: '/auth/error' }
+      ]
+    },
+    dashboardPages: {
+      name: 'Dashboard Pages',
+      icon: '📊',
+      color: '#8B5CF6',
+      children: [
+        { name: 'DashboardLayout', type: 'layout' },
+        { name: 'DashboardPage', path: '/dashboard' },
+        { name: 'Brand360Page', path: '/brand-360' },
+        { name: 'AEOPage', path: '/aeo' },
+        { name: 'ScanPage', path: '/aeo/scan' },
+        { name: 'InsightsPage', path: '/aeo/insights' },
+        { name: 'SettingsPage', path: '/settings' },
+        { name: 'ReviewQueuePage', path: '/review-queue' },
+        { name: 'ReportPage', path: '/reports' }
+      ]
+    },
+    onboarding: {
+      name: 'Onboarding',
+      icon: '📋',
+      color: '#14B8A6',
+      children: [
+        { name: 'OnboardingPage', path: '/onboarding' }
+      ]
     }
   };
 
-  const TreeNode = ({ node, depth = 0, parentColor }) => {
-    const nodeColor = node.color || parentColor || getTypeColor(node.type);
-    const hasChildren = node.children && node.children.length > 0;
-    const isExpanded = node.id ? expandedNodes[node.id] : true;
-
-    return (
-      <div style={{ marginLeft: depth > 0 ? '20px' : 0 }}>
-        <div onClick={() => node.id && hasChildren && toggleNode(node.id)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', marginBottom: '4px', background: node.type === 'group' ? `${nodeColor}15` : '#1E293B', borderRadius: '8px', border: `1px solid ${nodeColor}30`, cursor: hasChildren && node.id ? 'pointer' : 'default', transition: 'all 0.2s' }}>
-          {hasChildren && node.id && (<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={nodeColor} strokeWidth="2" style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s', flexShrink: 0 }}><polyline points="9 18 15 12 9 6" /></svg>)}
-          {!hasChildren && node.id && <div style={{ width: '14px' }} />}
-          <span style={{ color: node.type === 'group' ? nodeColor : '#E2E8F0', fontWeight: node.type === 'group' || node.type === 'page' ? '600' : '400', fontSize: node.type === 'group' ? '12px' : '11px', flex: 1 }}>{node.name}</span>
-          <span style={{ fontSize: '9px', color: nodeColor, background: `${nodeColor}20`, padding: '2px 6px', borderRadius: '8px' }}>{node.type}</span>
-        </div>
-        {hasChildren && isExpanded && (
-          <div style={{ borderLeft: `2px solid ${nodeColor}30`, marginLeft: '7px', paddingLeft: '8px' }}>
-            {node.children.map((child, idx) => (<TreeNode key={idx} node={child} depth={depth + 1} parentColor={nodeColor} />))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const componentTree = {
-    id: 'root', name: 'App Router (Next.js 14)', type: 'layout', color: '#6366F1',
-    children: [
-      { id: 'providers', name: 'PROVIDERS', type: 'group', color: '#8B5CF6', children: [
-        { name: 'SessionProvider (NextAuth)', type: 'provider' },
-        { name: 'ThemeProvider', type: 'provider' }
-      ]},
-      { id: 'auth', name: 'AUTH PAGES', type: 'group', color: '#3B82F6', children: [
-        { name: 'LoginPage → AuthForm', type: 'page' },
-        { name: 'RegisterPage → AuthForm', type: 'page' },
-        { name: 'ErrorPage', type: 'page' }
-      ]},
-      { id: 'dashboard', name: 'DASHBOARD PAGES', type: 'group', color: '#10B981', children: [
-        { name: 'DashboardLayout', type: 'layout', children: [
-          { name: 'Sidebar + Navigation', type: 'component' },
-          { name: 'TopBar + UserMenu', type: 'component' }
-        ]},
-        { name: 'DashboardPage (Home)', type: 'page', children: [
-          { name: 'BrandPresenceHero', type: 'component' },
-          { name: 'BrandHealthIndicator', type: 'component' },
-          { name: 'BrandMoments', type: 'component' },
-          { name: 'BrandGrowthOpportunities', type: 'component' },
-          { name: 'MarketLandscape', type: 'component' },
-          { name: 'BrandStoryVisualizer', type: 'component' },
-          { name: 'AIPlatformGalaxy', type: 'component' }
-        ]},
-        { id: 'brand360', name: 'Brand360Page', type: 'page', color: '#8B5CF6', children: [
-          { name: 'WebsiteAnalyzer', type: 'component' },
-          { name: 'BrandStoryCanvas', type: 'component' },
-          { name: 'BrandOfferingsShowcase', type: 'component' },
-          { name: 'ProfileStrengthMeter', type: 'component' },
-          { name: 'DocumentUpload', type: 'component' },
-          { name: 'ProductCatalogConnector', type: 'component' }
-        ]},
-        { id: 'aeo', name: 'AEOPage', type: 'page', color: '#F59E0B', children: [
-          { name: 'QuadrantChart', type: 'component' },
-          { name: 'MetricsRadarChart', type: 'component' },
-          { name: 'PerceptionScoreCard', type: 'component' },
-          { name: 'PlatformComparisonChart', type: 'component' },
-          { name: 'ScoreTrendChart', type: 'component' },
-          { name: 'InsightsPriorityMatrix', type: 'component' },
-          { name: 'CorrectionFunnel', type: 'component' }
-        ]},
-        { name: 'ScanPage', type: 'page' },
-        { name: 'InsightsPage', type: 'page' },
-        { id: 'review', name: 'ReviewQueuePage', type: 'page', color: '#EC4899', children: [
-          { name: 'ReviewQueueBanner', type: 'component' },
-          { name: 'ReviewModal', type: 'component' },
-          { name: 'FieldReviewCard', type: 'component' }
-        ]},
-        { id: 'settings', name: 'SettingsPage', type: 'page', color: '#6B7280' },
-        { name: 'ReportPage', type: 'page' }
-      ]},
-      { id: 'onboarding', name: 'ONBOARDING PAGE', type: 'group', color: '#F97316', children: [
-        { name: 'OnboardingWizard', type: 'component' },
-        { name: 'NewOnboardingWizard', type: 'component' },
-        { name: 'UrlAnalyzer', type: 'component' },
-        { name: 'ProfileReviewCards', type: 'component' },
-        { name: 'ProductIngestionTabs', type: 'component' }
-      ]},
-      { id: 'shared', name: 'SHARED UI COMPONENTS', type: 'group', color: '#A855F7', children: [
-        { name: 'ThemeToggle, ThemeSelector', type: 'component' },
-        { name: 'MetricCard, AlertBanner', type: 'component' },
-        { name: 'OpportunityCard', type: 'component' }
-      ]}
-    ]
+  const components = {
+    layout: {
+      name: 'Layout',
+      color: '#64748B',
+      items: ['DashboardLayout', 'SessionProvider']
+    },
+    auth: {
+      name: 'Auth',
+      color: '#3B82F6',
+      items: ['AuthForm']
+    },
+    brand360: {
+      name: 'Brand 360',
+      color: '#10B981',
+      items: ['WebsiteAnalyzer', 'BrandStoryCanvas', 'BrandOfferingsShowcase', 'ProfileStrengthMeter', 'DocumentUpload', 'ProductCatalogConnector']
+    },
+    aeo: {
+      name: 'AEO Engine',
+      color: '#8B5CF6',
+      items: ['QuadrantChart', 'MetricsRadarChart', 'PerceptionScoreCard', 'PlatformComparisonChart', 'ScoreTrendChart', 'InsightsPriorityMatrix', 'CorrectionFunnel']
+    },
+    dashboard: {
+      name: 'Dashboard',
+      color: '#EC4899',
+      items: ['BrandPresenceHero', 'BrandHealthIndicator', 'BrandMoments', 'BrandGrowthOpportunities', 'MarketLandscape', 'BrandStoryVisualizer', 'AIPlatformGalaxy']
+    },
+    onboarding: {
+      name: 'Onboarding',
+      color: '#14B8A6',
+      items: ['OnboardingWizard', 'NewOnboardingWizard', 'UrlAnalyzer', 'ProfileReviewCards', 'ProductIngestionTabs']
+    },
+    ui: {
+      name: 'UI Components',
+      color: '#F59E0B',
+      items: ['ThemeToggle', 'ThemeSelector', 'MetricCard', 'AlertBanner', 'OpportunityCard']
+    },
+    review: {
+      name: 'Review Queue',
+      color: '#EF4444',
+      items: ['ReviewQueueBanner', 'ReviewModal', 'FieldReviewCard']
+    }
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%)', padding: '40px 24px', fontFamily: "'Inter', -apple-system, sans-serif" }}>
-      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 8px 0' }}>Component Hierarchy</h1>
-        <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>VistralAI React application structure</p>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0C0F1A 0%, #131825 50%, #0C0F1A 100%)', padding: '24px 16px', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
+      <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 6px 0' }}>VistralAI Component Hierarchy</h1>
+        <p style={{ fontSize: '12px', color: '#64748B', margin: '0 0 16px 0' }}>React component structure and shared components</p>
+        
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+          {['pages', 'components'].map((section) => (
+            <button key={section} onClick={() => setExpandedSection(section)} style={{ background: expandedSection === section ? '#8B5CF620' : '#1A1F2E', border: `2px solid ${expandedSection === section ? '#8B5CF6' : '#334155'}`, borderRadius: '8px', padding: '8px 20px', cursor: 'pointer' }}>
+              <span style={{ color: expandedSection === section ? '#8B5CF6' : '#94A3B8', fontSize: '11px', fontWeight: '600', textTransform: 'capitalize' }}>{section}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '28px', flexWrap: 'wrap' }}>
-        {[{ type: 'layout', label: 'Layout' }, { type: 'page', label: 'Page' }, { type: 'component', label: 'Component' }, { type: 'provider', label: 'Provider' }].map(({ type, label }) => (
-          <div key={type} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '16px', height: '16px', borderRadius: '4px', background: getTypeColor(type) }} /><span style={{ color: '#94A3B8', fontSize: '11px' }}>{label}</span></div>
-        ))}
-      </div>
+      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+        {expandedSection === 'pages' && (
+          <div>
+            {/* App Router Root */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+              <div style={{ background: '#1A1F2E', borderRadius: '10px', padding: '16px 32px', border: '2px solid #334155', textAlign: 'center' }}>
+                <span style={{ fontSize: '24px' }}>▲</span>
+                <div style={{ color: '#F8FAFC', fontSize: '14px', fontWeight: '700' }}>App Router</div>
+                <div style={{ color: '#64748B', fontSize: '10px' }}>RootLayout + Providers</div>
+              </div>
+            </div>
 
-      <div style={{ maxWidth: '900px', margin: '0 auto', background: '#0F172A80', borderRadius: '16px', padding: '20px', border: '1px solid #334155' }}>
-        <TreeNode node={componentTree} />
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+              <svg width="2" height="24"><line x1="1" y1="0" x2="1" y2="24" stroke="#475569" strokeWidth="2" /></svg>
+            </div>
+
+            {/* Page Groups */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+              {Object.entries(hierarchy).filter(([k]) => k !== 'app').map(([key, group]) => (
+                <div key={key} style={{ background: '#1A1F2E', borderRadius: '10px', border: `1px solid ${group.color}40`, overflow: 'hidden' }}>
+                  <div style={{ background: `${group.color}15`, padding: '12px', borderBottom: `1px solid ${group.color}30`, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '18px' }}>{group.icon}</span>
+                    <span style={{ color: group.color, fontSize: '13px', fontWeight: '700' }}>{group.name}</span>
+                    <span style={{ color: '#64748B', fontSize: '10px', marginLeft: 'auto' }}>{group.children.length} items</span>
+                  </div>
+                  <div style={{ padding: '10px' }}>
+                    {group.children.map((child, idx) => (
+                      <div key={idx} style={{ background: '#0F172A', borderRadius: '6px', padding: '10px', marginBottom: '6px', border: '1px solid #334155' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ color: '#E2E8F0', fontSize: '11px', fontWeight: '600' }}>{child.name}</span>
+                          {child.type && (
+                            <span style={{ background: '#8B5CF620', color: '#A78BFA', fontSize: '8px', padding: '2px 6px', borderRadius: '4px' }}>{child.type}</span>
+                          )}
+                        </div>
+                        {child.path && (
+                          <code style={{ color: '#64748B', fontSize: '9px', fontFamily: 'monospace' }}>{child.path}</code>
+                        )}
+                        {child.children && (
+                          <div style={{ marginTop: '6px', paddingLeft: '12px', borderLeft: '2px solid #334155' }}>
+                            {child.children.map((c, i) => (
+                              <div key={i} style={{ color: '#94A3B8', fontSize: '9px', padding: '2px 0' }}>{c.name}</div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {expandedSection === 'components' && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+            {Object.entries(components).map(([key, group]) => (
+              <div key={key} style={{ background: '#1A1F2E', borderRadius: '10px', border: `1px solid ${group.color}40`, overflow: 'hidden' }}>
+                <div style={{ background: `${group.color}15`, padding: '10px 12px', borderBottom: `1px solid ${group.color}30` }}>
+                  <span style={{ color: group.color, fontSize: '12px', fontWeight: '700' }}>{group.name}</span>
+                  <span style={{ color: '#64748B', fontSize: '10px', marginLeft: '8px' }}>({group.items.length})</span>
+                </div>
+                <div style={{ padding: '8px' }}>
+                  {group.items.map((item, idx) => (
+                    <div key={idx} style={{ background: '#0F172A', borderRadius: '4px', padding: '6px 10px', marginBottom: '4px', border: '1px solid #334155' }}>
+                      <span style={{ color: '#E2E8F0', fontSize: '10px' }}>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

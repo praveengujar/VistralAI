@@ -47,6 +47,8 @@ export type AuditAction =
   | 'org.member_role_changed'
   | 'org.member_removed'
   | 'org.invitation_revoked'
+  | 'org.invitation_resent'
+  | 'org.ownership_transferred'
   // Brand
   | 'brand.created'
   | 'brand.updated'

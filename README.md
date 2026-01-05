@@ -4,7 +4,7 @@ AI Visibility Optimization Platform — Monitor and optimize how AI platforms pe
 
 ## Features
 
-- **Unified Onboarding**: Streamlined 5-step flow (Brand → Plan → Payment → Scan → Complete)
+- **Unified Onboarding**: Streamlined 6-step flow (Brand → Plan → Payment → Profile → Scan → Complete)
 - **Magic Import**: Auto-extract brand data from any website with real-time progress
 - **AI Perception Scanning**: Evaluate brand perception across ChatGPT, Claude, Gemini, Perplexity
 - **Real-Time Updates**: WebSocket-powered scan progress and insights
@@ -90,13 +90,15 @@ app/                  # Next.js App Router pages
 │   └── positioning/  # Market positioning endpoints
 ├── api/onboarding/   # Unified onboarding API
 │   ├── session/      # Session management
-│   ├── brand/        # Magic Import trigger
+│   ├── brand/        # Brand name + URL save
 │   ├── plan/         # Plan selection
 │   ├── payment/      # Subscription creation
+│   ├── profile/      # Magic Import trigger
+│   ├── scan/         # First perception scan
 │   └── complete/     # Finalization
 ├── api/review-sites/ # Review website integration
 ├── onboarding/       # Onboarding pages (route group)
-│   └── (steps)/      # Brand, Plan, Payment, Scan, Complete
+│   └── (steps)/      # Brand, Plan, Payment, Profile, Scan, Complete
 components/           # React components
 ├── audience/         # PersonaCard, PersonaForm
 ├── positioning/      # PositioningStatement, ValuePropositionCards

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VistralAI - Data Flow Architecture</title>
+  <title>VistralAI - Data Flow</title>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -20,127 +20,177 @@
 
 
 const Component = () => {
-  const dataSources = [
-    { name: 'Website URL', icon: '🌐', color: '#3B82F6' },
-    { name: 'CSV Upload', icon: '📊', color: '#10B981' },
-    { name: 'Manual Entry', icon: '✏️', color: '#8B5CF6' },
-    { name: 'OAuth Providers', icon: '🔐', color: '#F59E0B' }
-  ];
+  const [activeLayer, setActiveLayer] = useState(null);
 
-  const outputs = [
-    { name: 'Dashboard UI', icon: '📈', color: '#3B82F6' },
-    { name: 'Reports', icon: '📄', color: '#10B981' },
-    { name: 'API Response', icon: '🔌', color: '#F59E0B' }
-  ];
+  const layers = {
+    input: {
+      name: 'Data Sources',
+      color: '#3B82F6',
+      items: [
+        { name: 'Website URL', icon: '🌐', desc: 'Magic Import' },
+        { name: 'CSV Upload', icon: '📄', desc: 'Product catalog' },
+        { name: 'Manual Entry', icon: '✏️', desc: 'Form input' },
+        { name: 'OAuth Providers', icon: '🔐', desc: 'Google/GitHub' }
+      ]
+    },
+    processing: {
+      name: 'Processing Layer',
+      color: '#8B5CF6',
+      sections: {
+        crawling: {
+          name: 'Web Crawling',
+          items: [
+            { name: 'Firecrawl Service', icon: '🕷️' },
+            { name: 'WebCrawler Fallback', icon: '🔄' }
+          ]
+        },
+        ai: {
+          name: 'AI Processing',
+          items: [
+            { name: 'BrandIntelligence', icon: '🧠', sub: 'GPT-4o-mini' },
+            { name: 'VibeCheckAgent', icon: '✨' },
+            { name: 'CompetitorAgent', icon: '🎯' },
+            { name: 'PerceptionEvaluator', icon: '⚖️' }
+          ]
+        },
+        queue: {
+          name: 'Job Queue',
+          items: [
+            { name: 'Bull Queue', icon: '📋' },
+            { name: 'Redis', icon: '⚡' }
+          ]
+        }
+      }
+    },
+    storage: {
+      name: 'Data Storage',
+      color: '#22C55E',
+      items: [
+        { name: 'users', icon: '👤' },
+        { name: 'brand_profiles', icon: '🏢' },
+        { name: 'brand360_profiles', icon: '🎯' },
+        { name: 'products', icon: '📦' },
+        { name: 'perception_scans', icon: '📈' },
+        { name: 'ai_perception_results', icon: '🤖' }
+      ]
+    },
+    output: {
+      name: 'Output',
+      color: '#F59E0B',
+      items: [
+        { name: 'Dashboard UI', icon: '📊' },
+        { name: 'Reports', icon: '📄' },
+        { name: 'API Response', icon: '🔌' }
+      ]
+    }
+  };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0A0E17 0%, #131B2E 50%, #0A0E17 100%)', padding: '40px 24px', fontFamily: "'Inter', -apple-system, sans-serif" }}>
-      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 8px 0' }}>Data Flow Architecture</h1>
-        <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>How data moves through VistralAI with Bull Queue</p>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0C0F1A 0%, #131825 50%, #0C0F1A 100%)', padding: '24px 16px', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
+      <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 6px 0' }}>VistralAI Data Flow</h1>
+        <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>From data sources through processing to output</p>
       </div>
 
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 180px 140px', gap: '24px', alignItems: 'stretch' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'stretch' }}>
           
-          {/* Data Sources */}
-          <div>
-            <div style={{ color: '#64748B', fontSize: '11px', fontWeight: '600', letterSpacing: '1px', marginBottom: '16px', textAlign: 'center' }}>DATA SOURCES</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {dataSources.map((source) => (
-                <div key={source.name} style={{ background: `${source.color}15`, border: `1px solid ${source.color}40`, borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '20px', marginBottom: '6px' }}>{source.icon}</div>
-                  <div style={{ color: source.color, fontSize: '11px', fontWeight: '600' }}>{source.name}</div>
-                </div>
-              ))}
-            </div>
+          {/* Input Layer */}
+          <div style={{ flex: '0 0 180px', background: `${layers.input.color}10`, borderRadius: '12px', border: `2px solid ${layers.input.color}40`, padding: '12px' }}>
+            <div style={{ color: layers.input.color, fontSize: '11px', fontWeight: '700', marginBottom: '12px', textAlign: 'center' }}>{layers.input.name}</div>
+            {layers.input.items.map((item, idx) => (
+              <div key={idx} style={{ background: '#0F172A', borderRadius: '8px', padding: '10px', marginBottom: '8px', border: '1px solid #334155' }}>
+                <div style={{ fontSize: '20px', textAlign: 'center', marginBottom: '4px' }}>{item.icon}</div>
+                <div style={{ color: '#E2E8F0', fontSize: '10px', fontWeight: '600', textAlign: 'center' }}>{item.name}</div>
+                <div style={{ color: '#64748B', fontSize: '8px', textAlign: 'center' }}>{item.desc}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Arrow */}
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <svg width="40" height="20"><line x1="0" y1="10" x2="30" y2="10" stroke="#475569" strokeWidth="2" /><polygon points="30,5 40,10 30,15" fill="#475569" /></svg>
           </div>
 
           {/* Processing Layer */}
-          <div>
-            <div style={{ color: '#64748B', fontSize: '11px', fontWeight: '600', letterSpacing: '1px', marginBottom: '16px', textAlign: 'center' }}>PROCESSING LAYER</div>
-            
-            {/* Web Crawling */}
-            <div style={{ background: '#1A1F2E', borderRadius: '12px', border: '1px solid #F9731630', padding: '16px', marginBottom: '16px' }}>
-              <div style={{ color: '#F97316', fontSize: '12px', fontWeight: '600', marginBottom: '12px' }}>Web Crawling</div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <div style={{ background: '#F9731620', border: '1px solid #F9731640', borderRadius: '6px', padding: '8px 12px', flex: 1, textAlign: 'center' }}>
-                  <span style={{ color: '#F97316', fontSize: '10px', fontWeight: '500' }}>Firecrawl Service</span>
-                </div>
-                <div style={{ background: '#64748B20', border: '1px solid #64748B40', borderRadius: '6px', padding: '8px 12px', flex: 1, textAlign: 'center' }}>
-                  <span style={{ color: '#64748B', fontSize: '10px', fontWeight: '500' }}>WebCrawler Fallback</span>
-                </div>
-              </div>
-            </div>
-
-            {/* AI Processing */}
-            <div style={{ background: '#1A1F2E', borderRadius: '12px', border: '1px solid #8B5CF630', padding: '16px', marginBottom: '16px' }}>
-              <div style={{ color: '#8B5CF6', fontSize: '12px', fontWeight: '600', marginBottom: '12px' }}>AI Processing</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-                {[
-                  { name: 'BrandIntelligence', color: '#10B981' },
-                  { name: 'VibeCheckAgent', color: '#EC4899' },
-                  { name: 'CompetitorAgent', color: '#8B5CF6' },
-                  { name: 'PerceptionEvaluator', color: '#14B8A6' }
-                ].map((agent) => (
-                  <div key={agent.name} style={{ background: `${agent.color}20`, border: `1px solid ${agent.color}40`, borderRadius: '6px', padding: '6px 10px', textAlign: 'center' }}>
-                    <span style={{ color: agent.color, fontSize: '10px', fontWeight: '500' }}>{agent.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Job Queue */}
-            <div style={{ background: 'linear-gradient(135deg, #DC262620, #EF444420)', borderRadius: '12px', padding: '16px', border: '1px solid #DC262640' }}>
-              <div style={{ color: '#EF4444', fontSize: '12px', fontWeight: '600', marginBottom: '12px' }}>Job Queue (Bull + Redis)</div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <div style={{ background: '#DC262630', borderRadius: '6px', padding: '8px 12px', flex: 1, textAlign: 'center' }}>
-                  <span style={{ color: '#FCA5A5', fontSize: '10px', fontWeight: '500' }}>Bull Queue</span>
-                </div>
-                <div style={{ background: '#DC262630', borderRadius: '6px', padding: '8px 12px', flex: 1, textAlign: 'center' }}>
-                  <span style={{ color: '#FCA5A5', fontSize: '10px', fontWeight: '500' }}>Redis</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Data Storage */}
-          <div>
-            <div style={{ color: '#64748B', fontSize: '11px', fontWeight: '600', letterSpacing: '1px', marginBottom: '16px', textAlign: 'center' }}>DATA STORAGE</div>
-            <div style={{ background: '#1A1F2E', borderRadius: '12px', border: '1px solid #22C55E30', padding: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid #334155' }}>
-                <span style={{ fontSize: '16px' }}>🍃</span>
-                <span style={{ color: '#22C55E', fontSize: '12px', fontWeight: '600' }}>MongoDB</span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {['users', 'brand_profiles', 'brand360_profiles', 'products', 'perception_scans', 'ai_perception_results'].map((col) => (
-                  <div key={col} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 8px', background: '#0F172A60', borderRadius: '4px' }}>
-                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22C55E' }} />
-                    <code style={{ color: '#E2E8F0', fontSize: '9px' }}>{col}</code>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Output */}
-          <div>
-            <div style={{ color: '#64748B', fontSize: '11px', fontWeight: '600', letterSpacing: '1px', marginBottom: '16px', textAlign: 'center' }}>OUTPUT</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {outputs.map((output) => (
-                <div key={output.name} style={{ background: `${output.color}15`, border: `1px solid ${output.color}40`, borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '20px', marginBottom: '6px' }}>{output.icon}</div>
-                  <div style={{ color: output.color, fontSize: '11px', fontWeight: '600' }}>{output.name}</div>
+          <div style={{ flex: 1, background: `${layers.processing.color}10`, borderRadius: '12px', border: `2px solid ${layers.processing.color}40`, padding: '12px' }}>
+            <div style={{ color: layers.processing.color, fontSize: '11px', fontWeight: '700', marginBottom: '12px', textAlign: 'center' }}>{layers.processing.name}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+              {Object.entries(layers.processing.sections).map(([key, section]) => (
+                <div key={key} style={{ background: '#0F172A', borderRadius: '8px', padding: '10px', border: '1px solid #334155' }}>
+                  <div style={{ color: '#A78BFA', fontSize: '9px', fontWeight: '600', marginBottom: '8px', textAlign: 'center' }}>{section.name}</div>
+                  {section.items.map((item, idx) => (
+                    <div key={idx} style={{ background: '#1E293B', borderRadius: '4px', padding: '6px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '14px' }}>{item.icon}</span>
+                      <div>
+                        <div style={{ color: '#E2E8F0', fontSize: '9px', fontWeight: '500' }}>{item.name}</div>
+                        {item.sub && <div style={{ color: '#64748B', fontSize: '7px' }}>{item.sub}</div>}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
           </div>
+
+          {/* Arrow */}
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <svg width="40" height="20"><line x1="0" y1="10" x2="30" y2="10" stroke="#475569" strokeWidth="2" /><polygon points="30,5 40,10 30,15" fill="#475569" /></svg>
+          </div>
+
+          {/* Storage Layer */}
+          <div style={{ flex: '0 0 200px', background: `${layers.storage.color}10`, borderRadius: '12px', border: `2px solid ${layers.storage.color}40`, padding: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '12px' }}>
+              <span style={{ fontSize: '16px' }}>🍃</span>
+              <span style={{ color: layers.storage.color, fontSize: '11px', fontWeight: '700' }}>MongoDB</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
+              {layers.storage.items.map((item, idx) => (
+                <div key={idx} style={{ background: '#0F172A', borderRadius: '6px', padding: '8px', border: '1px solid #334155', textAlign: 'center' }}>
+                  <span style={{ fontSize: '16px' }}>{item.icon}</span>
+                  <div style={{ color: '#4ADE80', fontSize: '8px', fontWeight: '500' }}>{item.name}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Arrow */}
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <svg width="40" height="20"><line x1="0" y1="10" x2="30" y2="10" stroke="#475569" strokeWidth="2" /><polygon points="30,5 40,10 30,15" fill="#475569" /></svg>
+          </div>
+
+          {/* Output Layer */}
+          <div style={{ flex: '0 0 140px', background: `${layers.output.color}10`, borderRadius: '12px', border: `2px solid ${layers.output.color}40`, padding: '12px' }}>
+            <div style={{ color: layers.output.color, fontSize: '11px', fontWeight: '700', marginBottom: '12px', textAlign: 'center' }}>{layers.output.name}</div>
+            {layers.output.items.map((item, idx) => (
+              <div key={idx} style={{ background: '#0F172A', borderRadius: '8px', padding: '12px', marginBottom: '8px', border: '1px solid #334155', textAlign: 'center' }}>
+                <span style={{ fontSize: '20px' }}>{item.icon}</span>
+                <div style={{ color: '#E2E8F0', fontSize: '10px', fontWeight: '600' }}>{item.name}</div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Flow Arrows */}
-        <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'center', gap: '24px', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: '24px', height: '2px', background: '#3B82F6' }} /><span style={{ color: '#64748B', fontSize: '11px' }}>Data flow</span></div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: '24px', height: '2px', background: '#DC2626' }} /><span style={{ color: '#64748B', fontSize: '11px' }}>Queue jobs</span></div>
+        {/* Flow Legend */}
+        <div style={{ marginTop: '20px', background: '#1A1F2E', borderRadius: '10px', padding: '16px' }}>
+          <div style={{ color: '#94A3B8', fontSize: '10px', fontWeight: '600', marginBottom: '10px' }}>DATA FLOW CONNECTIONS</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
+            {[
+              { from: 'URL', to: 'Firecrawl', arrow: '→', desc: 'Web scraping' },
+              { from: 'Firecrawl', to: 'BrandIntelligence', arrow: '→', desc: 'Raw content' },
+              { from: 'BrandIntelligence', to: 'brand360_profiles', arrow: '→', desc: 'Structured data' },
+              { from: 'CSV', to: 'products', arrow: '→', desc: 'Direct import' },
+              { from: 'OAuth', to: 'users', arrow: '→', desc: 'Auth data' },
+              { from: 'PerceptionEvaluator', to: 'ai_perception_results', arrow: '→', desc: 'Scores' }
+            ].map((flow, idx) => (
+              <div key={idx} style={{ background: '#0F172A', borderRadius: '6px', padding: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: '#3B82F6', fontSize: '9px', fontWeight: '600' }}>{flow.from}</span>
+                <span style={{ color: '#475569' }}>{flow.arrow}</span>
+                <span style={{ color: '#22C55E', fontSize: '9px', fontWeight: '600' }}>{flow.to}</span>
+                <span style={{ color: '#64748B', fontSize: '8px', marginLeft: 'auto' }}>{flow.desc}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

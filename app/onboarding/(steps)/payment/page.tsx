@@ -77,6 +77,27 @@ export default function PaymentPage() {
     setError(errorMessage);
   };
 
+  const handleSkip = async () => {
+    // Skip payment for testing - call API to mark step complete
+    console.log('[Payment] Skipping payment for testing');
+    try {
+      const response = await fetch('/api/onboarding/payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'skip_payment' }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        await refetch();
+        router.push('/onboarding/profile');
+      } else {
+        setError(data.error || 'Failed to skip payment');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to skip payment');
+    }
+  };
+
   if (isLoading || !session?.selectedTierId) {
     return null;
   }
@@ -107,6 +128,7 @@ export default function PaymentPage() {
         onPaymentSuccess={handlePaymentSuccess}
         onError={handlePaymentError}
         isProcessing={confirmPayment.isPending}
+        onSkip={handleSkip}
       />
     </OnboardingLayout>
   );

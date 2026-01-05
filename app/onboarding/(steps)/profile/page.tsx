@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { OnboardingLayout, BuildProfileStep } from '@/components/onboarding/unified';
 import {
@@ -21,6 +21,9 @@ export default function BuildProfilePage() {
   const [importStatus, setImportStatus] = useState<'idle' | 'running' | 'complete' | 'failed'>('idle');
   const [importError, setImportError] = useState<string | undefined>();
   const [completionScore, setCompletionScore] = useState<number | undefined>();
+
+  // Ref to prevent duplicate API calls in React Strict Mode
+  const importStartedRef = useRef(false);
 
   // Redirect if prerequisites not met
   useEffect(() => {
@@ -52,12 +55,17 @@ export default function BuildProfilePage() {
   };
 
   const handleNext = () => {
-    router.push('/onboarding/complete');
+    router.push('/onboarding/scan');
   };
 
   const handleStartImport = useCallback(async () => {
+    // Prevent duplicate API calls (React Strict Mode can trigger useEffect twice)
+    if (importStartedRef.current) return;
+
     if (importStatus !== 'idle' && importStatus !== 'failed') return;
 
+    // Mark as started to prevent duplicate calls
+    importStartedRef.current = true;
     setImportError(undefined);
     setImportStatus('running');
 
@@ -69,22 +77,28 @@ export default function BuildProfilePage() {
           setImportStatus('complete');
           setCompletionScore(result.data.completionScore);
           await refetch();
-          // Auto-advance after short delay
-          setTimeout(() => {
-            router.push('/onboarding/complete');
-          }, 2000);
+          // No auto-advance, user clicks Continue
+          // setTimeout(() => {
+          //   router.push('/onboarding/complete');
+          // }, 2000);
         } else if (result.data.status === 'failed') {
           setImportStatus('failed');
           setImportError(result.error || 'Profile creation failed');
+          // Reset ref to allow retry
+          importStartedRef.current = false;
         }
       }
     } catch (err) {
       setImportStatus('failed');
       setImportError(err instanceof Error ? err.message : 'Profile creation failed');
+      // Reset ref to allow retry
+      importStartedRef.current = false;
     }
   }, [importStatus, startBuildProfile, refetch, router]);
 
   const handleRetry = async () => {
+    // Set ref to allow retry (it was reset on failure)
+    importStartedRef.current = true;
     setImportError(undefined);
     setImportStatus('running');
 
@@ -96,17 +110,22 @@ export default function BuildProfilePage() {
           setImportStatus('complete');
           setCompletionScore(result.data.completionScore);
           await refetch();
-          setTimeout(() => {
-            router.push('/onboarding/complete');
-          }, 2000);
+          // No auto-advance
+          // setTimeout(() => {
+          //   router.push('/onboarding/complete');
+          // }, 2000);
         } else if (result.data.status === 'failed') {
           setImportStatus('failed');
           setImportError(result.error || 'Profile creation failed');
+          // Reset ref to allow retry
+          importStartedRef.current = false;
         }
       }
     } catch (err) {
       setImportStatus('failed');
       setImportError(err instanceof Error ? err.message : 'Retry failed');
+      // Reset ref to allow retry
+      importStartedRef.current = false;
     }
   };
 

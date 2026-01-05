@@ -1,5 +1,5 @@
 // VistralAI Onboarding Configuration
-// Unified onboarding flow: Brand → Plan → Payment → Build Profile → Complete
+// Unified onboarding flow: Brand → Plan → Payment → Build Profile → First Scan → Complete
 
 import { TRIAL_DAYS, PRICING_TIERS, type PricingTierConfig } from './pricing';
 
@@ -61,6 +61,16 @@ export const ONBOARDING_STEPS: OnboardingStepConfig[] = [
   },
   {
     id: 5,
+    name: 'scan',
+    route: '/onboarding/scan',
+    label: 'First Scan',
+    description: 'Run your first AI perception scan',
+    icon: 'Zap',
+    optional: true, // Can be skipped
+    requiredFields: [],
+  },
+  {
+    id: 6,
     name: 'complete',
     route: '/onboarding/complete',
     label: 'Complete',
@@ -98,6 +108,7 @@ export interface OnboardingSessionData {
   subscriptionId?: string;
   brand360Id?: string;
   firstScanId?: string;
+  firstScanType?: 'quick' | 'comprehensive' | 'skipped';
   websiteUrl?: string;
   brandName?: string;
   metadata?: Record<string, unknown>;
@@ -253,9 +264,13 @@ export function validateStepData(
       }
       break;
 
+    case 'scan':
+      // Scan step is optional, no validation required
+      break;
+
     case 'complete':
-      // Final step, check all required steps are complete
-      const requiredSteps = ONBOARDING_STEPS.filter(s => !s.optional && s.id < 5);
+      // Final step, check all required steps are complete (steps 1-4 are required, step 5 scan is optional)
+      const requiredSteps = ONBOARDING_STEPS.filter(s => !s.optional && s.id < 6);
       const incompleteSteps = requiredSteps.filter(
         s => !data.completedSteps?.includes(s.id)
       );
@@ -384,7 +399,11 @@ export function calculateOverallProgress(
   stageProgress: number
 ): number {
   const stage = getMagicImportStage(currentStage);
-  if (!stage) return 0;
+  if (!stage) {
+    // For unknown stages (from sub-agents), return -1 to indicate "ignore this update"
+    // Caller should check for -1 and skip the progress update
+    return -1;
+  }
 
   const stageRange = stage.percentage.end - stage.percentage.start;
   const progressWithinStage = (stageProgress / 100) * stageRange;

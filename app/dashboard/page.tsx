@@ -36,6 +36,36 @@ export default function DashboardPage() {
       if (session?.user?.id) {
         try {
           setIsLoadingBrand(true);
+
+          // First, try to get Brand360Profile via organization (from onboarding)
+          const orgId = (session.user as any)?.organizationId;
+          if (orgId) {
+            try {
+              const brand360Res = await fetch(`/api/brand-360?brandId=${orgId}`);
+              if (brand360Res.ok) {
+                const brand360Data = await brand360Res.json();
+                if (brand360Data.data) {
+                  setBrand360Profile(brand360Data.data);
+                  setBrand360Id(brand360Data.data.id);
+                  // Create a minimal brandProfile from Brand360 data
+                  setBrandProfile({
+                    id: brand360Data.data.id,
+                    brandName: brand360Data.data.brandName || brand360Data.data.companyName,
+                    domain: brand360Data.data.primaryDomain,
+                    category: brand360Data.data.industry,
+                    descriptor: brand360Data.data.tagline || brand360Data.data.description?.substring(0, 100),
+                    crawlingStatus: 'completed',
+                  } as any);
+                  setIsLoadingBrand(false);
+                  return; // Exit early if we found Brand360 via org
+                }
+              }
+            } catch (e) {
+              console.error('Failed to fetch Brand360 profile via organization', e);
+            }
+          }
+
+          // Fallback: try legacy BrandProfile lookup
           const res = await fetch(`/api/brand-profile?userId=${session.user.id}`);
           if (res.ok) {
             const data = await res.json();
@@ -71,7 +101,7 @@ export default function DashboardPage() {
     if (status === 'authenticated') {
       fetchBrandProfile();
     }
-  }, [status, session?.user?.id]);
+  }, [status, session?.user?.id, (session?.user as any)?.organizationId]);
 
   useEffect(() => {
     if (crawlingStatus !== 'processing') return;

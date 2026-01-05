@@ -1367,6 +1367,142 @@ Automatically detects relevant industry categories based on brand data (products
 
 ## Onboarding API
 
+### Session Management
+```
+GET /api/onboarding/session
+POST /api/onboarding/session
+```
+
+Get or create an onboarding session for the current user.
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "session": {
+      "id": "session_123",
+      "userId": "user_123",
+      "currentStep": 1,
+      "completedSteps": [],
+      "status": "in_progress",
+      "websiteUrl": null,
+      "brandName": null,
+      "selectedTierId": null
+    }
+  }
+}
+```
+
+### Brand Setup (Step 1)
+```
+POST /api/onboarding/brand
+```
+
+Save brand name and website URL.
+
+**Request**:
+```json
+{
+  "websiteUrl": "https://example.com",
+  "brandName": "Example Corp"
+}
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "session": { "currentStep": 2, "completedSteps": [1] }
+  }
+}
+```
+
+### Plan Selection (Step 2)
+```
+POST /api/onboarding/plan
+```
+
+Save selected pricing tier and billing cycle.
+
+**Request**:
+```json
+{
+  "tierId": "growth",
+  "billingCycle": "monthly"
+}
+```
+
+### Build Profile (Step 4)
+```
+POST /api/onboarding/profile
+```
+
+Trigger Magic Import to create brand profile. Returns SSE stream for progress updates.
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "status": "completed",
+    "brand360Id": "brand360_123",
+    "completionScore": 85
+  }
+}
+```
+
+### First Scan (Step 5)
+```
+POST /api/onboarding/scan
+```
+
+Start or skip the first perception scan.
+
+**Request** (Start Scan):
+```json
+{
+  "scanType": "quick"
+}
+```
+
+**Request** (Skip):
+```json
+{
+  "skip": true
+}
+```
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "scanId": "scan_123",
+    "status": "started"
+  }
+}
+```
+
+### Complete Onboarding (Step 6)
+```
+POST /api/onboarding/complete
+```
+
+Finalize onboarding and redirect to dashboard.
+
+**Response** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "onboardingComplete": true,
+    "redirectUrl": "/dashboard"
+  }
+}
+```
+
 ### Start Website Analysis
 ```
 POST /onboarding/analyze

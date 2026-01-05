@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VistralAI - Subscription State Machine</title>
+  <title>VistralAI - Subscription States</title>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -20,122 +20,150 @@
 
 
 const Component = () => {
-  const [hoveredState, setHoveredState] = useState(null);
+  const [activeState, setActiveState] = useState(null);
 
   const states = [
-    { id: 'trialing', name: 'Trialing', color: '#3B82F6', x: 200, y: 100, desc: '15-day free trial' },
-    { id: 'active', name: 'Active', color: '#10B981', x: 400, y: 200, desc: 'Paid subscription' },
-    { id: 'past_due', name: 'Past Due', color: '#F59E0B', x: 600, y: 200, desc: 'Payment failed' },
-    { id: 'paused', name: 'Paused', color: '#8B5CF6', x: 400, y: 350, desc: 'User paused' },
-    { id: 'canceled', name: 'Canceled', color: '#EF4444', x: 600, y: 350, desc: 'Subscription ended' }
+    { id: 'start', name: 'Start', icon: '⚫', color: '#64748B', desc: 'User signs up', x: 50, y: 10 },
+    { id: 'trialing', name: 'Trialing', icon: '🎁', color: '#8B5CF6', desc: '15-day free trial', x: 50, y: 30 },
+    { id: 'active', name: 'Active', icon: '✅', color: '#22C55E', desc: 'Paid subscription', x: 50, y: 55 },
+    { id: 'past_due', name: 'Past Due', icon: '⚠️', color: '#F59E0B', desc: 'Payment failed', x: 80, y: 55 },
+    { id: 'paused', name: 'Paused', icon: '⏸️', color: '#3B82F6', desc: 'User paused', x: 20, y: 55 },
+    { id: 'canceled', name: 'Canceled', icon: '❌', color: '#EF4444', desc: 'Subscription ended', x: 50, y: 80 },
+    { id: 'end', name: 'End', icon: '⚫', color: '#64748B', desc: 'Account closed', x: 50, y: 95 }
   ];
 
   const transitions = [
-    { from: 'trialing', to: 'active', label: 'Trial ends + Payment succeeds', color: '#10B981' },
+    { from: 'start', to: 'trialing', label: 'User signs up', color: '#8B5CF6' },
+    { from: 'trialing', to: 'active', label: 'Trial ends + Payment succeeds', color: '#22C55E' },
     { from: 'trialing', to: 'canceled', label: 'User cancels during trial', color: '#EF4444' },
     { from: 'active', to: 'past_due', label: 'Payment fails', color: '#F59E0B' },
     { from: 'active', to: 'canceled', label: 'User cancels', color: '#EF4444' },
-    { from: 'active', to: 'paused', label: 'User pauses', color: '#8B5CF6' },
-    { from: 'past_due', to: 'active', label: 'Payment succeeds', color: '#10B981' },
+    { from: 'active', to: 'paused', label: 'User pauses', color: '#3B82F6' },
+    { from: 'past_due', to: 'active', label: 'Payment succeeds', color: '#22C55E' },
     { from: 'past_due', to: 'canceled', label: 'Grace period expires', color: '#EF4444' },
-    { from: 'paused', to: 'active', label: 'User resumes', color: '#10B981' }
+    { from: 'paused', to: 'active', label: 'User resumes', color: '#22C55E' },
+    { from: 'canceled', to: 'end', label: '', color: '#64748B' }
   ];
 
-  const getState = (id) => states.find(s => s.id === id);
+  const getStatePosition = (stateId) => {
+    const state = states.find(s => s.id === stateId);
+    return state ? { x: state.x, y: state.y } : { x: 50, y: 50 };
+  };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0A0A12 0%, #12121F 50%, #0A0A12 100%)', padding: '40px 24px', fontFamily: "'Inter', -apple-system, sans-serif" }}>
-      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 8px 0' }}>Subscription State Machine</h1>
-        <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>Lifecycle states and transitions</p>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0C0F1A 0%, #131825 50%, #0C0F1A 100%)', padding: '24px 16px', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
+      <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 6px 0' }}>Subscription State Machine</h1>
+        <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>Lifecycle of a VistralAI subscription</p>
       </div>
 
-      {/* State Diagram */}
-      <div style={{ maxWidth: '800px', margin: '0 auto 40px', position: 'relative', height: '450px', background: '#1A1F2E', borderRadius: '20px', border: '1px solid #334155' }}>
-        {/* Entry Point */}
-        <div style={{ position: 'absolute', left: '60px', top: '95px' }}>
-          <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#475569', marginBottom: '6px' }} />
-          <div style={{ color: '#64748B', fontSize: '10px', whiteSpace: 'nowrap' }}>User signs up</div>
-        </div>
-        <svg style={{ position: 'absolute', left: '80px', top: '105px' }} width="100" height="20">
-          <line x1="0" y1="10" x2="90" y2="10" stroke="#475569" strokeWidth="2" />
-          <polygon points="90,6 100,10 90,14" fill="#475569" />
-        </svg>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', gap: '24px' }}>
+          {/* State Diagram */}
+          <div style={{ flex: 1, background: '#1A1F2E', borderRadius: '12px', padding: '24px', border: '1px solid #334155', position: 'relative', minHeight: '500px' }}>
+            {/* States */}
+            {states.map((state) => (
+              <div key={state.id} onClick={() => setActiveState(activeState === state.id ? null : state.id)} style={{ position: 'absolute', left: `${state.x}%`, top: `${state.y}%`, transform: 'translate(-50%, -50%)', cursor: 'pointer', zIndex: 10 }}>
+                <div style={{ width: state.id === 'start' || state.id === 'end' ? '24px' : '64px', height: state.id === 'start' || state.id === 'end' ? '24px' : '64px', borderRadius: state.id === 'start' || state.id === 'end' ? '50%' : '12px', background: activeState === state.id ? state.color : `${state.color}30`, border: `3px solid ${state.color}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', boxShadow: activeState === state.id ? `0 0 20px ${state.color}50` : 'none' }}>
+                  {state.id !== 'start' && state.id !== 'end' && (
+                    <>
+                      <span style={{ fontSize: '20px' }}>{state.icon}</span>
+                      <span style={{ color: activeState === state.id ? 'white' : state.color, fontSize: '8px', fontWeight: '700' }}>{state.name}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
 
-        {/* States */}
-        {states.map((state) => (
-          <div
-            key={state.id}
-            onMouseEnter={() => setHoveredState(state.id)}
-            onMouseLeave={() => setHoveredState(null)}
-            style={{
-              position: 'absolute',
-              left: state.x,
-              top: state.y,
-              transform: 'translate(-50%, -50%)',
-              cursor: 'pointer'
-            }}
-          >
-            <div style={{
-              width: hoveredState === state.id ? '110px' : '100px',
-              height: hoveredState === state.id ? '110px' : '100px',
-              borderRadius: '50%',
-              background: `${state.color}15`,
-              border: `3px solid ${state.color}`,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s',
-              boxShadow: hoveredState === state.id ? `0 8px 32px ${state.color}40` : 'none'
-            }}>
-              <div style={{ color: state.color, fontSize: '13px', fontWeight: '700' }}>{state.name}</div>
-              {hoveredState === state.id && (
-                <div style={{ color: '#94A3B8', fontSize: '9px', marginTop: '4px' }}>{state.desc}</div>
-              )}
+            {/* SVG for transitions */}
+            <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+              <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                  <polygon points="0 0, 10 3.5, 0 7" fill="#475569" />
+                </marker>
+              </defs>
+              
+              {/* Simple vertical lines for main flow */}
+              <line x1="50%" y1="12%" x2="50%" y2="26%" stroke="#8B5CF6" strokeWidth="2" markerEnd="url(#arrowhead)" />
+              <line x1="50%" y1="34%" x2="50%" y2="51%" stroke="#22C55E" strokeWidth="2" markerEnd="url(#arrowhead)" />
+              <line x1="50%" y1="59%" x2="50%" y2="76%" stroke="#EF4444" strokeWidth="2" markerEnd="url(#arrowhead)" />
+              <line x1="50%" y1="84%" x2="50%" y2="93%" stroke="#64748B" strokeWidth="2" markerEnd="url(#arrowhead)" />
+
+              {/* Trial to canceled */}
+              <path d="M 45% 34% Q 35% 50% 45% 76%" fill="none" stroke="#EF4444" strokeWidth="2" markerEnd="url(#arrowhead)" />
+              
+              {/* Active to past_due */}
+              <line x1="55%" y1="55%" x2="75%" y2="55%" stroke="#F59E0B" strokeWidth="2" markerEnd="url(#arrowhead)" />
+              
+              {/* Past_due to active */}
+              <path d="M 75% 52% Q 65% 45% 55% 52%" fill="none" stroke="#22C55E" strokeWidth="2" markerEnd="url(#arrowhead)" />
+              
+              {/* Past_due to canceled */}
+              <path d="M 77% 59% Q 70% 70% 55% 76%" fill="none" stroke="#EF4444" strokeWidth="2" markerEnd="url(#arrowhead)" />
+              
+              {/* Active to paused */}
+              <line x1="45%" y1="55%" x2="25%" y2="55%" stroke="#3B82F6" strokeWidth="2" markerEnd="url(#arrowhead)" />
+              
+              {/* Paused to active */}
+              <path d="M 25% 52% Q 35% 45% 45% 52%" fill="none" stroke="#22C55E" strokeWidth="2" markerEnd="url(#arrowhead)" />
+            </svg>
+          </div>
+
+          {/* Transitions List */}
+          <div style={{ width: '300px' }}>
+            <div style={{ color: '#94A3B8', fontSize: '10px', fontWeight: '600', marginBottom: '12px' }}>STATE TRANSITIONS</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {transitions.filter(t => t.label).map((trans, idx) => {
+                const fromState = states.find(s => s.id === trans.from);
+                const toState = states.find(s => s.id === trans.to);
+                return (
+                  <div key={idx} style={{ background: '#0F172A', borderRadius: '8px', padding: '10px', border: `1px solid ${trans.color}30` }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                      <span style={{ background: fromState?.color, color: 'white', fontSize: '8px', padding: '2px 6px', borderRadius: '4px' }}>{fromState?.name}</span>
+                      <svg width="16" height="8"><line x1="0" y1="4" x2="10" y2="4" stroke={trans.color} strokeWidth="2" /><polygon points="10,1 16,4 10,7" fill={trans.color} /></svg>
+                      <span style={{ background: toState?.color, color: 'white', fontSize: '8px', padding: '2px 6px', borderRadius: '4px' }}>{toState?.name}</span>
+                    </div>
+                    <div style={{ color: '#94A3B8', fontSize: '9px' }}>{trans.label}</div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        ))}
-
-        {/* Exit Point */}
-        <div style={{ position: 'absolute', right: '60px', bottom: '60px' }}>
-          <div style={{ width: '24px', height: '24px', borderRadius: '50%', border: '3px solid #EF4444', background: '#EF444420' }} />
         </div>
-      </div>
 
-      {/* Transitions Table */}
-      <div style={{ maxWidth: '800px', margin: '0 auto', background: '#1A1F2E', borderRadius: '16px', padding: '20px', border: '1px solid #334155' }}>
-        <div style={{ color: '#94A3B8', fontSize: '11px', fontWeight: '600', letterSpacing: '1px', marginBottom: '14px' }}>STATE TRANSITIONS</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {transitions.map((t, idx) => {
-            const fromState = getState(t.from);
-            const toState = getState(t.to);
-            return (
-              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: '#0F172A', borderRadius: '10px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '100px' }}>
-                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: fromState.color }} />
-                  <span style={{ color: fromState.color, fontSize: '12px', fontWeight: '600' }}>{fromState.name}</span>
+        {/* State Details */}
+        <div style={{ marginTop: '20px', background: '#1A1F2E', borderRadius: '12px', padding: '16px', border: '1px solid #334155' }}>
+          <div style={{ color: '#94A3B8', fontSize: '10px', fontWeight: '600', marginBottom: '12px' }}>STATE DETAILS</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
+            {states.filter(s => s.id !== 'start' && s.id !== 'end').map((state) => (
+              <div key={state.id} style={{ background: '#0F172A', borderRadius: '8px', padding: '12px', border: `1px solid ${state.color}30` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '16px' }}>{state.icon}</span>
+                  <span style={{ color: state.color, fontSize: '11px', fontWeight: '700' }}>{state.name}</span>
                 </div>
-                <svg width="24" height="16" viewBox="0 0 24 16"><line x1="0" y1="8" x2="18" y2="8" stroke={t.color} strokeWidth="2" /><polygon points="18,4 24,8 18,12" fill={t.color} /></svg>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '100px' }}>
-                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: toState.color }} />
-                  <span style={{ color: toState.color, fontSize: '12px', fontWeight: '600' }}>{toState.name}</span>
-                </div>
-                <span style={{ color: '#94A3B8', fontSize: '11px', marginLeft: 'auto' }}>{t.label}</span>
+                <div style={{ color: '#64748B', fontSize: '9px' }}>{state.desc}</div>
+                {state.id === 'trialing' && <div style={{ color: '#8B5CF6', fontSize: '8px', marginTop: '4px' }}>Duration: 15 days</div>}
+                {state.id === 'past_due' && <div style={{ color: '#F59E0B', fontSize: '8px', marginTop: '4px' }}>Grace period: 7 days</div>}
               </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* State Legend */}
-      <div style={{ maxWidth: '800px', margin: '24px auto 0', display: 'flex', justifyContent: 'center', gap: '24px', flexWrap: 'wrap' }}>
-        {states.map((state) => (
-          <div key={state.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: `${state.color}30`, border: `2px solid ${state.color}` }} />
-            <span style={{ color: '#94A3B8', fontSize: '12px' }}>{state.name}</span>
+            ))}
           </div>
-        ))}
+        </div>
+
+        {/* Webhook Events */}
+        <div style={{ marginTop: '16px', background: '#0F172A', borderRadius: '10px', padding: '12px', border: '1px solid #334155' }}>
+          <div style={{ color: '#94A3B8', fontSize: '9px', fontWeight: '600', marginBottom: '8px' }}>STRIPE WEBHOOK EVENTS</div>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {[
+              'customer.subscription.created',
+              'customer.subscription.updated',
+              'customer.subscription.deleted',
+              'invoice.payment_succeeded',
+              'invoice.payment_failed'
+            ].map((evt) => (
+              <code key={evt} style={{ background: '#1E293B', color: '#22C55E', fontSize: '8px', padding: '4px 8px', borderRadius: '4px', fontFamily: 'monospace' }}>{evt}</code>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

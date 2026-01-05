@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VistralAI - Docker Services</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+
+
+
+const Component = () => {
+  const [hoveredService, setHoveredService] = useState(null);
+
+  const mainCompose = [
+    { name: 'Firecrawl', port: '3002', icon: '🕷️', color: '#F97316', desc: 'Web scraping API' },
+    { name: 'Redis', port: '6379', icon: '⚡', color: '#DC2626', desc: 'Cache & Rate limiting' },
+    { name: 'PostgreSQL', port: '5432', icon: '🐘', color: '#336791', desc: 'NUQ Job Queue' },
+    { name: 'Playwright', port: '3001', icon: '🎭', color: '#2EAD33', desc: 'Browser automation' },
+    { name: 'RabbitMQ', port: '5672', icon: '🐰', color: '#FF6600', desc: 'Message queue' }
+  ];
+
+  const mongoCompose = [
+    { name: 'MongoDB', port: '27017', icon: '🍃', color: '#22C55E', desc: 'Primary database' },
+    { name: 'Mongo Express', port: '8081', icon: '🖥️', color: '#10B981', desc: 'Admin UI' }
+  ];
+
+  const connections = [
+    { from: 'Next.js', to: 'Firecrawl', label: 'HTTP :3002' },
+    { from: 'Next.js', to: 'MongoDB', label: 'TCP :27017' },
+    { from: 'Next.js', to: 'Redis', label: 'TCP :6379' },
+    { from: 'Firecrawl', to: 'Redis', label: 'Cache' },
+    { from: 'Firecrawl', to: 'PostgreSQL', label: 'Job Queue' },
+    { from: 'Firecrawl', to: 'RabbitMQ', label: 'Worker msgs' },
+    { from: 'Firecrawl', to: 'Playwright', label: 'JS Render' },
+    { from: 'Mongo Express', to: 'MongoDB', label: 'Admin' }
+  ];
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0C0F1A 0%, #131825 50%, #0C0F1A 100%)', padding: '24px 16px', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
+      <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 6px 0' }}>VistralAI Docker Services</h1>
+        <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>Container architecture and service connections</p>
+      </div>
+
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        {/* Next.js App (Central) */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+          <div style={{ background: 'linear-gradient(135deg, #000 0%, #1A1F2E 100%)', borderRadius: '12px', padding: '20px 40px', textAlign: 'center', border: '2px solid #475569', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)' }}>
+            <span style={{ fontSize: '32px' }}>▲</span>
+            <div style={{ color: '#F8FAFC', fontSize: '14px', fontWeight: '700' }}>Next.js App</div>
+            <div style={{ color: '#64748B', fontSize: '10px' }}>VistralAI • Port 3000</div>
+          </div>
+        </div>
+
+        {/* Connection Lines */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+          <svg width="400" height="40">
+            <line x1="200" y1="0" x2="80" y2="40" stroke="#475569" strokeWidth="2" />
+            <line x1="200" y1="0" x2="200" y2="40" stroke="#475569" strokeWidth="2" />
+            <line x1="200" y1="0" x2="320" y2="40" stroke="#475569" strokeWidth="2" />
+          </svg>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+          {/* Main Docker Compose */}
+          <div style={{ background: '#F9731612', borderRadius: '12px', border: '2px solid #F9731640', padding: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+              <span style={{ fontSize: '18px' }}>🐳</span>
+              <div>
+                <div style={{ color: '#F97316', fontSize: '12px', fontWeight: '700' }}>docker-compose.yml</div>
+                <div style={{ color: '#64748B', fontSize: '9px' }}>Firecrawl Stack</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {mainCompose.map((svc) => (
+                <div key={svc.name} onMouseEnter={() => setHoveredService(svc.name)} onMouseLeave={() => setHoveredService(null)} style={{ background: hoveredService === svc.name ? `${svc.color}20` : '#0F172A', borderRadius: '8px', padding: '12px', border: `1px solid ${svc.color}40`, cursor: 'pointer', transition: 'all 0.2s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '20px' }}>{svc.icon}</span>
+                      <div>
+                        <div style={{ color: svc.color, fontSize: '11px', fontWeight: '600' }}>{svc.name}</div>
+                        <div style={{ color: '#64748B', fontSize: '9px' }}>{svc.desc}</div>
+                      </div>
+                    </div>
+                    <div style={{ background: '#1E293B', borderRadius: '4px', padding: '4px 8px' }}>
+                      <span style={{ color: '#94A3B8', fontSize: '10px', fontFamily: 'monospace' }}>:{svc.port}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* MongoDB Compose */}
+          <div style={{ background: '#22C55E12', borderRadius: '12px', border: '2px solid #22C55E40', padding: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+              <span style={{ fontSize: '18px' }}>🐳</span>
+              <div>
+                <div style={{ color: '#22C55E', fontSize: '12px', fontWeight: '700' }}>docker-compose.mongodb.yml</div>
+                <div style={{ color: '#64748B', fontSize: '9px' }}>Database Stack</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {mongoCompose.map((svc) => (
+                <div key={svc.name} onMouseEnter={() => setHoveredService(svc.name)} onMouseLeave={() => setHoveredService(null)} style={{ background: hoveredService === svc.name ? `${svc.color}20` : '#0F172A', borderRadius: '8px', padding: '12px', border: `1px solid ${svc.color}40`, cursor: 'pointer', transition: 'all 0.2s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '20px' }}>{svc.icon}</span>
+                      <div>
+                        <div style={{ color: svc.color, fontSize: '11px', fontWeight: '600' }}>{svc.name}</div>
+                        <div style={{ color: '#64748B', fontSize: '9px' }}>{svc.desc}</div>
+                      </div>
+                    </div>
+                    <div style={{ background: '#1E293B', borderRadius: '4px', padding: '4px 8px' }}>
+                      <span style={{ color: '#94A3B8', fontSize: '10px', fontFamily: 'monospace' }}>:{svc.port}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Network Info */}
+            <div style={{ marginTop: '16px', background: '#0F172A', borderRadius: '8px', padding: '12px', border: '1px solid #334155' }}>
+              <div style={{ color: '#94A3B8', fontSize: '9px', fontWeight: '600', marginBottom: '6px' }}>DOCKER NETWORK</div>
+              <div style={{ color: '#E2E8F0', fontSize: '10px' }}>vistralai-network</div>
+              <div style={{ color: '#64748B', fontSize: '8px' }}>Bridge driver • Internal DNS</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Connections */}
+        <div style={{ marginTop: '20px', background: '#1A1F2E', borderRadius: '12px', padding: '16px', border: '1px solid #334155' }}>
+          <div style={{ color: '#94A3B8', fontSize: '10px', fontWeight: '600', marginBottom: '12px' }}>SERVICE CONNECTIONS</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
+            {connections.map((conn, idx) => (
+              <div key={idx} style={{ background: '#0F172A', borderRadius: '6px', padding: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: '#3B82F6', fontSize: '9px', fontWeight: '600' }}>{conn.from}</span>
+                <svg width="16" height="8"><line x1="0" y1="4" x2="10" y2="4" stroke="#475569" strokeWidth="1.5" /><polygon points="10,1 16,4 10,7" fill="#475569" /></svg>
+                <span style={{ color: '#22C55E', fontSize: '9px', fontWeight: '600' }}>{conn.to}</span>
+                <span style={{ color: '#64748B', fontSize: '7px', marginLeft: 'auto' }}>{conn.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Commands */}
+        <div style={{ marginTop: '16px', background: '#0F172A', borderRadius: '10px', padding: '12px', border: '1px solid #334155' }}>
+          <div style={{ color: '#94A3B8', fontSize: '9px', fontWeight: '600', marginBottom: '8px' }}>QUICK COMMANDS</div>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {[
+              'docker-compose up -d',
+              'docker-compose ps',
+              'docker-compose logs -f firecrawl',
+              'docker-compose down'
+            ].map((cmd) => (
+              <code key={cmd} style={{ background: '#1E293B', color: '#22C55E', fontSize: '9px', padding: '4px 8px', borderRadius: '4px', fontFamily: 'monospace' }}>{cmd}</code>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<Component />);
+  </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VistralAI - Infrastructure & Deployment</title>
+  <title>VistralAI - Infrastructure</title>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -20,125 +20,193 @@
 
 
 const Component = () => {
+  const [activeEnv, setActiveEnv] = useState('production');
+
+  const environments = [
+    { id: 'local', name: 'Local Dev', color: '#22C55E' },
+    { id: 'production', name: 'Production (GCP)', color: '#3B82F6' }
+  ];
+
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0C0F1A 0%, #151C2C 50%, #0C0F1A 100%)', padding: '40px 24px', fontFamily: "'Inter', -apple-system, sans-serif" }}>
-      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 8px 0' }}>Infrastructure & Deployment</h1>
-        <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>CI/CD pipeline and GCP production architecture</p>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0C0F1A 0%, #131825 50%, #0C0F1A 100%)', padding: '24px 16px', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 6px 0' }}>VistralAI Infrastructure</h1>
+        <p style={{ fontSize: '12px', color: '#64748B', margin: '0 0 16px 0' }}>Deployment Architecture & CI/CD Pipeline</p>
+        
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+          {environments.map((env) => (
+            <button key={env.id} onClick={() => setActiveEnv(env.id)} style={{ background: activeEnv === env.id ? `${env.color}20` : '#1A1F2E', border: `2px solid ${activeEnv === env.id ? env.color : '#334155'}`, borderRadius: '8px', padding: '8px 16px', cursor: 'pointer' }}>
+              <span style={{ color: activeEnv === env.id ? env.color : '#94A3B8', fontSize: '11px', fontWeight: '600' }}>{env.name}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-        
-        {/* CI/CD Pipeline */}
-        <div style={{ background: '#1A1F2E', borderRadius: '16px', padding: '24px', marginBottom: '24px', border: '1px solid #334155' }}>
-          <div style={{ color: '#94A3B8', fontSize: '11px', fontWeight: '600', letterSpacing: '1px', marginBottom: '20px' }}>CI/CD PIPELINE (Cloud Build)</div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-            {[
-              { name: 'Source Code', icon: '📝', color: '#64748B' },
-              { name: 'Git Push', icon: '↗️', color: '#64748B' },
-              { name: 'Run Tests', icon: '✅', color: '#34A853' },
-              { name: 'Docker Build', icon: '🐳', color: '#2496ED' },
-              { name: 'Push GCR', icon: '📤', color: '#4285F4' },
-              { name: 'Deploy', icon: '🚀', color: '#10B981' }
-            ].map((step, idx, arr) => (
-              <React.Fragment key={step.name}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: `${step.color}20`, border: `2px solid ${step.color}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>{step.icon}</div>
-                  <span style={{ color: '#E2E8F0', fontSize: '9px', fontWeight: '500', textAlign: 'center' }}>{step.name}</span>
+        {activeEnv === 'production' && (
+          <div>
+            {/* Developer Environment */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+              <div style={{ background: '#1A1F2E', borderRadius: '10px', padding: '16px 32px', border: '1px solid #334155', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <span style={{ fontSize: '24px' }}>💻</span>
+                  <div style={{ color: '#E2E8F0', fontSize: '11px', fontWeight: '600' }}>Source Code</div>
                 </div>
-                {idx < arr.length - 1 && (<div style={{ width: '20px', height: '2px', background: '#334155', position: 'relative' }}><div style={{ position: 'absolute', right: 0, top: '-3px', width: 0, height: 0, borderTop: '4px solid transparent', borderBottom: '4px solid transparent', borderLeft: '6px solid #334155' }} /></div>)}
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
+                <svg width="30" height="12"><line x1="0" y1="6" x2="20" y2="6" stroke="#475569" strokeWidth="2" /><polygon points="20,2 30,6 20,10" fill="#475569" /></svg>
+                <div style={{ textAlign: 'center' }}>
+                  <span style={{ fontSize: '24px' }}>📦</span>
+                  <div style={{ color: '#E2E8F0', fontSize: '11px', fontWeight: '600' }}>Git Repository</div>
+                </div>
+              </div>
+            </div>
 
-        {/* Main Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '20px' }}>
-          
-          {/* Local Dev */}
-          <div style={{ background: '#1A1F2E', borderRadius: '16px', padding: '18px', border: '1px solid #334155' }}>
-            <div style={{ color: '#94A3B8', fontSize: '11px', fontWeight: '600', letterSpacing: '1px', marginBottom: '14px' }}>LOCAL DEV</div>
-            <div style={{ background: '#0F172A', borderRadius: '10px', padding: '14px', border: '1px solid #334155' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}><span style={{ fontSize: '14px' }}>🐳</span><span style={{ color: '#2496ED', fontSize: '12px', fontWeight: '600' }}>Docker Compose</span></div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+              <svg width="2" height="24"><line x1="1" y1="0" x2="1" y2="24" stroke="#475569" strokeWidth="2" /></svg>
+            </div>
+
+            {/* CI/CD Pipeline */}
+            <div style={{ background: '#F59E0B10', borderRadius: '12px', border: '2px solid #F59E0B40', padding: '16px', marginBottom: '12px' }}>
+              <div style={{ color: '#F59E0B', fontSize: '11px', fontWeight: '700', marginBottom: '12px', textAlign: 'center' }}>CI/CD PIPELINE (Cloud Build)</div>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
                 {[
-                  { name: 'MongoDB', port: '27017', color: '#22C55E' },
-                  { name: 'Redis', port: '6379', color: '#DC2626' },
-                  { name: 'Firecrawl', port: '3002', color: '#F97316' },
-                  { name: 'Mongo Express', port: '8081', color: '#6B7280' }
-                ].map((svc) => (
-                  <div key={svc.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px', background: `${svc.color}10`, borderRadius: '5px', borderLeft: `3px solid ${svc.color}` }}>
-                    <span style={{ color: '#E2E8F0', fontSize: '10px' }}>{svc.name}</span>
-                    <code style={{ color: svc.color, fontSize: '9px' }}>{svc.port}</code>
-                  </div>
+                  { name: 'Cloud Build', icon: '🔧', desc: 'Trigger on push' },
+                  { name: 'Run Tests', icon: '🧪', desc: 'Jest + Playwright' },
+                  { name: 'Build Docker', icon: '🐳', desc: 'Multi-stage build' },
+                  { name: 'Push to GCR', icon: '📤', desc: 'Container Registry' }
+                ].map((step, idx, arr) => (
+                  <React.Fragment key={step.name}>
+                    <div style={{ background: '#0F172A', borderRadius: '8px', padding: '12px 16px', textAlign: 'center', minWidth: '110px' }}>
+                      <span style={{ fontSize: '20px' }}>{step.icon}</span>
+                      <div style={{ color: '#FBBF24', fontSize: '10px', fontWeight: '600' }}>{step.name}</div>
+                      <div style={{ color: '#64748B', fontSize: '8px' }}>{step.desc}</div>
+                    </div>
+                    {idx < arr.length - 1 && (
+                      <svg width="24" height="12"><line x1="0" y1="6" x2="18" y2="6" stroke="#F59E0B" strokeWidth="2" /><polygon points="18,2 24,6 18,10" fill="#F59E0B" /></svg>
+                    )}
+                  </React.Fragment>
                 ))}
               </div>
             </div>
-          </div>
 
-          {/* GCP Production */}
-          <div style={{ background: '#1A1F2E', borderRadius: '16px', padding: '18px', border: '2px solid #4285F4' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '18px', paddingBottom: '14px', borderBottom: '1px solid #334155' }}>
-              <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, #4285F4 25%, #34A853 25%, #34A853 50%, #FBBC05 50%, #FBBC05 75%, #EA4335 75%)', borderRadius: '6px' }} />
-              <div><div style={{ color: '#F8FAFC', fontWeight: '700', fontSize: '14px' }}>Google Cloud Platform</div><div style={{ color: '#64748B', fontSize: '11px' }}>Production • us-central1</div></div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+              <svg width="2" height="24"><line x1="1" y1="0" x2="1" y2="24" stroke="#475569" strokeWidth="2" /></svg>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div>
-                <div style={{ color: '#94A3B8', fontSize: '10px', fontWeight: '600', letterSpacing: '1px', marginBottom: '10px' }}>CLOUD RUN</div>
-                <div style={{ background: 'linear-gradient(135deg, #059669, #10B981)', borderRadius: '10px', padding: '12px', marginBottom: '8px' }}>
-                  <div style={{ color: 'white', fontWeight: '600', fontSize: '13px' }}>VistralAI</div>
-                  <div style={{ color: '#A7F3D0', fontSize: '9px' }}>2Gi/2CPU • 0-20 instances</div>
-                </div>
-                <div style={{ background: 'linear-gradient(135deg, #D97706, #F59E0B)', borderRadius: '10px', padding: '12px' }}>
-                  <div style={{ color: 'white', fontWeight: '600', fontSize: '13px' }}>Firecrawl</div>
-                  <div style={{ color: '#FEF3C7', fontSize: '9px' }}>1Gi/1CPU • 0-10 instances</div>
-                </div>
+            {/* Production Environment */}
+            <div style={{ background: '#3B82F610', borderRadius: '12px', border: '2px solid #3B82F640', padding: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}>
+                <div style={{ width: '24px', height: '24px', background: 'linear-gradient(135deg, #4285F4 25%, #34A853 25%, #34A853 50%, #FBBC05 50%, #FBBC05 75%, #EA4335 75%)', borderRadius: '4px' }} />
+                <span style={{ color: '#3B82F6', fontSize: '13px', fontWeight: '700' }}>PRODUCTION ENVIRONMENT (GCP)</span>
               </div>
-              <div>
-                <div style={{ color: '#94A3B8', fontSize: '10px', fontWeight: '600', letterSpacing: '1px', marginBottom: '10px' }}>NETWORKING</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                {/* Cloud Run Services */}
+                <div style={{ background: '#0F172A', borderRadius: '8px', padding: '12px', border: '1px solid #334155' }}>
+                  <div style={{ color: '#60A5FA', fontSize: '10px', fontWeight: '600', marginBottom: '8px' }}>CLOUD RUN SERVICES</div>
                   {[
-                    { name: 'Cloud Load Balancer', color: '#4285F4' },
-                    { name: 'VPC Connector', color: '#8B5CF6' },
-                    { name: 'Firewall Rules', color: '#64748B' }
-                  ].map((item) => (
-                    <div key={item.name} style={{ background: '#0F172A', borderRadius: '6px', padding: '8px 10px', borderLeft: `3px solid ${item.color}` }}>
-                      <div style={{ color: '#E2E8F0', fontSize: '10px', fontWeight: '500' }}>{item.name}</div>
+                    { name: 'VistralAI Service', region: 'us-central1', instances: '0-20', specs: '2Gi/2CPU' },
+                    { name: 'Firecrawl Service', region: 'us-central1', instances: '0-10', specs: '1Gi/1CPU' }
+                  ].map((svc, idx) => (
+                    <div key={idx} style={{ background: '#1E293B', borderRadius: '6px', padding: '8px', marginBottom: '6px' }}>
+                      <div style={{ color: '#E2E8F0', fontSize: '10px', fontWeight: '600' }}>☁️ {svc.name}</div>
+                      <div style={{ color: '#64748B', fontSize: '8px' }}>{svc.region} • {svc.instances} instances</div>
+                      <div style={{ color: '#64748B', fontSize: '8px' }}>{svc.specs}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Networking */}
+                <div style={{ background: '#0F172A', borderRadius: '8px', padding: '12px', border: '1px solid #334155' }}>
+                  <div style={{ color: '#60A5FA', fontSize: '10px', fontWeight: '600', marginBottom: '8px' }}>NETWORKING</div>
+                  {[
+                    { name: 'Cloud Load Balancer', icon: '⚖️' },
+                    { name: 'VPC Connector', icon: '🔗' },
+                    { name: 'Firewall Rules', icon: '🛡️' }
+                  ].map((item, idx) => (
+                    <div key={idx} style={{ background: '#1E293B', borderRadius: '6px', padding: '6px 8px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '12px' }}>{item.icon}</span>
+                      <span style={{ color: '#E2E8F0', fontSize: '9px' }}>{item.name}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Data Services */}
+                <div style={{ background: '#0F172A', borderRadius: '8px', padding: '12px', border: '1px solid #334155' }}>
+                  <div style={{ color: '#60A5FA', fontSize: '10px', fontWeight: '600', marginBottom: '8px' }}>DATA SERVICES</div>
+                  {[
+                    { name: 'Memorystore (Redis 7.0)', icon: '📦', desc: '1GB' },
+                    { name: 'Secret Manager', icon: '🔒', desc: 'API keys, DB creds' }
+                  ].map((item, idx) => (
+                    <div key={idx} style={{ background: '#1E293B', borderRadius: '6px', padding: '6px 8px', marginBottom: '4px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '12px' }}>{item.icon}</span>
+                        <span style={{ color: '#E2E8F0', fontSize: '9px' }}>{item.name}</span>
+                      </div>
+                      <div style={{ color: '#64748B', fontSize: '7px', marginLeft: '18px' }}>{item.desc}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Monitoring */}
+                <div style={{ background: '#0F172A', borderRadius: '8px', padding: '12px', border: '1px solid #334155' }}>
+                  <div style={{ color: '#60A5FA', fontSize: '10px', fontWeight: '600', marginBottom: '8px' }}>MONITORING</div>
+                  {[
+                    { name: 'Cloud Logging', icon: '📊' },
+                    { name: 'Cloud Monitoring', icon: '📈' },
+                    { name: 'Alerting', icon: '🚨' }
+                  ].map((item, idx) => (
+                    <div key={idx} style={{ background: '#1E293B', borderRadius: '6px', padding: '6px 8px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '12px' }}>{item.icon}</span>
+                      <span style={{ color: '#E2E8F0', fontSize: '9px' }}>{item.name}</span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            <div style={{ marginTop: '14px' }}>
-              <div style={{ color: '#94A3B8', fontSize: '10px', fontWeight: '600', letterSpacing: '1px', marginBottom: '8px' }}>DATA & MONITORING</div>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {['Memorystore Redis 1GB', 'Secret Manager', 'Cloud Logging', 'Cloud Monitoring', 'Alerting'].map((item) => (
-                  <div key={item} style={{ background: '#0F172A', borderRadius: '5px', padding: '5px 10px', border: '1px solid #334155' }}><span style={{ color: '#94A3B8', fontSize: '9px' }}>{item}</span></div>
+            {/* External Services */}
+            <div style={{ marginTop: '16px', background: '#EC489910', borderRadius: '12px', border: '2px solid #EC489940', padding: '16px' }}>
+              <div style={{ color: '#EC4899', fontSize: '11px', fontWeight: '700', marginBottom: '12px', textAlign: 'center' }}>EXTERNAL SERVICES</div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                {[
+                  { name: 'MongoDB Atlas', icon: '🍃', color: '#22C55E' },
+                  { name: 'OpenAI API', icon: '🤖', color: '#10B981' },
+                  { name: 'Anthropic API', icon: '🧠', color: '#EA580C' },
+                  { name: 'Stripe API', icon: '💳', color: '#6366F1' }
+                ].map((svc) => (
+                  <div key={svc.name} style={{ background: '#0F172A', borderRadius: '8px', padding: '12px 20px', textAlign: 'center', border: `1px solid ${svc.color}40` }}>
+                    <span style={{ fontSize: '20px' }}>{svc.icon}</span>
+                    <div style={{ color: svc.color, fontSize: '10px', fontWeight: '600' }}>{svc.name}</div>
+                  </div>
                 ))}
               </div>
             </div>
           </div>
+        )}
 
-          {/* External Services */}
-          <div style={{ background: '#1A1F2E', borderRadius: '16px', padding: '18px', border: '1px solid #334155' }}>
-            <div style={{ color: '#94A3B8', fontSize: '11px', fontWeight: '600', letterSpacing: '1px', marginBottom: '14px' }}>EXTERNAL</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {activeEnv === 'local' && (
+          <div style={{ background: '#22C55E10', borderRadius: '12px', border: '2px solid #22C55E40', padding: '20px' }}>
+            <div style={{ color: '#22C55E', fontSize: '13px', fontWeight: '700', marginBottom: '16px', textAlign: 'center' }}>LOCAL DEVELOPMENT (Docker Compose)</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
               {[
-                { name: 'MongoDB Atlas', desc: 'Database', color: '#22C55E' },
-                { name: 'Anthropic API', desc: 'Claude', color: '#EA580C' },
-                { name: 'OpenAI API', desc: 'GPT-4o', color: '#10B981' },
-                { name: 'Stripe', desc: 'Payments', color: '#6366F1' }
+                { name: 'Next.js App', port: '3000', icon: '▲', color: '#000' },
+                { name: 'MongoDB', port: '27017', icon: '🍃', color: '#22C55E' },
+                { name: 'Redis', port: '6379', icon: '⚡', color: '#DC2626' },
+                { name: 'Firecrawl', port: '3002', icon: '🕷️', color: '#F97316' },
+                { name: 'PostgreSQL', port: '5432', icon: '🐘', color: '#336791' },
+                { name: 'RabbitMQ', port: '5672', icon: '🐰', color: '#FF6600' },
+                { name: 'Playwright', port: '3001', icon: '🎭', color: '#2EAD33' },
+                { name: 'Mongo Express', port: '8081', icon: '🖥️', color: '#10B981' }
               ].map((svc) => (
-                <div key={svc.name} style={{ background: `linear-gradient(135deg, ${svc.color}20, ${svc.color}10)`, borderRadius: '10px', padding: '12px', borderLeft: `3px solid ${svc.color}` }}>
-                  <div style={{ color: svc.color, fontWeight: '600', fontSize: '12px' }}>{svc.name}</div>
-                  <div style={{ color: '#94A3B8', fontSize: '10px' }}>{svc.desc}</div>
+                <div key={svc.name} style={{ background: '#0F172A', borderRadius: '8px', padding: '12px', textAlign: 'center', border: `1px solid ${svc.color}40` }}>
+                  <span style={{ fontSize: '24px' }}>{svc.icon}</span>
+                  <div style={{ color: '#E2E8F0', fontSize: '11px', fontWeight: '600' }}>{svc.name}</div>
+                  <div style={{ color: '#64748B', fontSize: '9px' }}>Port: {svc.port}</div>
                 </div>
               ))}
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

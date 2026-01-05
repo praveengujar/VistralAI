@@ -213,11 +213,12 @@ export const GET = withMiddleware(
 ### A. Unified Onboarding Flow
 
 ```
-Step 1: Brand Setup     → Enter website URL → Magic Import
+Step 1: Brand Setup     → Enter website URL and brand name
 Step 2: Choose Plan     → Select tier + billing cycle
 Step 3: Payment         → Stripe PaymentElement → Start trial
-Step 4: First Scan      → Optional perception scan
-Step 5: Complete        → Redirect to dashboard
+Step 4: Build Profile   → Magic Import creates brand profile
+Step 5: First Scan      → Optional perception scan (Quick/Comprehensive/Skip)
+Step 6: Complete        → Redirect to dashboard
 ```
 
 **OnboardingService** (`lib/services/onboarding/OnboardingService.ts`)
@@ -529,9 +530,11 @@ app/
 │   │   └── positioning/ # Market positioning API
 │   ├── onboarding/   # Unified onboarding API
 │   │   ├── session/  # Session management
-│   │   ├── brand/    # Magic Import trigger
+│   │   ├── brand/    # Brand name + URL save
 │   │   ├── plan/     # Plan selection
 │   │   ├── payment/  # Subscription creation
+│   │   ├── profile/  # Magic Import trigger
+│   │   ├── scan/     # First perception scan
 │   │   └── complete/ # Finalization
 │   ├── payments/     # Payment API
 │   │   └── stripe/   # Stripe integration
@@ -541,8 +544,9 @@ app/
 │       ├── brand/    # Step 1: Brand Setup
 │       ├── plan/     # Step 2: Choose Plan
 │       ├── payment/  # Step 3: Payment
-│       ├── scan/     # Step 4: First Scan
-│       └── complete/ # Step 5: Complete
+│       ├── profile/  # Step 4: Build Profile
+│       ├── scan/     # Step 5: First Scan
+│       └── complete/ # Step 6: Complete
 └── dashboard/
     └── brand-profile/
         ├── audience/     # Audience page
@@ -557,6 +561,7 @@ components/
 │   ├── BrandStep.tsx
 │   ├── PlanStep.tsx
 │   ├── PaymentStep.tsx
+│   ├── BuildProfileStep.tsx
 │   ├── ScanStep.tsx
 │   └── CompleteStep.tsx
 ├── payments/         # Payment components

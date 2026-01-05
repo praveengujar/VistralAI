@@ -78,25 +78,33 @@ export default function AEODashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [brand360Id, setBrand360Id] = useState<string | null>(null);
 
-  // Fetch brand profile to get brand360Id
+  // Fetch brand360 profile using organizationId
   useEffect(() => {
-    const fetchBrandProfile = async () => {
-      if (status !== 'authenticated' || !session?.user?.id) return;
+    const fetchBrand360Profile = async () => {
+      if (status !== 'authenticated' || !session?.user) return;
+
+      // Get organizationId from session
+      const orgId = (session.user as any).organizationId;
+      if (!orgId) {
+        console.log('[AEO] No organizationId in session');
+        return;
+      }
 
       try {
-        const res = await fetch(`/api/brand-profile?userId=${session.user.id}`);
+        const res = await fetch(`/api/brand-360?brandId=${orgId}`);
         if (res.ok) {
           const data = await res.json();
-          if (data.profile?.id) {
-            setBrand360Id(data.profile.id);
+          // The API returns { data: brand360Profile } where brand360Profile has id field
+          if (data.data?.id) {
+            setBrand360Id(data.data.id);
           }
         }
       } catch (err) {
-        console.error('Error fetching brand profile:', err);
+        console.error('Error fetching brand360 profile:', err);
       }
     };
 
-    fetchBrandProfile();
+    fetchBrand360Profile();
   }, [status, session]);
 
   // Fetch AEO dashboard data

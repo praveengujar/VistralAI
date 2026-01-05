@@ -381,7 +381,7 @@ export function useRetryBuildProfile() {
 }
 
 /**
- * Run first perception scan
+ * Run first perception scan (legacy)
  */
 export function useRunFirstScan() {
   const queryClient = useQueryClient();
@@ -399,7 +399,7 @@ export function useRunFirstScan() {
 }
 
 /**
- * Skip first scan step
+ * Skip first scan step (legacy)
  */
 export function useSkipFirstScan() {
   const queryClient = useQueryClient();
@@ -407,6 +407,58 @@ export function useSkipFirstScan() {
   return useMutation({
     mutationFn: () =>
       fetchJson<ScanResponse>('/api/onboarding/scan', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'skip' }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['onboarding'] });
+    },
+  });
+}
+
+// ============================================
+// Step 5: AI Perception Scan Hooks
+// ============================================
+
+interface OnboardingScanResponse {
+  success: boolean;
+  data?: {
+    status: string;
+    scanId?: string;
+    promptCount?: number;
+    platforms?: string[];
+    message?: string;
+  };
+  error?: string;
+}
+
+/**
+ * Start onboarding perception scan (Step 5)
+ */
+export function useStartOnboardingScan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { scanType: 'quick' | 'comprehensive'; brand360Id: string }) =>
+      fetchJson<OnboardingScanResponse>('/api/onboarding/scan', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'start', ...data }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['onboarding'] });
+    },
+  });
+}
+
+/**
+ * Skip onboarding scan step (Step 5)
+ */
+export function useSkipOnboardingScan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      fetchJson<OnboardingScanResponse>('/api/onboarding/scan', {
         method: 'POST',
         body: JSON.stringify({ action: 'skip' }),
       }),

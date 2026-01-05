@@ -27,6 +27,7 @@ interface PaymentStepProps {
   onPaymentSuccess: (paymentMethodId: string) => void;
   onError: (error: string) => void;
   isProcessing: boolean;
+  onSkip?: () => void; // For testing purposes
 }
 
 function PaymentForm({
@@ -35,6 +36,7 @@ function PaymentForm({
   onPaymentSuccess,
   onError,
   isProcessing,
+  onSkip,
 }: Omit<PaymentStepProps, 'clientSecret'>) {
   const stripe = useStripe();
   const elements = useElements();
@@ -154,6 +156,21 @@ function PaymentForm({
       <p className="text-center text-xs text-[rgb(var(--foreground-secondary))]">
         By confirming, you agree to our Terms of Service and Privacy Policy.
       </p>
+
+      {/* Skip for Testing - Only shown in development */}
+      {onSkip && process.env.NODE_ENV === 'development' && (
+        <div className="pt-4 border-t border-[rgb(var(--border))]">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="w-full text-[rgb(var(--foreground-secondary))] hover:text-[rgb(var(--foreground))]"
+            onClick={onSkip}
+          >
+            Skip Payment (Testing Only)
+          </Button>
+        </div>
+      )}
     </form>
   );
 }
@@ -165,6 +182,7 @@ export function PaymentStep({
   onPaymentSuccess,
   onError,
   isProcessing,
+  onSkip,
 }: PaymentStepProps) {
   const [stripeLoadError, setStripeLoadError] = useState(false);
   const [stripeReady, setStripeReady] = useState(false);
@@ -207,13 +225,22 @@ export function PaymentStep({
             <p className="text-xs text-red-500 mt-3">
               Check browser console for details. Verify your Stripe key in the Dashboard.
             </p>
-            <Button
-              className="mt-4"
-              variant="outline"
-              onClick={() => window.location.reload()}
-            >
-              Refresh Page
-            </Button>
+            <div className="flex gap-3 mt-4">
+              <Button
+                variant="outline"
+                onClick={() => window.location.reload()}
+              >
+                Refresh Page
+              </Button>
+              {onSkip && (
+                <Button
+                  variant="ghost"
+                  onClick={onSkip}
+                >
+                  Skip Payment (Testing)
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -281,6 +308,7 @@ export function PaymentStep({
         onPaymentSuccess={onPaymentSuccess}
         onError={onError}
         isProcessing={isProcessing}
+        onSkip={onSkip}
       />
     </Elements>
   );

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VistralAI - Unified Onboarding Flow</title>
+  <title>VistralAI - Onboarding Flow</title>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -20,165 +20,205 @@
 
 
 const Component = () => {
-  const [activeStep, setActiveStep] = useState(1);
+  const [activeStep, setActiveStep] = useState(null);
+
+  const participants = [
+    { id: 'user', name: 'User', icon: '👤' },
+    { id: 'browser', name: 'Browser', icon: '🌐' },
+    { id: 'api', name: 'Next.js API', icon: '▲' },
+    { id: 'mio', name: 'MagicImport', icon: '🎭' },
+    { id: 'stripe', name: 'Stripe', icon: '💳' },
+    { id: 'db', name: 'MongoDB', icon: '🍃' }
+  ];
 
   const steps = [
     {
-      step: 1,
+      id: 1,
       name: 'Brand Setup',
       color: '#3B82F6',
-      icon: '🌐',
-      actions: [
-        'User enters website URL',
-        'POST /api/onboarding/brand',
-        'Start Magic Import',
-        'WebSocket: progress updates',
-        'Create Brand360Profile',
-        'Mark step 1 complete'
+      icon: '🏢',
+      desc: 'Enter website URL + brand name',
+      flows: [
+        { from: 0, to: 1, label: 'Enter website URL + brand name' },
+        { from: 1, to: 2, label: 'POST /api/onboarding/brand' },
+        { from: 2, to: 5, label: 'Save brand info to session' },
+        { from: 2, to: 1, label: 'Step 1 complete' }
       ]
     },
     {
-      step: 2,
+      id: 2,
       name: 'Choose Plan',
       color: '#8B5CF6',
       icon: '📋',
-      actions: [
-        'Select tier (Monitor/Growth/Dominance)',
-        'Select billing cycle',
-        'POST /api/onboarding/plan',
-        'Save plan selection',
-        'Mark step 2 complete'
+      desc: 'Select pricing tier and billing cycle',
+      flows: [
+        { from: 0, to: 1, label: 'Select tier + billing cycle' },
+        { from: 1, to: 2, label: 'POST /api/onboarding/plan' },
+        { from: 2, to: 5, label: 'Save plan selection' },
+        { from: 2, to: 1, label: 'Step 2 complete' }
       ]
     },
     {
-      step: 3,
+      id: 3,
       name: 'Payment',
-      color: '#10B981',
+      color: '#22C55E',
       icon: '💳',
-      actions: [
-        'POST /api/payments/stripe/create-setup-intent',
-        'Get clientSecret from Stripe',
-        'Enter payment / Apple Pay',
-        'confirmSetup(elements)',
-        'POST /api/onboarding/payment',
-        'Create subscription (15-day trial)',
-        'Mark step 3 complete'
+      desc: 'Add payment method and start subscription',
+      flows: [
+        { from: 1, to: 2, label: 'POST /api/payments/stripe/create-setup-intent' },
+        { from: 2, to: 4, label: 'createSetupIntent()' },
+        { from: 4, to: 1, label: 'clientSecret' },
+        { from: 0, to: 1, label: 'Enter payment / Apple Pay' },
+        { from: 1, to: 4, label: 'confirmSetup(elements)' },
+        { from: 4, to: 1, label: 'setupIntent succeeded' },
+        { from: 1, to: 2, label: 'POST /api/onboarding/payment' },
+        { from: 2, to: 4, label: 'createSubscription(trial: 15 days)' },
+        { from: 4, to: 2, label: 'subscription object' },
+        { from: 2, to: 5, label: 'Create subscription record' },
+        { from: 2, to: 1, label: 'Step 3 complete' }
       ]
     },
     {
-      step: 4,
+      id: 4,
+      name: 'Build Profile',
+      color: '#EC4899',
+      icon: '🎭',
+      desc: 'Magic Import builds Brand360 profile',
+      flows: [
+        { from: 1, to: 2, label: 'POST /api/onboarding/profile' },
+        { from: 2, to: 3, label: 'Start Magic Import' },
+        { from: 3, to: 1, label: 'SSE: progress updates', dashed: true },
+        { from: 3, to: 5, label: 'Create Brand360Profile' },
+        { from: 3, to: 1, label: 'SSE: complete', dashed: true },
+        { from: 2, to: 1, label: 'Step 4 complete' }
+      ]
+    },
+    {
+      id: 5,
       name: 'First Scan',
       color: '#F59E0B',
       icon: '🔍',
-      actions: [
-        'Click "Start Scan" or "Skip"',
-        'POST /api/aeo/perception-scan',
-        'Scan started (optional)',
-        'Mark step 4 complete'
+      desc: 'Choose Quick/Comprehensive/Skip',
+      optional: true,
+      flows: [
+        { from: 0, to: 1, label: 'Choose Quick/Comprehensive/Skip' },
+        { from: 1, to: 2, label: 'POST /api/onboarding/scan', condition: 'Start Scan' },
+        { from: 2, to: 1, label: 'Scan started', condition: 'Start Scan' },
+        { from: 1, to: 2, label: 'POST /api/onboarding/scan (skip)', condition: 'Skip' },
+        { from: 2, to: 1, label: 'Step 5 skipped', condition: 'Skip' }
       ]
     },
     {
-      step: 5,
+      id: 6,
       name: 'Complete',
-      color: '#EC4899',
-      icon: '🎉',
-      actions: [
-        'POST /api/onboarding/complete',
-        'Mark onboarding complete',
-        'Redirect to dashboard'
+      color: '#10B981',
+      icon: '✅',
+      desc: 'Finalize onboarding and redirect',
+      flows: [
+        { from: 1, to: 2, label: 'POST /api/onboarding/complete' },
+        { from: 2, to: 5, label: 'Mark onboarding complete' },
+        { from: 2, to: 1, label: 'Redirect to dashboard' }
       ]
     }
   ];
 
-  const currentStep = steps.find(s => s.step === activeStep);
-
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0A0A12 0%, #12121F 50%, #0A0A12 100%)', padding: '40px 24px', fontFamily: "'Inter', -apple-system, sans-serif" }}>
-      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 8px 0' }}>Unified Onboarding Flow</h1>
-        <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>5-step guided setup with Magic Import</p>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0C0F1A 0%, #131825 50%, #0C0F1A 100%)', padding: '24px 16px', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
+      <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 6px 0' }}>VistralAI Onboarding Flow</h1>
+        <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>Unified 6-step onboarding process</p>
       </div>
 
-      {/* Step Navigation */}
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '40px', flexWrap: 'wrap' }}>
-        {steps.map((step, idx) => (
-          <React.Fragment key={step.step}>
-            <button
-              onClick={() => setActiveStep(step.step)}
-              style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '50%',
-                border: activeStep === step.step ? `3px solid ${step.color}` : '2px solid #334155',
-                background: activeStep === step.step ? `${step.color}20` : '#1A1F2E',
-                color: activeStep === step.step ? step.color : '#64748B',
-                fontWeight: '700',
-                fontSize: '20px',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: activeStep === step.step ? `0 4px 16px ${step.color}40` : 'none'
-              }}
-            >
-              {step.icon}
-            </button>
-            {idx < steps.length - 1 && (
-              <div style={{ width: '40px', height: '3px', background: idx < activeStep - 1 ? '#10B981' : '#334155', borderRadius: '2px' }} />
-            )}
-          </React.Fragment>
-        ))}
-      </div>
+      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', marginBottom: '24px', flexWrap: 'wrap' }}>
+          {steps.map((step, idx) => (
+            <React.Fragment key={step.id}>
+              <div onClick={() => setActiveStep(activeStep === step.id ? null : step.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', opacity: activeStep && activeStep !== step.id ? 0.5 : 1, transition: 'all 0.2s' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: activeStep === step.id ? step.color : `${step.color}30`, border: `2px solid ${step.color}`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
+                  <span style={{ fontSize: '18px' }}>{step.icon}</span>
+                </div>
+                <div style={{ color: step.color, fontSize: '9px', fontWeight: '600', marginTop: '4px', textAlign: 'center', maxWidth: '60px' }}>{step.name}</div>
+                {step.optional && <div style={{ color: '#64748B', fontSize: '7px' }}>(Optional)</div>}
+              </div>
+              {idx < steps.length - 1 && (
+                <div style={{ width: '24px', height: '2px', background: '#334155' }} />
+              )}
+            </React.Fragment>
+          ))}
+        </div>
 
-      {/* Step Labels */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '48px', marginBottom: '40px', flexWrap: 'wrap' }}>
-        {steps.map((step) => (
-          <div key={step.step} style={{ textAlign: 'center', opacity: activeStep === step.step ? 1 : 0.5 }}>
-            <div style={{ color: step.color, fontSize: '11px', fontWeight: '600', letterSpacing: '1px' }}>STEP {step.step}</div>
-            <div style={{ color: '#E2E8F0', fontSize: '13px', fontWeight: '500' }}>{step.name}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Current Step Detail */}
-      <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-        <div style={{ background: '#1A1F2E', borderRadius: '16px', border: `2px solid ${currentStep.color}`, overflow: 'hidden', boxShadow: `0 8px 32px ${currentStep.color}20` }}>
-          <div style={{ background: `${currentStep.color}20`, padding: '18px 24px', borderBottom: `1px solid ${currentStep.color}40`, display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: currentStep.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>{currentStep.icon}</div>
-            <div>
-              <div style={{ color: currentStep.color, fontSize: '11px', fontWeight: '600', letterSpacing: '1px' }}>STEP {currentStep.step}</div>
-              <div style={{ color: '#F8FAFC', fontSize: '18px', fontWeight: '700' }}>{currentStep.name}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '6px', marginBottom: '16px' }}>
+          {participants.map((p) => (
+            <div key={p.id} style={{ background: '#1A1F2E', borderRadius: '6px', padding: '8px', textAlign: 'center', border: '1px solid #334155' }}>
+              <span style={{ fontSize: '18px' }}>{p.icon}</span>
+              <div style={{ color: '#94A3B8', fontSize: '9px', fontWeight: '500' }}>{p.name}</div>
             </div>
-          </div>
-          <div style={{ padding: '20px 24px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {currentStep.actions.map((action, idx) => (
-                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: '#0F172A', borderRadius: '10px', borderLeft: `3px solid ${currentStep.color}` }}>
-                  <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: `${currentStep.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: currentStep.color, fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>{idx + 1}</div>
-                  <span style={{ color: '#E2E8F0', fontSize: '13px' }}>{action}</span>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {steps.filter(step => !activeStep || activeStep === step.id).map((step) => (
+            <div key={step.id} style={{ background: `${step.color}08`, borderRadius: '12px', border: `2px solid ${step.color}40`, padding: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: step.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ color: 'white', fontSize: '12px', fontWeight: '700' }}>{step.id}</span>
+                </div>
+                <div>
+                  <div style={{ color: step.color, fontSize: '12px', fontWeight: '700' }}>{step.name}</div>
+                  <div style={{ color: '#64748B', fontSize: '9px' }}>{step.desc}</div>
+                </div>
+                {step.optional && (
+                  <span style={{ background: '#F59E0B20', color: '#F59E0B', fontSize: '8px', padding: '2px 8px', borderRadius: '4px', marginLeft: 'auto' }}>OPTIONAL</span>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {step.flows.map((flow, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 8px', background: '#0F172A', borderRadius: '6px' }}>
+                    <div style={{ width: '18px', height: '18px', background: step.color, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px', fontWeight: '700', flexShrink: 0 }}>{idx + 1}</div>
+                    <span style={{ background: '#1E293B', color: '#94A3B8', fontSize: '7px', padding: '2px 5px', borderRadius: '4px', minWidth: '50px', textAlign: 'center' }}>{participants[flow.from].name}</span>
+                    <svg width="16" height="8" style={{ flexShrink: 0 }}>
+                      <line x1="0" y1="4" x2="10" y2="4" stroke={step.color} strokeWidth="1.5" strokeDasharray={flow.dashed ? '3,2' : 'none'} />
+                      <polygon points="10,1 16,4 10,7" fill={step.color} />
+                    </svg>
+                    <span style={{ background: '#1E293B', color: '#94A3B8', fontSize: '7px', padding: '2px 5px', borderRadius: '4px', minWidth: '50px', textAlign: 'center' }}>{participants[flow.to].name}</span>
+                    <span style={{ color: '#E2E8F0', fontSize: '9px', flex: 1 }}>{flow.label}</span>
+                    {flow.condition && (
+                      <span style={{ background: '#F59E0B20', color: '#F59E0B', fontSize: '7px', padding: '2px 6px', borderRadius: '4px', flexShrink: 0 }}>{flow.condition}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ marginTop: '16px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: '200px', background: '#1A1F2E', borderRadius: '10px', padding: '12px', border: '1px solid #334155' }}>
+            <div style={{ color: '#94A3B8', fontSize: '9px', fontWeight: '600', marginBottom: '8px' }}>SSE EVENTS (Step 4)</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {['progress', 'complete', 'error'].map((evt) => (
+                <div key={evt} style={{ background: '#0F172A', borderRadius: '4px', padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: evt === 'error' ? '#EF4444' : '#22C55E' }} />
+                  <span style={{ color: '#E2E8F0', fontSize: '9px' }}>{evt}</span>
                 </div>
               ))}
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Flow Summary */}
-      <div style={{ maxWidth: '900px', margin: '40px auto 0', background: '#1A1F2E', borderRadius: '12px', padding: '20px', border: '1px solid #334155' }}>
-        <div style={{ color: '#94A3B8', fontSize: '11px', fontWeight: '600', letterSpacing: '1px', marginBottom: '14px' }}>FLOW SUMMARY</div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-          {steps.map((step, idx) => (
-            <React.Fragment key={step.step}>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: `${step.color}20`, border: `2px solid ${step.color}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>{step.icon}</div>
-                <span style={{ color: '#94A3B8', fontSize: '10px', fontWeight: '500' }}>{step.name}</span>
-              </div>
-              {idx < steps.length - 1 && (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
-              )}
-            </React.Fragment>
-          ))}
+          <div style={{ flex: 1, minWidth: '200px', background: '#1A1F2E', borderRadius: '10px', padding: '12px', border: '1px solid #334155' }}>
+            <div style={{ color: '#94A3B8', fontSize: '9px', fontWeight: '600', marginBottom: '8px' }}>SCAN OPTIONS (Step 5)</div>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {['Quick', 'Comprehensive', 'Skip'].map((opt) => (
+                <span key={opt} style={{ background: '#0F172A', color: opt === 'Skip' ? '#64748B' : '#F59E0B', fontSize: '9px', padding: '4px 8px', borderRadius: '4px' }}>{opt}</span>
+              ))}
+            </div>
+          </div>
+          <div style={{ flex: 1, minWidth: '200px', background: '#1A1F2E', borderRadius: '10px', padding: '12px', border: '1px solid #334155' }}>
+            <div style={{ color: '#94A3B8', fontSize: '9px', fontWeight: '600', marginBottom: '8px' }}>SESSION DATA</div>
+            <code style={{ color: '#22C55E', fontSize: '8px', fontFamily: 'monospace' }}>
+              {'{ currentStep, completedSteps[], selectedTierId, subscriptionId, brand360Id }'}
+            </code>
+          </div>
         </div>
       </div>
     </div>

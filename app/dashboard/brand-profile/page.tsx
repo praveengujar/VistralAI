@@ -116,6 +116,27 @@ export default function BrandProfilePage() {
     const fetchBrandProfile = async () => {
       if (status === 'authenticated' && session?.user?.id) {
         try {
+          // First, try to get Brand360Profile via organization (from onboarding)
+          const orgId = (session.user as any)?.organizationId;
+          if (orgId) {
+            try {
+              const brand360Res = await fetch(`/api/brand-360?brandId=${orgId}`);
+              if (brand360Res.ok) {
+                const brand360Data = await brand360Res.json();
+                if (brand360Data.data) {
+                  setBrand360Data(brand360Data.data);
+                  setBrandId(brand360Data.data.id);
+                  setBrandDomain(brand360Data.data.entityHome?.canonicalUrl?.replace(/^https?:\/\//, '') || '');
+                  setIsLoading(false);
+                  return; // Exit early if we found Brand360 via org
+                }
+              }
+            } catch (e) {
+              console.error('Failed to fetch Brand360 profile via organization', e);
+            }
+          }
+
+          // Fallback: try legacy BrandProfile lookup
           const brandProfileRes = await fetch(`/api/brand-profile?userId=${session.user.id}`);
 
           if (!brandProfileRes.ok) {
@@ -153,7 +174,7 @@ export default function BrandProfilePage() {
     };
 
     fetchBrandProfile();
-  }, [status, session]);
+  }, [status, session, (session?.user as any)?.organizationId]);
 
   const handleComplete = async () => {
     if (brandId) {

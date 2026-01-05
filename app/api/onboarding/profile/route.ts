@@ -8,6 +8,15 @@ import { authOptions } from '@/lib/auth/auth.config';
 import { onboardingService } from '@/lib/services/onboarding';
 import { MagicImportOrchestrator } from '@/lib/services/agents/MagicImportOrchestrator';
 import prisma from '@/lib/db/prisma';
+import {
+  setOnboardingProgress,
+  setOnboardingComplete,
+  setOnboardingError,
+} from '@/lib/realtime/onboarding-progress';
+import {
+  MAGIC_IMPORT_STAGES,
+  calculateOverallProgress,
+} from '@/lib/config/onboarding';
 
 // Singleton orchestrator instance
 const magicImportOrchestrator = new MagicImportOrchestrator();
@@ -109,39 +118,86 @@ export async function POST(request: NextRequest) {
     // Get or create organization for this user
     let organization = await prisma.organization.findFirst({
       where: {
-        members: {
+        memberships: {
           some: { userId: session.user.id },
         },
       },
     });
 
     if (!organization) {
-      // Create organization for user
-      organization = await prisma.organization.create({
-        data: {
-          name: onboardingSession.brandName,
-          slug: onboardingSession.brandName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-          members: {
-            create: {
-              userId: session.user.id,
-              role: 'owner',
+      // Generate unique slug with random suffix to avoid collisions
+      const baseSlug = onboardingSession.brandName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const uniqueSlug = `${baseSlug}-${Date.now().toString(36)}`;
+
+      try {
+        // Create organization for user
+        organization = await prisma.organization.create({
+          data: {
+            name: onboardingSession.brandName,
+            slug: uniqueSlug,
+            memberships: {
+              create: {
+                userId: session.user.id,
+                role: 'ADMIN',
+              },
             },
           },
-        },
-      });
+        });
+      } catch (createError: unknown) {
+        // Handle race condition - organization might have been created by parallel request
+        if (createError && typeof createError === 'object' && 'code' in createError && createError.code === 'P2002') {
+          // Re-fetch the organization
+          organization = await prisma.organization.findFirst({
+            where: {
+              memberships: {
+                some: { userId: session.user.id },
+              },
+            },
+          });
+          if (!organization) {
+            throw new Error('Failed to create or find organization');
+          }
+        } else {
+          throw createError;
+        }
+      }
     }
 
-    // Execute Magic Import
+    // Execute Magic Import with real-time progress updates
     const result = await magicImportOrchestrator.execute(
       organization.id,
       onboardingSession.websiteUrl,
       onboardingSession.brandName,
       {
         maxPages: 20, // Limit for onboarding
-        onProgress: (stage, progress, message) => {
-          // In a production setup, this would emit WebSocket events
-          // For now, we log progress
+        onProgress: async (stage, progress, message) => {
+          // Log progress for debugging
           console.log(`[Magic Import] ${stage}: ${progress}% - ${message}`);
+
+          // Calculate overall progress - returns -1 for unknown stages
+          const overallProgress = calculateOverallProgress(stage, progress);
+
+          // Skip unknown stages from sub-agents (they would reset UI progress)
+          if (overallProgress < 0) {
+            console.log(`[Magic Import] Skipping unknown stage: ${stage}`);
+            return;
+          }
+
+          // Get stage configuration
+          const stageConfig = MAGIC_IMPORT_STAGES.find((s) => s.id === stage);
+          const stageName = stageConfig?.name || stage;
+          const stageDescription = stageConfig?.description || message;
+
+          // Write to Redis for SSE endpoint to stream to client
+          await setOnboardingProgress({
+            sessionId: onboardingSession.id,
+            stage,
+            stageName,
+            stageDescription,
+            stageProgress: progress,
+            overallProgress,
+            message,
+          });
         },
       }
     );
@@ -167,6 +223,16 @@ export async function POST(request: NextRequest) {
       stepName: 'profile',
       brand360Id: result.brand360Id,
       completionScore: result.completionScore,
+    });
+
+    // Write completion to Redis for SSE endpoint
+    await setOnboardingComplete({
+      sessionId: onboardingSession.id,
+      brand360Id: result.brand360Id,
+      completionScore: result.completionScore,
+      entityHealthScore: result.entityHealthScore,
+      discoveries: result.discoveries,
+      totalDuration: result.totalDuration,
     });
 
     return NextResponse.json({
@@ -200,6 +266,13 @@ export async function POST(request: NextRequest) {
             error instanceof Error ? error.message : 'Unknown error',
             { stack: error instanceof Error ? error.stack : undefined }
           );
+
+          // Write error to Redis for SSE endpoint
+          await setOnboardingError({
+            sessionId: onboardingSession.id,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            recoverable: true,
+          });
         }
       }
     } catch {

@@ -55,6 +55,10 @@ model User {
   paymentMethods    PaymentMethod[]
   invoices          Invoice[]
   onboardingSession OnboardingSession?
+  sentInvitations   Invitation[] @relation("InvitedBy")
+
+  // Invitation tracking
+  invitedVia        String?  @db.ObjectId // Reference to invitation if user was invited
 
   @@map("users")
 }
@@ -126,6 +130,7 @@ model Organization {
   updatedAt   DateTime     @updatedAt
 
   memberships Membership[]
+  invitations Invitation[]
 
   @@map("organizations")
 }
@@ -134,8 +139,9 @@ model Membership {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
   userId         String   @db.ObjectId
   organizationId String   @db.ObjectId
-  role           String   @default("member")
+  role           String   @default("MEMBER") // ADMIN, MEMBER
   status         String   @default("ACTIVE")
+  invitationId   String?  @db.ObjectId // Track how member joined (null = original admin)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -183,6 +189,34 @@ model AuditLog {
   @@index([organizationId, createdAt])
   @@index([action, createdAt])
   @@map("audit_logs")
+}
+
+// ============================================
+// Team Invitations
+// ============================================
+
+model Invitation {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  email           String
+  role            String   @default("MEMBER") // ADMIN, MEMBER
+  status          String   @default("PENDING") // PENDING, ACCEPTED, EXPIRED, REVOKED
+  token           String   @unique
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+
+  // Relations
+  invitedById     String   @db.ObjectId
+  invitedBy       User     @relation("InvitedBy", fields: [invitedById], references: [id])
+  organizationId  String   @db.ObjectId
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([email])
+  @@index([status])
+  @@map("invitations")
 }
 
 enum AccountType {
