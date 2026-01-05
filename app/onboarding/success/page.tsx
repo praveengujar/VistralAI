@@ -7,22 +7,9 @@ import { TRIAL_DAYS } from '@/lib/config/pricing';
 
 export default function OnboardingSuccessPage() {
   const router = useRouter();
-  const [countdown, setCountdown] = useState(5);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          router.push('/dashboard');
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
 
-    return () => clearInterval(timer);
-  }, [router]);
+
 
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'rgb(var(--background))' }}>
@@ -98,9 +85,7 @@ export default function OnboardingSuccessPage() {
         </button>
 
         {/* Auto-redirect notice */}
-        <p className="mt-4 text-sm" style={{ color: 'rgb(var(--foreground-muted))' }}>
-          Redirecting in {countdown} seconds...
-        </p>
+
       </div>
     </div>
   );

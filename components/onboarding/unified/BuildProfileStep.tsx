@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { Loader2, CheckCircle2, AlertCircle, RefreshCw, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { useMagicImportProgress } from '@/lib/hooks/useOnboardingSocket';
+import { useMagicImportSSE } from '@/lib/hooks/useMagicImportSSE';
 import { MAGIC_IMPORT_STAGES } from '@/lib/config/onboarding';
 
 interface BuildProfileStepProps {
@@ -30,8 +30,8 @@ export function BuildProfileStep({
   importError,
   completionScore,
 }: BuildProfileStepProps) {
-  // Real-time progress from WebSocket
-  const progress = useMagicImportProgress({
+  // Real-time progress from SSE
+  const progress = useMagicImportSSE({
     sessionId,
     enabled: importStatus === 'running',
   });

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VistralAI - AEO Agent Flow</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+
+
+
+const Component = () => {
+  const [activeAgent, setActiveAgent] = useState(null);
+
+  const agents = [
+    { id: 'CA', name: 'CrawlerAgent', icon: '🕷️', color: '#3B82F6', desc: 'Web crawling + Schema.org extraction', input: 'Website URL', output: 'Raw HTML/Markdown', external: 'Firecrawl' },
+    { id: 'VCA', name: 'VibeCheckAgent', icon: '✨', color: '#EC4899', desc: 'Brand personality inference', input: 'Crawled content', output: 'Brand personality', external: 'OpenAI' },
+    { id: 'CMA', name: 'CompetitorAgent', icon: '🎯', color: '#F59E0B', desc: 'Competitor discovery', input: 'Brand data', output: '3 competitors', external: 'OpenAI' },
+    { id: 'PEA', name: 'ProductExtractorAgent', icon: '📦', color: '#10B981', desc: 'Products/Services extraction', input: 'Page content', output: 'Products + Pricing', external: 'OpenAI' },
+    { id: 'APA', name: 'AudiencePositioningAgent', icon: '👥', color: '#6366F1', desc: 'Personas + Positioning', input: 'Brand data', output: 'Customer personas', external: 'OpenAI' },
+    { id: 'PGA', name: 'PromptGeneratorAgent', icon: '📝', color: '#14B8A6', desc: 'Test prompt creation', input: 'Brand360 Profile', output: 'Generated prompts', external: 'OpenAI' },
+    { id: 'PEvA', name: 'PerceptionEvaluatorAgent', icon: '⚖️', color: '#EF4444', desc: 'LLM-as-Judge scoring', input: 'Prompts', output: 'Perception scores', external: 'Multi-LLM' }
+  ];
+
+  const metrics = [
+    { name: 'Faithfulness', range: '0-100', icon: '✓', color: '#22C55E', desc: 'Accuracy of AI responses' },
+    { name: 'Share of Voice', range: '0-100', icon: '📢', color: '#3B82F6', desc: 'Brand mention frequency' },
+    { name: 'Sentiment', range: '-1 to 1', icon: '😊', color: '#F59E0B', desc: 'Positive/negative tone' },
+    { name: 'Voice Alignment', range: '0-100', icon: '🎯', color: '#8B5CF6', desc: 'Brand voice consistency' },
+    { name: 'Hallucination', range: '0-100', icon: '⚠️', color: '#EF4444', desc: 'False information rate' }
+  ];
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0C0F1A 0%, #131825 50%, #0C0F1A 100%)', padding: '24px 16px', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
+      <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 6px 0' }}>VistralAI AEO Agent Pipeline</h1>
+        <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>AI Exposure Optimization Agent Flow & Metrics</p>
+      </div>
+
+      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+        {/* Input */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+          <div style={{ background: 'linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%)', borderRadius: '50%', width: '80px', height: '80px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(59, 130, 246, 0.4)' }}>
+            <span style={{ fontSize: '24px' }}>🌐</span>
+            <span style={{ color: 'white', fontSize: '9px', fontWeight: '600' }}>Website URL</span>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+          <svg width="2" height="24"><line x1="1" y1="0" x2="1" y2="24" stroke="#3B82F6" strokeWidth="2" /></svg>
+        </div>
+
+        {/* Orchestrator */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+          <div style={{ background: '#8B5CF620', borderRadius: '10px', padding: '12px 24px', border: '2px solid #8B5CF6', textAlign: 'center' }}>
+            <span style={{ fontSize: '20px' }}>🎭</span>
+            <div style={{ color: '#A78BFA', fontSize: '12px', fontWeight: '700' }}>MagicImportOrchestrator</div>
+            <div style={{ color: '#64748B', fontSize: '9px' }}>Coordinates Agent Flow</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+          <svg width="2" height="24"><line x1="1" y1="0" x2="1" y2="24" stroke="#8B5CF6" strokeWidth="2" /></svg>
+        </div>
+
+        {/* Agent Pipeline */}
+        <div style={{ background: '#1A1F2E', borderRadius: '12px', padding: '16px', border: '1px solid #334155', marginBottom: '20px' }}>
+          <div style={{ color: '#94A3B8', fontSize: '10px', fontWeight: '600', marginBottom: '16px', textAlign: 'center' }}>AGENT PIPELINE</div>
+          
+          {/* Brand Building Agents */}
+          <div style={{ marginBottom: '16px' }}>
+            <div style={{ color: '#10B981', fontSize: '9px', fontWeight: '600', marginBottom: '8px' }}>BRAND BUILDING PHASE</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              {agents.slice(0, 5).map((agent, idx, arr) => (
+                <React.Fragment key={agent.id}>
+                  <div onClick={() => setActiveAgent(activeAgent === agent.id ? null : agent.id)} style={{ background: activeAgent === agent.id ? `${agent.color}30` : `${agent.color}15`, borderRadius: '8px', padding: '12px 16px', textAlign: 'center', border: `2px solid ${activeAgent === agent.id ? agent.color : agent.color + '40'}`, cursor: 'pointer', transition: 'all 0.2s', minWidth: '120px' }}>
+                    <span style={{ fontSize: '24px' }}>{agent.icon}</span>
+                    <div style={{ color: agent.color, fontSize: '10px', fontWeight: '600' }}>{agent.name}</div>
+                    <div style={{ color: '#64748B', fontSize: '7px', marginTop: '2px' }}>→ {agent.external}</div>
+                  </div>
+                  {idx < arr.length - 1 && (
+                    <svg width="24" height="12"><line x1="0" y1="6" x2="18" y2="6" stroke="#475569" strokeWidth="2" /><polygon points="18,2 24,6 18,10" fill="#475569" /></svg>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+
+          {/* Arrow to storage */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+            <svg width="2" height="30"><line x1="1" y1="0" x2="1" y2="24" stroke="#22C55E" strokeWidth="2" /><polygon points="-2,24 1,30 4,24" fill="#22C55E" /></svg>
+          </div>
+
+          {/* Brand360 Profile */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+            <div style={{ background: '#22C55E20', borderRadius: '8px', padding: '10px 24px', border: '2px solid #22C55E', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '18px' }}>🍃</span>
+              <div>
+                <div style={{ color: '#22C55E', fontSize: '11px', fontWeight: '700' }}>Brand360Profile</div>
+                <div style={{ color: '#64748B', fontSize: '8px' }}>MongoDB Storage</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Arrow to perception */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+            <svg width="2" height="30"><line x1="1" y1="0" x2="1" y2="24" stroke="#8B5CF6" strokeWidth="2" /><polygon points="-2,24 1,30 4,24" fill="#8B5CF6" /></svg>
+          </div>
+
+          {/* Perception Agents */}
+          <div>
+            <div style={{ color: '#EF4444', fontSize: '9px', fontWeight: '600', marginBottom: '8px' }}>PERCEPTION EVALUATION PHASE</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              {agents.slice(5).map((agent, idx, arr) => (
+                <React.Fragment key={agent.id}>
+                  <div onClick={() => setActiveAgent(activeAgent === agent.id ? null : agent.id)} style={{ background: activeAgent === agent.id ? `${agent.color}30` : `${agent.color}15`, borderRadius: '8px', padding: '12px 16px', textAlign: 'center', border: `2px solid ${activeAgent === agent.id ? agent.color : agent.color + '40'}`, cursor: 'pointer', transition: 'all 0.2s', minWidth: '140px' }}>
+                    <span style={{ fontSize: '24px' }}>{agent.icon}</span>
+                    <div style={{ color: agent.color, fontSize: '10px', fontWeight: '600' }}>{agent.name}</div>
+                    <div style={{ color: '#64748B', fontSize: '7px', marginTop: '2px' }}>→ {agent.external}</div>
+                  </div>
+                  {idx < arr.length - 1 && (
+                    <svg width="24" height="12"><line x1="0" y1="6" x2="18" y2="6" stroke="#475569" strokeWidth="2" /><polygon points="18,2 24,6 18,10" fill="#475569" /></svg>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Agent Details */}
+        {activeAgent && (
+          <div style={{ background: '#0F172A', borderRadius: '10px', padding: '16px', marginBottom: '20px', border: `2px solid ${agents.find(a => a.id === activeAgent)?.color}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+              <span style={{ fontSize: '28px' }}>{agents.find(a => a.id === activeAgent)?.icon}</span>
+              <div>
+                <div style={{ color: agents.find(a => a.id === activeAgent)?.color, fontSize: '14px', fontWeight: '700' }}>{agents.find(a => a.id === activeAgent)?.name}</div>
+                <div style={{ color: '#94A3B8', fontSize: '11px' }}>{agents.find(a => a.id === activeAgent)?.desc}</div>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+              <div style={{ background: '#1E293B', borderRadius: '6px', padding: '10px' }}>
+                <div style={{ color: '#64748B', fontSize: '8px', marginBottom: '4px' }}>INPUT</div>
+                <div style={{ color: '#E2E8F0', fontSize: '10px' }}>{agents.find(a => a.id === activeAgent)?.input}</div>
+              </div>
+              <div style={{ background: '#1E293B', borderRadius: '6px', padding: '10px' }}>
+                <div style={{ color: '#64748B', fontSize: '8px', marginBottom: '4px' }}>OUTPUT</div>
+                <div style={{ color: '#E2E8F0', fontSize: '10px' }}>{agents.find(a => a.id === activeAgent)?.output}</div>
+              </div>
+              <div style={{ background: '#1E293B', borderRadius: '6px', padding: '10px' }}>
+                <div style={{ color: '#64748B', fontSize: '8px', marginBottom: '4px' }}>EXTERNAL SERVICE</div>
+                <div style={{ color: '#E2E8F0', fontSize: '10px' }}>{agents.find(a => a.id === activeAgent)?.external}</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Perception Metrics */}
+        <div style={{ background: '#1A1F2E', borderRadius: '12px', padding: '16px', border: '1px solid #EF444440' }}>
+          <div style={{ color: '#EF4444', fontSize: '11px', fontWeight: '700', marginBottom: '16px', textAlign: 'center' }}>PERCEPTION METRICS</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
+            {metrics.map((metric) => (
+              <div key={metric.name} style={{ background: '#0F172A', borderRadius: '8px', padding: '12px', border: `1px solid ${metric.color}30` }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '14px' }}>{metric.icon}</span>
+                    <span style={{ color: metric.color, fontSize: '11px', fontWeight: '600' }}>{metric.name}</span>
+                  </div>
+                  <span style={{ background: '#1E293B', color: '#94A3B8', fontSize: '8px', padding: '2px 6px', borderRadius: '4px' }}>{metric.range}</span>
+                </div>
+                <div style={{ color: '#64748B', fontSize: '9px' }}>{metric.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<Component />);
+  </script>
+</body>
+</html>

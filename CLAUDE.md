@@ -168,24 +168,26 @@ audienceQueryKeys.positioning(brand360Id)
 
 ## Unified Onboarding Flow
 
-### Flow: Brand → Plan → Payment → Scan → Complete
+### Flow: Brand → Plan → Payment → Profile → Scan → Complete
 
 ```
-Step 1: Brand Setup     → Enter website URL, Magic Import runs
+Step 1: Brand Setup     → Enter website URL and brand name
 Step 2: Choose Plan     → Select tier (Monitor/Growth/Dominance) + billing cycle
 Step 3: Payment         → Add payment method, start 15-day trial
-Step 4: First Scan      → Run initial perception scan (optional)
-Step 5: Complete        → Redirect to dashboard
+Step 4: Build Profile   → Magic Import creates comprehensive brand profile
+Step 5: First Scan      → Run initial AI perception scan (optional)
+Step 6: Complete        → Redirect to dashboard
 ```
 
 ### Onboarding Components (`components/onboarding/unified/`)
 | Component | Purpose |
 |-----------|---------|
 | `OnboardingLayout` | Step progress bar, navigation |
-| `BrandStep` | Website URL input + Magic Import progress |
+| `BrandStep` | Website URL + brand name input |
 | `PlanStep` | Tier selection with billing toggle |
 | `PaymentStep` | Stripe PaymentElement integration |
-| `ScanStep` | First perception scan (optional) |
+| `BuildProfileStep` | Magic Import progress + brand profile creation |
+| `ScanStep` | First perception scan (Quick/Comprehensive/Skip) |
 | `CompleteStep` | Success state + dashboard redirect |
 
 ### Onboarding Service (`lib/services/onboarding/`)
@@ -201,17 +203,23 @@ Step 5: Complete        → Redirect to dashboard
 | Route | Method | Purpose |
 |-------|--------|---------|
 | `/api/onboarding/session` | GET/POST | Session management |
-| `/api/onboarding/brand` | POST | Start Magic Import |
+| `/api/onboarding/brand` | POST | Save brand name + URL |
 | `/api/onboarding/plan` | POST | Save plan selection |
 | `/api/onboarding/payment` | POST | Create subscription |
+| `/api/onboarding/profile` | POST | Trigger Magic Import |
+| `/api/onboarding/scan` | POST | Start or skip first perception scan |
 | `/api/onboarding/complete` | POST | Finalize onboarding |
 
 ### Onboarding Hooks (`lib/query/onboardingHooks.ts`)
 | Hook | Purpose |
 |------|---------|
 | `useOnboardingSession()` | Fetch current session |
+| `useSaveBrand()` | Save brand name + URL |
+| `useStartBuildProfile()` | Start Magic Import for brand profile |
+| `useRetryBuildProfile()` | Retry failed Magic Import |
+| `useStartOnboardingScan()` | Start first perception scan |
+| `useSkipOnboardingScan()` | Skip scan step |
 | `useCompleteOnboarding()` | Mutation to finalize |
-| `useMagicImportProgress(sessionId)` | WebSocket progress |
 
 ### Magic Import Stages
 | Stage | Progress | Description |

@@ -79,7 +79,7 @@ export class MagicImportOrchestrator {
 
     // Step 2: Run Crawler Agent
     if (!options.skipCrawler) {
-      onProgress('crawler', 0, 'Starting website crawl...');
+      await onProgress('crawler', 0, 'Starting website crawl...');
       stages.push({ name: 'crawler', status: 'running' });
 
       const crawlResult = options.maxPages
@@ -176,7 +176,7 @@ export class MagicImportOrchestrator {
           }
         }
 
-        onProgress('crawler', 100, 'Crawl complete');
+        await onProgress('crawler', 100, 'Crawl complete');
       } else {
         stages[stages.length - 1] = {
           name: 'crawler',
@@ -189,7 +189,7 @@ export class MagicImportOrchestrator {
 
     // Step 3: Run Vibe Check Agent
     if (!options.skipVibeCheck && websiteContent) {
-      onProgress('vibecheck', 0, 'Analyzing brand identity...');
+      await onProgress('vibecheck', 0, 'Analyzing brand identity...');
       stages.push({ name: 'vibecheck', status: 'running' });
 
       const vibeResult = await this.vibeCheckAgent.analyze(websiteContent, brandName);
@@ -300,7 +300,7 @@ export class MagicImportOrchestrator {
         }
 
         discoveries.brandIdentity = true;
-        onProgress('vibecheck', 100, 'Brand identity analysis complete');
+        await onProgress('vibecheck', 100, 'Brand identity analysis complete');
       } else {
         stages[stages.length - 1] = {
           name: 'vibecheck',
@@ -313,7 +313,7 @@ export class MagicImportOrchestrator {
 
     // Step 4: Run Competitor Agent
     if (!options.skipCompetitors && websiteContent) {
-      onProgress('competitors', 0, 'Discovering competitors...');
+      await onProgress('competitors', 0, 'Discovering competitors...');
       stages.push({ name: 'competitors', status: 'running' });
 
       // Get category from organization schema
@@ -381,7 +381,7 @@ export class MagicImportOrchestrator {
           errors.push(`CompetitorGraph save error: ${err}`);
         }
 
-        onProgress('competitors', 100, 'Competitor discovery complete');
+        await onProgress('competitors', 100, 'Competitor discovery complete');
       } else {
         stages[stages.length - 1] = {
           name: 'competitors',
@@ -394,14 +394,14 @@ export class MagicImportOrchestrator {
 
     // Step 5: Run Product Extractor Agent
     if (!options.skipProducts && websiteContent) {
-      onProgress('products', 0, 'Extracting products and services...');
+      await onProgress('products', 0, 'Extracting products and services...');
       stages.push({ name: 'products', status: 'running' });
 
       const productResult = await this.productExtractorAgent.extract(
         websiteUrl,
         websiteContent,
         brandName,
-        { onProgress }
+        {} // No onProgress - orchestrator handles main stage progress
       );
 
       if (productResult.success && productResult.data) {
@@ -512,7 +512,7 @@ export class MagicImportOrchestrator {
           errors.push(`Product save error: ${err}`);
         }
 
-        onProgress('products', 100, 'Product extraction complete');
+        await onProgress('products', 100, 'Product extraction complete');
       } else {
         stages[stages.length - 1] = {
           name: 'products',
@@ -524,7 +524,7 @@ export class MagicImportOrchestrator {
     }
 
     // Step 6: Run Audience & Positioning Agent
-    onProgress('audience', 0, 'Extracting target audience and positioning...');
+    await onProgress('audience', 0, 'Extracting target audience and positioning...');
     stages.push({ name: 'audience', status: 'running' });
 
     // Get competitor names and brand values for context
@@ -553,7 +553,7 @@ export class MagicImportOrchestrator {
         competitors: competitorNames,
         brandValues,
       },
-      { onProgress }
+      {} // No onProgress - orchestrator handles main stage progress
     );
 
     if (audienceResult.success && audienceResult.data) {
@@ -712,7 +712,7 @@ export class MagicImportOrchestrator {
         errors.push(`Market Positioning save error: ${err}`);
       }
 
-      onProgress('audience', 100, 'Audience and positioning complete');
+      await onProgress('audience', 100, 'Audience and positioning complete');
     } else {
       stages[stages.length - 1] = {
         name: 'audience',
@@ -723,7 +723,12 @@ export class MagicImportOrchestrator {
     }
 
     // Step 7: Calculate scores
+    await onProgress('scoring', 0, 'Calculating profile scores...');
+    stages.push({ name: 'scoring', status: 'running' });
+
     const completionScore = await this.calculateCompletionScore(brand360.id);
+    await onProgress('scoring', 50, 'Calculating entity health score...');
+
     const entityHealthScore = await this.calculateEntityHealthScore(brand360.id);
 
     // Update profile
@@ -736,6 +741,9 @@ export class MagicImportOrchestrator {
         lastAnalyzedAt: new Date(),
       },
     });
+
+    stages[stages.length - 1] = { name: 'scoring', status: 'completed' };
+    await onProgress('scoring', 100, 'Profile analysis complete!');
 
     const totalDuration = Date.now() - startTime;
 

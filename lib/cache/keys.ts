@@ -68,6 +68,13 @@ export const cacheKeys = {
     aeoList: (brand360Id: string) => `${PREFIX}:products:aeo:${brand360Id}`,
     invalidateBrand: (brandId: string) => `${PREFIX}:products:*:${brandId}*`,
   },
+
+  // Onboarding Progress (for SSE real-time updates)
+  onboarding: {
+    progress: (sessionId: string) => `${PREFIX}:onboarding:progress:${sessionId}`,
+    complete: (sessionId: string) => `${PREFIX}:onboarding:complete:${sessionId}`,
+    error: (sessionId: string) => `${PREFIX}:onboarding:error:${sessionId}`,
+  },
 };
 
 // ============================================
@@ -75,6 +82,9 @@ export const cacheKeys = {
 // ============================================
 
 export const cacheTTL = {
+  // Progress (30 seconds) - real-time progress data
+  progress: 30,
+
   // Short-lived (1 minute) - frequently changing data
   short: 60,
 

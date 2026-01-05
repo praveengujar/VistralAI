@@ -2,13 +2,19 @@
 # Docker Compose for VistralAI Local Development
 # ============================================
 # External services for local development
-# Run VistralAI with: npm run dev
-# Run services with: docker-compose up
+#
+# IMPORTANT: Start MongoDB services FIRST:
+#   docker-compose -f docker-compose.mongodb.yml up -d
+# Then start Firecrawl services:
+#   docker-compose up -d
 #
 # Services:
-#   - redis: Redis cache/queue backend (port 6379)
 #   - firecrawl: Firecrawl API service (port 3002)
 #   - playwright: Playwright browser service (internal)
+#   - postgres: PostgreSQL for Firecrawl queue
+#   - rabbitmq: RabbitMQ for Firecrawl workers
+#
+# Note: Redis is provided by docker-compose.mongodb.yml
 #
 
 services:
@@ -28,29 +34,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - vistralai-network
+      - vistralai-mongodb-network
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U postgres']
-      interval: 5s
-      timeout: 3s
-      retries: 5
-    restart: unless-stopped
-
-  # ============================================
-  # Redis (Queue and Cache)
-  # ============================================
-  redis:
-    image: redis:7-alpine
-    container_name: vistralai-redis
-    ports:
-      - '6379:6379'
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-    networks:
-      - vistralai-network
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       timeout: 3s
       retries: 5
@@ -71,7 +57,7 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
-      - vistralai-network
+      - vistralai-mongodb-network
     healthcheck:
       test: ['CMD', 'rabbitmq-diagnostics', 'check_running']
       interval: 10s
@@ -91,7 +77,7 @@ services:
       PROXY_SERVER: ''
       BLOCK_MEDIA: 'false'
     networks:
-      - vistralai-network
+      - vistralai-mongodb-network
     healthcheck:
       test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3000/health']
       interval: 10s
@@ -144,14 +130,12 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       playwright:
         condition: service_started
     networks:
-      - vistralai-network
+      - vistralai-mongodb-network
     healthcheck:
       test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3000/']
       interval: 10s
@@ -165,13 +149,12 @@ services:
 volumes:
   postgres_data:
     driver: local
-  redis_data:
-    driver: local
   rabbitmq_data:
     driver: local
   firecrawl_data:
     driver: local
 
 networks:
-  vistralai-network:
-    driver: bridge
+  vistralai-mongodb-network:
+    external: true
+    name: vistralai_vistralai-mongodb-network

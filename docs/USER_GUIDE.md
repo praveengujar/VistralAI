@@ -42,7 +42,7 @@ Upon first login, you'll see:
 
 **Recommended first steps**:
 1. Complete the **Onboarding Wizard** (5-10 minutes)
-2. Review your **Brand 360° Profile** (10-15 minutes)
+2. Review your **Brand 360° Profile** (5-10 minutes)
 3. Check the **AI Visibility Dashboard** (5 minutes)
 4. Explore **Competitor Analysis** (5 minutes)
 
@@ -281,12 +281,14 @@ Click **"Add Product"** to document:
 
 ### What is Onboarding?
 
-The Onboarding Wizard automatically analyzes your website to extract brand information and populate your Brand 360° Profile. It's a **5-minute automated process** that:
+The Onboarding Wizard guides you through a **6-step process** to set up your brand profile and start monitoring AI visibility:
 
-1. **Crawls** your website (homepage, about, products, etc.)
-2. **Extracts** brand information using AI
-3. **Creates reviews** for low-confidence data
-4. **Populates** your Brand 360° Profile
+1. **Brand Setup** - Enter your website URL and brand name
+2. **Choose Plan** - Select your pricing tier and billing cycle
+3. **Payment** - Add payment method and start 15-day free trial
+4. **Build Profile** - Magic Import analyzes your website to create your Brand 360° Profile
+5. **First Scan** - Run an optional AI perception scan (Quick, Comprehensive, or Skip)
+6. **Complete** - Redirect to your dashboard
 
 ### Starting Onboarding
 

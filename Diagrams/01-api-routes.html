@@ -20,189 +20,180 @@
 
 
 const Component = () => {
-  const [expandedGroups, setExpandedGroups] = useState({
-    middleware: true, auth: true, brand360: true, aeo: true, user: true,
-    onboarding: true, payments: true, admin: true, other: true
-  });
-
-  const toggleGroup = (group) => {
-    setExpandedGroups(prev => ({ ...prev, [group]: !prev[group] }));
-  };
-
-  const middlewareStack = [
-    { name: 'withErrorHandler()', desc: 'Standardized JSON error responses' },
-    { name: 'withAuth()', desc: 'Session validation wrapper' },
-    { name: 'withRateLimit()', desc: 'Rate limiting (100 req/min default)' },
-    { name: 'successResponse() / errorResponse()', desc: 'Response helpers' }
-  ];
+  const [expandedGroup, setExpandedGroup] = useState(null);
 
   const routeGroups = [
     {
-      id: 'auth', name: 'AUTHENTICATION', color: '#3B82F6', bgColor: '#1E3A5F',
+      name: 'Authentication',
+      icon: '🔐',
+      color: '#3B82F6',
       routes: [
-        { method: 'ALL', path: '/api/auth/[...nextauth]', desc: 'NextAuth handler (credentials, Google, GitHub)' },
-        { method: 'POST', path: '/api/auth/register', desc: 'User registration with validation' }
+        { path: '/api/auth/[...nextauth]', method: 'ALL', desc: 'NextAuth.js handler' },
+        { path: '/api/auth/register', method: 'POST', desc: 'User registration' }
       ]
     },
     {
-      id: 'brand360', name: 'BRAND 360', color: '#10B981', bgColor: '#134E3A',
+      name: 'Brand 360',
+      icon: '🎯',
+      color: '#10B981',
       routes: [
-        { method: 'GET/POST', path: '/api/brand-360', desc: 'Complete brand data / Create profile' },
-        { method: 'CRUD', path: '/api/brand-360/identity', desc: 'Brand identity (mission, vision, values)' },
-        { method: 'CRUD', path: '/api/brand-360/products', desc: 'Products with pricing' },
-        { method: 'CRUD', path: '/api/brand-360/competitors', desc: 'Competitors with threat levels' },
-        { method: 'CRUD', path: '/api/brand-360/market-position', desc: 'Market position' },
-        { method: 'POST', path: '/api/brand-360/analyze-website', desc: 'AI website analysis (GPT-4o-mini)' },
-        { method: 'POST', path: '/api/brand-360/upload', desc: 'Document upload & processing' },
-        { method: 'POST', path: '/api/brand-360/catalog/upload', desc: 'Product catalog CSV/Excel import' }
+        { path: '/api/brand-360', method: 'GET/POST', desc: 'Brand profile CRUD' },
+        { path: '/api/brand-360/identity', method: 'GET/PUT', desc: 'Brand identity' },
+        { path: '/api/brand-360/products', method: 'GET/POST', desc: 'Product catalog' },
+        { path: '/api/brand-360/competitors', method: 'GET/POST', desc: 'Competitor list' },
+        { path: '/api/brand-360/market-position', method: 'GET', desc: 'Market positioning' },
+        { path: '/api/brand-360/analyze-website', method: 'POST', desc: 'Website analysis' },
+        { path: '/api/brand-360/upload', method: 'POST', desc: 'File upload' },
+        { path: '/api/brand-360/catalog/upload', method: 'POST', desc: 'Catalog import' }
       ]
     },
     {
-      id: 'aeo', name: 'AEO ENGINE', color: '#8B5CF6', bgColor: '#4C1D95',
+      name: 'AEO Engine',
+      icon: '📊',
+      color: '#8B5CF6',
       routes: [
-        { method: 'POST', path: '/api/aeo/magic-import', desc: 'One-click brand extraction from URL' },
-        { method: 'GET/POST', path: '/api/aeo/perception-scan', desc: 'Start scan / List scans' },
-        { method: 'GET', path: '/api/aeo/perception-scan/[scanId]', desc: 'Scan results with metrics' },
-        { method: 'CRUD', path: '/api/aeo/insights', desc: 'Perception insights' },
-        { method: 'GET', path: '/api/aeo/insights/[insightId]', desc: 'Single insight details' },
-        { method: 'CRUD', path: '/api/aeo/corrections', desc: 'Correction workflow' },
-        { method: 'GET', path: '/api/aeo/corrections/[workflowId]', desc: 'Workflow details' },
-        { method: 'CRUD', path: '/api/aeo/prompts', desc: 'Prompt management (5 categories)' },
-        { method: 'POST', path: '/api/aeo/prompts/generate', desc: 'AI prompt generation' },
-        { method: 'GET', path: '/api/aeo/reports/summary', desc: 'Dashboard summary report' },
-        { method: 'POST', path: '/api/aeo/reports/export', desc: 'Export to PDF/CSV' },
-        { method: 'POST', path: '/api/aeo/compare-scans', desc: 'Compare two scans side-by-side' }
+        { path: '/api/aeo/magic-import', method: 'POST', desc: 'Magic Import orchestrator' },
+        { path: '/api/aeo/perception-scan', method: 'POST', desc: 'Start perception scan' },
+        { path: '/api/aeo/perception-scan/[scanId]', method: 'GET', desc: 'Get scan status' },
+        { path: '/api/aeo/insights', method: 'GET', desc: 'List all insights' },
+        { path: '/api/aeo/insights/[insightId]', method: 'GET/PUT', desc: 'Insight details' },
+        { path: '/api/aeo/corrections', method: 'GET/POST', desc: 'Correction workflows' },
+        { path: '/api/aeo/corrections/[workflowId]', method: 'GET/PUT', desc: 'Workflow details' },
+        { path: '/api/aeo/prompts', method: 'GET', desc: 'List prompts' },
+        { path: '/api/aeo/prompts/generate', method: 'POST', desc: 'Generate prompts' },
+        { path: '/api/aeo/reports/summary', method: 'GET', desc: 'Report summary' },
+        { path: '/api/aeo/reports/export', method: 'POST', desc: 'Export report' },
+        { path: '/api/aeo/compare-scans', method: 'POST', desc: 'Compare scans' }
       ]
     },
     {
-      id: 'user', name: 'USER', color: '#F97316', bgColor: '#7C2D12',
+      name: 'User',
+      icon: '👤',
+      color: '#EC4899',
       routes: [
-        { method: 'GET/PUT', path: '/api/user/profile', desc: 'User profile' },
-        { method: 'PUT', path: '/api/user/password', desc: 'Password change with validation' },
-        { method: 'GET/DEL', path: '/api/user/sessions', desc: 'Active session management' },
-        { method: 'GET', path: '/api/user/mfa', desc: 'MFA status check' },
-        { method: 'POST', path: '/api/user/mfa/setup', desc: 'Generate TOTP secret + QR code' },
-        { method: 'POST', path: '/api/user/mfa/verify', desc: 'Verify TOTP code' }
+        { path: '/api/user/profile', method: 'GET/PUT', desc: 'User profile' },
+        { path: '/api/user/password', method: 'PUT', desc: 'Change password' },
+        { path: '/api/user/sessions', method: 'GET/DELETE', desc: 'Manage sessions' },
+        { path: '/api/user/mfa', method: 'GET', desc: 'MFA status' },
+        { path: '/api/user/mfa/setup', method: 'POST', desc: 'Setup MFA' },
+        { path: '/api/user/mfa/verify', method: 'POST', desc: 'Verify MFA' }
       ]
     },
     {
-      id: 'onboarding', name: 'ONBOARDING', color: '#14B8A6', bgColor: '#134E4A',
+      name: 'Onboarding',
+      icon: '📋',
+      color: '#14B8A6',
       routes: [
-        { method: 'GET/POST', path: '/api/onboarding/session', desc: 'Onboarding session management' },
-        { method: 'POST', path: '/api/onboarding/brand', desc: 'Brand setup with Magic Import' },
-        { method: 'POST', path: '/api/onboarding/plan', desc: 'Plan selection (Monitor/Growth/Dominance)' },
-        { method: 'POST', path: '/api/onboarding/payment', desc: 'Payment processing' },
-        { method: 'POST', path: '/api/onboarding/complete', desc: 'Complete onboarding flow' },
-        { method: 'GET', path: '/api/onboarding/status', desc: 'Onboarding completion status' },
-        { method: 'POST', path: '/api/onboarding/analyze', desc: 'Website URL analysis' }
+        { path: '/api/onboarding/session', method: 'GET/POST', desc: 'Session management' },
+        { path: '/api/onboarding/brand', method: 'POST', desc: 'Brand setup (save info)' },
+        { path: '/api/onboarding/plan', method: 'POST', desc: 'Plan selection' },
+        { path: '/api/onboarding/payment', method: 'POST', desc: 'Payment processing' },
+        { path: '/api/onboarding/profile', method: 'POST', desc: 'Build profile (Magic Import)' },
+        { path: '/api/onboarding/scan', method: 'POST', desc: 'First scan (optional)' },
+        { path: '/api/onboarding/complete', method: 'POST', desc: 'Complete onboarding' }
       ]
     },
     {
-      id: 'payments', name: 'PAYMENTS', color: '#EC4899', bgColor: '#831843',
+      name: 'Payments',
+      icon: '💳',
+      color: '#F59E0B',
       routes: [
-        { method: 'POST', path: '/api/payments/stripe/create-setup-intent', desc: 'Create Stripe SetupIntent' },
-        { method: 'POST', path: '/api/subscription', desc: 'Create subscription (15-day trial)' },
-        { method: 'GET', path: '/api/subscription/status', desc: 'Subscription status' },
-        { method: 'POST', path: '/api/subscription/cancel', desc: 'Cancel subscription' },
-        { method: 'POST', path: '/api/webhooks/stripe', desc: 'Stripe webhook handler' }
+        { path: '/api/payments/stripe/create-setup-intent', method: 'POST', desc: 'Create SetupIntent' },
+        { path: '/api/payments/stripe/subscription', method: 'POST', desc: 'Create subscription' },
+        { path: '/api/webhooks/stripe', method: 'POST', desc: 'Stripe webhooks' }
       ]
     },
     {
-      id: 'admin', name: 'ADMIN', color: '#EF4444', bgColor: '#7F1D1D',
+      name: 'Admin',
+      icon: '⚙️',
+      color: '#EF4444',
       routes: [
-        { method: 'GET', path: '/api/admin/queue-stats', desc: 'Bull queue statistics' },
-        { method: 'GET', path: '/api/admin/review-queue', desc: 'Admin review dashboard' }
+        { path: '/api/admin/queue-stats', method: 'GET', desc: 'Bull queue stats' },
+        { path: '/api/admin/review-queue', method: 'GET/POST', desc: 'Review queue management' }
       ]
     },
     {
-      id: 'other', name: 'OTHER', color: '#6B7280', bgColor: '#374151',
+      name: 'Other',
+      icon: '🔧',
+      color: '#64748B',
       routes: [
-        { method: 'GET', path: '/api/health', desc: 'Health check endpoint' },
-        { method: 'GET', path: '/api/brand-profile', desc: 'Legacy brand profile' },
-        { method: 'GET', path: '/api/reports/brand-story', desc: 'Brand story narrative report' },
-        { method: 'GET', path: '/api/debug/db-dump', desc: 'Database debug (dev only)' }
+        { path: '/api/health', method: 'GET', desc: 'Health check' },
+        { path: '/api/brand-profile', method: 'GET', desc: 'Legacy brand profile' },
+        { path: '/api/reports/brand-story', method: 'GET', desc: 'Brand story report' },
+        { path: '/api/debug/db-dump', method: 'GET', desc: 'Debug DB dump' }
       ]
     }
   ];
 
-  const totalRoutes = routeGroups.reduce((acc, group) => acc + group.routes.length, 0);
-
-  const getMethodColor = (method) => {
-    if (method.includes('GET')) return '#22C55E';
-    if (method.includes('POST')) return '#3B82F6';
-    if (method.includes('PUT')) return '#F59E0B';
-    if (method.includes('DEL')) return '#EF4444';
-    if (method.includes('CRUD')) return '#8B5CF6';
-    return '#6B7280';
+  const methodColors = {
+    'GET': '#22C55E',
+    'POST': '#3B82F6',
+    'PUT': '#F59E0B',
+    'DELETE': '#EF4444',
+    'ALL': '#8B5CF6',
+    'GET/POST': '#14B8A6',
+    'GET/PUT': '#06B6D4',
+    'GET/DELETE': '#EC4899'
   };
 
+  const totalRoutes = routeGroups.reduce((sum, g) => sum + g.routes.length, 0);
+
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%)', padding: '40px 24px', fontFamily: "'JetBrains Mono', 'Fira Code', monospace" }}>
-      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 8px 0' }}>VistralAI API Routes</h1>
-        <p style={{ fontSize: '14px', color: '#94A3B8', margin: 0 }}>{totalRoutes} endpoints across {routeGroups.length} modules</p>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0C0F1A 0%, #131825 50%, #0C0F1A 100%)', padding: '24px 16px', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
+      <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 6px 0' }}>VistralAI API Routes</h1>
+        <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>{totalRoutes} endpoints across {routeGroups.length} route groups</p>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
-        <div style={{ background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)', borderRadius: '12px', padding: '16px 32px', boxShadow: '0 4px 24px rgba(99, 102, 241, 0.4)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" /></svg>
-          <span style={{ color: 'white', fontWeight: '600', fontSize: '16px' }}>Client</span>
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}><div style={{ width: '2px', height: '24px', background: 'linear-gradient(to bottom, #6366F1, #475569)' }} /></div>
-
-      <div style={{ maxWidth: '1400px', margin: '0 auto 24px', background: 'linear-gradient(90deg, #0EA5E9 0%, #06B6D4 100%)', borderRadius: '12px', padding: '16px 24px', boxShadow: '0 4px 24px rgba(14, 165, 233, 0.3)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-            <span style={{ color: 'white', fontWeight: '700', fontSize: '14px', letterSpacing: '1px' }}>MIDDLEWARE LAYER</span>
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-            {middlewareStack.map((mw) => (<div key={mw.name} style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '8px', padding: '6px 12px' }}><code style={{ color: 'white', fontSize: '11px', fontWeight: '500' }}>{mw.name}</code></div>))}
+      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+          <div style={{ background: 'linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%)', borderRadius: '50%', width: '80px', height: '80px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(59, 130, 246, 0.4)' }}>
+            <span style={{ fontSize: '24px' }}>🌐</span>
+            <span style={{ color: 'white', fontSize: '10px', fontWeight: '600' }}>Client</span>
           </div>
         </div>
-      </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}><div style={{ width: '2px', height: '24px', background: '#475569' }} /></div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+          <svg width="2" height="30"><line x1="1" y1="0" x2="1" y2="30" stroke="#475569" strokeWidth="2" /></svg>
+        </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px', maxWidth: '1400px', margin: '0 auto 24px' }}>
-        {routeGroups.map((group) => (
-          <div key={group.id} style={{ background: group.bgColor, borderRadius: '12px', border: `1px solid ${group.color}40`, overflow: 'hidden' }}>
-            <button onClick={() => toggleGroup(group.id)} style={{ width: '100%', padding: '14px 20px', background: `${group.color}20`, border: 'none', borderBottom: `1px solid ${group.color}40`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: group.color, boxShadow: `0 0 12px ${group.color}` }} />
-                <span style={{ color: group.color, fontWeight: '700', fontSize: '13px', letterSpacing: '1px' }}>{group.name}</span>
-                <span style={{ color: '#94A3B8', fontSize: '12px', background: '#1E293B', padding: '2px 8px', borderRadius: '10px' }}>{group.routes.length}</span>
-              </div>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={group.color} strokeWidth="2" style={{ transform: expandedGroups[group.id] ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}><polyline points="6 9 12 15 18 9" /></svg>
-            </button>
-            {expandedGroups[group.id] && (
-              <div style={{ padding: '12px' }}>
-                {group.routes.map((route, idx) => (
-                  <div key={idx} style={{ padding: '10px 12px', marginBottom: idx < group.routes.length - 1 ? '8px' : 0, background: '#0F172A80', borderRadius: '8px', borderLeft: `3px solid ${group.color}` }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                      <span style={{ background: getMethodColor(route.method), color: 'white', fontSize: '9px', fontWeight: '700', padding: '2px 6px', borderRadius: '4px' }}>{route.method}</span>
-                      <code style={{ color: '#E2E8F0', fontSize: '12px' }}>{route.path}</code>
-                    </div>
-                    <span style={{ color: '#64748B', fontSize: '11px' }}>{route.desc}</span>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
+          {routeGroups.map((group) => (
+            <div key={group.name} style={{ background: '#1A1F2E', borderRadius: '10px', border: `1px solid ${group.color}40`, overflow: 'hidden' }}>
+              <div onClick={() => setExpandedGroup(expandedGroup === group.name ? null : group.name)} style={{ background: `${group.color}15`, padding: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${group.color}30` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '18px' }}>{group.icon}</span>
+                  <div>
+                    <div style={{ color: group.color, fontSize: '12px', fontWeight: '700' }}>{group.name}</div>
+                    <div style={{ color: '#64748B', fontSize: '10px' }}>{group.routes.length} endpoints</div>
                   </div>
-                ))}
+                </div>
+                <span style={{ color: group.color, fontSize: '14px', transform: expandedGroup === group.name ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▼</span>
               </div>
-            )}
-          </div>
-        ))}
-      </div>
+              
+              <div style={{ maxHeight: expandedGroup === group.name ? '500px' : '150px', overflow: 'hidden', transition: 'max-height 0.3s ease' }}>
+                <div style={{ padding: '8px' }}>
+                  {group.routes.map((route, idx) => (
+                    <div key={idx} style={{ background: '#0F172A', borderRadius: '6px', padding: '8px', marginBottom: '6px', border: '1px solid #334155' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <span style={{ background: methodColors[route.method] || '#64748B', color: 'white', fontSize: '7px', fontWeight: '700', padding: '2px 6px', borderRadius: '4px' }}>{route.method}</span>
+                        <code style={{ color: '#E2E8F0', fontSize: '9px', fontFamily: 'monospace' }}>{route.path}</code>
+                      </div>
+                      <div style={{ color: '#64748B', fontSize: '8px', marginLeft: '40px' }}>{route.desc}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
 
-      <div style={{ maxWidth: '1400px', margin: '0 auto 32px', background: 'linear-gradient(90deg, #DC2626 0%, #EF4444 100%)', borderRadius: '12px', padding: '16px 24px', boxShadow: '0 4px 24px rgba(220, 38, 38, 0.3)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
-            <span style={{ color: 'white', fontWeight: '700', fontSize: '14px', letterSpacing: '1px' }}>REDIS CACHING + BULL QUEUE</span>
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-            {['5 min TTL default', 'Cache invalidation on mutations', 'Bull Queue for async jobs', 'In-memory fallback'].map((item) => (<div key={item} style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '8px', padding: '6px 12px' }}><span style={{ color: 'white', fontSize: '11px' }}>{item}</span></div>))}
-          </div>
+        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          {Object.entries(methodColors).slice(0, 5).map(([method, color]) => (
+            <div key={method} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ background: color, color: 'white', fontSize: '8px', fontWeight: '700', padding: '2px 6px', borderRadius: '4px' }}>{method}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>
